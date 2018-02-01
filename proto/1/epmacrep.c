@@ -30,6 +30,8 @@ int epf_macrep_rep(
 	rep->UL_prbs_used   = htonl(report->UL_prbs_used);
 	rep->UL_prbs_total  = report->UL_prbs_total;
 
+	ep_dbg_dump("F - MREP Rep: ", buf, sizeof(ep_macrep_rep));
+
 	return sizeof(ep_macrep_rep);
 }
 
@@ -46,6 +48,8 @@ int epp_macrep_rep(
 	rep->UL_prbs_used   = ntohl(report->UL_prbs_used);
 	rep->UL_prbs_total  = report->UL_prbs_total;
 
+	ep_dbg_dump("P - MREP Rep: ", buf, sizeof(ep_macrep_rep));
+
 	return EP_SUCCESS;
 }
 
@@ -55,6 +59,8 @@ int epf_macrep_req(char * buf, unsigned int size, uint16_t interval)
 
 	req->interval = htons(interval);
 
+	ep_dbg_dump("F - MREP Req: ", buf, sizeof(ep_macrep_req));
+
 	return sizeof(ep_macrep_req);
 }
 
@@ -63,6 +69,8 @@ int epp_macrep_req(char * buf, unsigned int size, uint16_t * interval)
 	ep_macrep_req * req = (ep_macrep_req *)buf;
 
 	*interval = ntohs(req->interval);
+
+	ep_dbg_dump("P - MREP Req: ", buf, sizeof(ep_macrep_req));
 
 	return EP_SUCCESS;
 }

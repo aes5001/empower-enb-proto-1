@@ -1,0 +1,249 @@
+
+	EmPOWER Agent protocol standard interactions
+
+
+
+The following files contains description on how the Agent interacts with the 
+Controller to establish a communication and carry on the synchronization between
+the instances.
+
+The ONLY mandatory behavior for the Empower protocol is the Hello message, which
+is requested from the Agent to the Controller in order to present itself.
+
+All the other messages can be issued in different order without any problem 
+for the agent and the protocol, since they are independent from each others.
+
+
+  THE MODULES AND THEIR IDs
+  
+As you can notice, the master header which is always present in the protocol
+communication is composed as follows:
+
+       0        1        2        3        4        5        6        7
+   +--------+--------+--------+--------+--------+--------+--------+--------+
+00 | Type   | Vers   |              eNB ID               |       PCI       |
+   +--------+--------+--------+--------+--------+--------+--------+--------+
+08 |             Module Id             |      Length     |     Sequence  ->|
+   +--------+--------+--------+--------+--------+--------+--------+--------+
+16 |<-   Sequence    | ................................................... |
+   +--------+--------+--------+--------+--------+--------+--------+--------+
+
+If most of the fields are trivial, the "module id" one is quite obscure as it is
+here. Well, this is an identifier which is valid at controller-side, and helps
+to classify the message in a proper way.
+
+If its true that, for the moment, the agent connects to one controller per time,
+the controller itself can have any number of elements and some of them handles
+a certain piece of the protocol.
+
+This ID is here to aim at the right module in the controller.
+
+
+  MESSAGE-PER-MESSAGE INTERACTION WITH THE CONTROLLER
+
+
+  HELLO INTERACTIONS
+
+File: ephello.h
+  
+The following schema resumes how Agent interact with the Controller through the
+Hello message:
+
+        Agent                            Controller
+        +------------------+             +------------------+
+        |                  |             |                  |
+        | Hello            |             |                  |
+        |  request ----------------------> Handle Hello     |
+        |   ^   |          |             |  request         |
+        |   |   |          |             |  |               |
+        |   +---+ every    |             |  |               |
+        |          'n' ms  |             |  |               |
+        |           ^      |             |  |               |
+        |           |      |             |  v               |
+        |           |      |             | Hello            |
+        |     Handle Hello <--------------  reply           |
+        |      reply       |             |                  |
+        +------------------+             +------------------+
+
+The Agent always makes the first move and request for an Hello to the 
+controller. The message itself contains all the information which are necessary
+to identify the eNB which present itself.
+
+The controller then elaborates and respond to the Agent.
+
+The schedule-type message is then analyzed by the Agent again, which can 
+eventually tune the Hello cycle by the given interval time. This way the 
+controller can tune dynamically the Hello interval by sending Hello replies
+to the connected Agent.
+
+
+  ENB CAPABILITIES
+  
+File: epenbcap.h 
+
+ENB capabilities message provides a bit-mask with the options that can be 
+enabled in a base station. This is useful to distinguish base stations with a 
+different number of features, and allow the Controller to select the feature
+to enable.
+
+ENB capabilities message is then followed with an array of cell properties.
+
+For each cell present (or exposed) by the Agent, you will get precious 
+information as the Physical Cell ID, the frequency and bandwidth on which it's
+operating, and the capabilities which are specific of the cell domain.
+You can use these informations later to enable/disable specific functionalities
+on the single cells of the eNB.
+
+        Agent                            Controller
+        +------------------+             +------------------+
+        |                  |             |                  |
+        |                  |             | enb_cap          |
+        | Handle <------------------------- request         |
+        |  enb_cap request |             |                  |
+	|   |              |             |                  |
+        |   |              |             |                  |
+        |   v              |             |                  |
+        | enb_cap          |             |                  |
+        |  reply ------------------------> Handle           |
+        |                  |             |  enb_cap reply   |
+        +------------------+             +------------------+
+        
+        
+  CELL CAPABILITIES
+  
+File: epcelcap.h 
+
+Even if the single Cell capabilities are already exchanged during eNB capability
+stage, you can always ask for a single cell capabilities list. This is done with
+Cell capability request from the controller, at which the Agent respond with an
+appropriate response.
+
+        Agent                            Controller
+        +------------------+             +------------------+
+        |                  |             |                  |
+        |                  |             | enb_cap          |
+        | Handle <------------------------- request         |
+        |  enb_cap request |             |                  |
+	|   |              |             |                  |
+        |   |              |             |                  |
+        |   v              |             |                  |
+        | enb_cap          |             |                  |
+        |  reply ------------------------> Handle           |
+        |                  |             |  enb_cap reply   |
+        +------------------+             +------------------+
+
+
+  UE REPORT
+  
+File: epuerep.h 
+
+UE reports are messages containing the list of the actual situation of connected
+UE inside the eNB. Every time you receive an UE response from an Agent, you get
+the list of UE and their eventual states/configuration, and not the difference
+between the previous state and the new one.
+
+UE reports are activated by sending a properly formatted request to the Agent.
+
+        Agent                            Controller
+        +------------------+             +------------------+
+        |                  |             |                  |
+        |                  |             | ue_rep           |
+        | Handle <------------------------- request         |
+        |  ue_rep request  |             |                  |
+	|   |              |             |                  |
+        |   |              |             |                  |
+        |   v              |             |                  |
+        | ue_rep           |             |                  |
+        |  reply ------------------------> Handle           |
+        |                  |             |  ue_rep reply    |
+        +------------------+             +------------------+
+
+
+  UE MEASUREMENT
+  
+File: epuemeas.h 
+
+UE measurements messages contains the information about a requested measure 
+issued to a certain RNTI located in a certain cell in an eNB. The measure id 
+provided is not strictly used for eNB-UE communication, but is useful in order
+to distinguish one measure from another one for a certain RNTI, since a single
+UE device can perform multiple measurements at the same time.
+
+        Agent                            Controller
+        +------------------+             +------------------+
+        |                  |             |                  |
+        |                  |             | ue_meas          |
+        | Handle <------------------------- request         |
+        |  ue_meas request |             |                  |
+	|                  |             |                  |
+        |                  |             |                  |
+        |                  |             |                  |
+        | ue_meas          |             |                  |
+        |  reply ------------------------> Handle           |
+        |                  |             |  ue_meas reply   |
+        +------------------+             +------------------+
+
+
+  MAC REPORT
+  
+File: epmacrep.h 
+
+MAC report messages contains the state of the MAC layer.
+Multiple modules can request for a MAC report to the agent, and for every of 
+them the statistic of various elements in this layer is saved and then reported.
+
+For MAC report you can issue a "deadline" interval, even if the message has
+Trigger nature. This deadline allows the wrap to send you an update even if no
+important changes occurs in the layer.
+
+        Agent                            Controller
+        +------------------+             +------------------+
+        |                  |             |                  |
+        |                  |             | mac_rep          |
+        | Handle <------------------------- request         |
+        |  mac_rep request |             |                  |
+	|                  |             |                  |
+        |                  |             |                  |
+        |                  |             |                  |
+        | mac_rep          |             |                  |
+        |  reply ------------------------> Handle           |
+        |                  |             |  mac_rep reply   |
+        +------------------+             +------------------+
+
+
+  HANDOVER
+  
+File: epho.h 
+
+Handover messages contains information to manage an Handover operation which is
+assumed to be carried on with X2 interface between two eNB instances. The 
+message is designed to be an one-time-only operation attempt; no triggers or 
+intervals are considered in the protocols or agent cycle (but you can always 
+invoke the mechanism from an high level logic).
+
+A negative reply from the eNB is sent by the one which receive the original 
+request (the source eNB), while the positive reply is sent by the eNB which 
+performs the HO (the target eNB). This way the controller is aware of errors,
+or if the operation has been performed successfully in the target eNB.
+
+        Source eNB Agent                 Controller
+        +------------------+             +------------------+
+        |                  |             |                  |
+        |                  |             | ho               |
+        | Handle <------------------------- request         |
+        |  ho request      |             |                  |
+	|                  |             |                  |
+        +------------------+             |                  |
+               |                         |  Handle          |
+               | x2 interactions         |  ho reply        |
+               v                         +----^-------------+
+        Target eNB Agent                      |
+        +------------------+                  |
+        |                  |                  |
+        |                  |                  |
+        | ho               |                  |
+        |  reply -----------------------------+
+        |                  |
+        +------------------+
+
+Kewin R.

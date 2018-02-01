@@ -34,6 +34,8 @@ int epf_schedule(
 	h->op       = (uint8_t)op;
 	h->dir      = (uint8_t)dir;
 	h->interval = htonl(interval);
+	
+	ep_dbg_dump("F - SCHE: ", buf, sizeof(ep_c_hdr));
 
 	return sizeof(ep_c_hdr);
 }

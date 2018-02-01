@@ -31,16 +31,23 @@ int epf_uerep_rep(
 
 	rep->nof_ues = htonl(nof_ues);
 
+        ep_dbg_dump("F - UREP Rep: ", buf, sizeof(ep_uerep_rep));
+
 	if(ues) {
 		for(i = 0; i < nof_ues && i < max_ues; i++) {
 			det[i].pci  = htons(ues[i].pci);
 			det[i].rnti = htons(ues[i].rnti);
 			det[i].plmn = htonl(ues[i].plmn);
 			det[i].imsi = htobe64(ues[i].imsi);
+
+                        ep_dbg_dump(
+                                "    F - UREP UE: ", 
+                                buf + (sizeof(ep_uerep_rep) * i),
+                                sizeof(ep_uerep_det));
 		}
 	}
 
-	return sizeof(ep_uerep_rep) + (sizeof(ep_uerep_det) * (i + 1));
+	return sizeof(ep_uerep_rep) + (sizeof(ep_uerep_det) * i);
 }
 
 int epp_uerep_rep(
@@ -50,12 +57,14 @@ int epp_uerep_rep(
 	uint32_t        max_ues,
 	ep_ue_details * ues)
 {
-	int i;
+	int i = -1;
 
 	ep_uerep_rep * rep = (ep_uerep_rep *)buf;
 	ep_uerep_det * det = (ep_uerep_det *)(buf + sizeof(ep_uerep_rep));
 
 	*nof_ues = ntohl(rep->nof_ues);
+
+        ep_dbg_dump("P - UREP Rep: ", buf, sizeof(ep_uerep_rep));
 
 	if(ues) {
 		for(i = 0; i < *nof_ues && i < max_ues; i++) {
@@ -63,9 +72,14 @@ int epp_uerep_rep(
 			ues[i].rnti = ntohs(det[i].rnti);
 			ues[i].plmn = ntohl(det[i].plmn);
 			ues[i].imsi = be64toh(det[i].imsi);
+
+                        ep_dbg_dump(
+                                "    P - UREP UE: ",
+                                buf + (sizeof(ep_uerep_rep) * i),
+                                sizeof(ep_uerep_det));
 		}
 	}
-
+        
 	return EP_SUCCESS;
 }
 
@@ -75,11 +89,15 @@ int epf_uerep_req(char * buf, unsigned int size)
 
 	req->dummy = 0;
 
+	ep_dbg_dump("F - UREP Req: ", buf, sizeof(ep_uerep_req));
+
 	return sizeof(ep_uerep_req);
 }
 
 int epp_uerep_req(char * buf, unsigned int size)
 {
+	ep_dbg_dump("P - UREP Req: ", buf, 0);
+
 	return EP_SUCCESS;
 }
 

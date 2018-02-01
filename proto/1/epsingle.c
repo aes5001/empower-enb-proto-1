@@ -27,6 +27,8 @@ int epf_single(
 	h->op   = (uint8_t)op;
 	h->dir  = (uint8_t)dir;
 
+	ep_dbg_dump("F - SING: ", buf, sizeof(ep_s_hdr));
+
 	return sizeof(ep_s_hdr);
 }
 

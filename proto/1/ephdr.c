@@ -36,6 +36,8 @@ int epf_head(
 	h->id.cell_id = htons(cell_id);
 	h->id.mod_id  = htonl(mod_id);
 
+	ep_dbg_dump("F - HDR:  ", buf, sizeof(ep_hdr));
+
 	return sizeof(ep_hdr);
 }
 
@@ -67,6 +69,8 @@ int epp_head(
 	if(mod_id) {
 		*mod_id  = ntohl(h->id.mod_id);
 	}
+
+	ep_dbg_dump("P - HDR:  ", buf, sizeof(ep_hdr));
 
 	return EP_SUCCESS;
 }

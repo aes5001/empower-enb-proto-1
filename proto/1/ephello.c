@@ -25,6 +25,8 @@ int epf_hello_rep(
 
 	hr->id = htonl(id);
 
+	ep_dbg_dump("F - HELO Rep: ", buf, sizeof(ep_hello_rep));
+
 	return sizeof(ep_hello_rep);
 }
 
@@ -35,6 +37,8 @@ int epp_hello_rep(
 	ep_hello_rep * hr = (ep_hello_rep *)buf;
 
 	*id = ntohl(hr->id);
+
+	ep_dbg_dump("P - HELO Rep: ", buf, sizeof(ep_hello_rep));
 
 	return 0;
 }
@@ -47,6 +51,8 @@ int epf_hello_req(
 
 	hr->id = htonl(id);
 
+	ep_dbg_dump("F - HELO Req: ", buf, sizeof(ep_hello_req));
+
 	return sizeof(ep_hello_req);
 }
 
@@ -57,6 +63,8 @@ int epp_hello_req(
 	ep_hello_req * hr = (ep_hello_req *)buf;
 
 	*id = ntohl(hr->id);
+
+	ep_dbg_dump("P - HELO Req: ", buf, sizeof(ep_hello_req));
 
 	return 0;
 }

@@ -1,0 +1,503 @@
+
+	EmPOWER Protocol for Radio Access Network (RAN) mechanism
+
+
+
+This file contains information about the structure of the RAN subsystem of the
+EmPOWER protocols. This subsystem relays on the standard/common header of the 
+protocols to identify the operation, and adds additional information for every
+operation that is necessary to perform remotely.
+
+To sum up, the possible messages which are exchanged between Agent and 
+Controller are the following:
+
+    - RAN_SETUP, 
+      operating on the top-level setup of the RAN subsystem. This means changing
+      characteristics of the subsystem which are not related with Tenancy of 
+      Users.
+
+    - RAN_TENANT,
+      operating on Tenancy level in the RAN subsystem. This means getting a 
+      report of the RAN tenants, adding, removing or setting parameters on such
+      elements.
+
+    - RAN_USER,
+      operating on User level in the RAN subsystem. This means getting a report
+      of the RAN users mapping (RNTI --> Tenant association), adding or removing
+      such entries.
+
+    - RAN_SCHED,
+      operating on schedulers parameters in the RAN subsystem. This means set
+      various elements/parameters to a different value.
+
+
+  FEEDBACK
+
+For every operation the normal feedback is considered: successful requests, if 
+not specifically indicated, returns a 'Succeeded', 'Failed' or 'Not supported' 
+reply back from the agent.
+
+
+  MESSAGES
+
+All the message here must be encapsulated in a Header and Event Header as
+defined in the protocols.txt file. Important parameters of such headers to set
+defines the type of RNA interaction you want to perform.
+
+Type:      RAN_SETUP
+Direction: Request
+Operation: Unspecified
+
+This message request a report of the status of the RAN subsystem. Information
+exchanged here are not related with Tenancy and Users. Except from the headers,
+the message is basically empty.
+
+Message:
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Life-cycle:
+    Controller           Agent
+        | Request          |
+	+----------------->|
+	|                  |
+	|            Reply |
+	|<-----------------+
+	|                  |
+	v                  v
+
+
+Type:      RAN_SETUP
+Direction: Reply
+Operation: Unspecified
+
+This message reports to the controller the status of the RAN subsystem.
+
+Fields:
+    Tenant scheduler ID (32 bits)
+
+Message:
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                     Tenant scheduler ID                       |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Life-cycle:
+    Controller           Agent
+        | Request          |
+	+----------------->|
+	|                  |
+	|            Reply |
+	|<-----------------+
+	|                  |
+	v                  v
+
+
+Type:      RAN_SETUP
+Direction: Request
+Operation: Set
+
+This message allows to set some parameters which are related to the RAN
+subsystem. If not specified, 0 filled fields will usually be ignored.
+
+Fields:
+    Tenant scheduler ID (32 bits)
+
+Message:
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                     Tenant scheduler ID                       |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Life-cycle:
+    Controller           Agent
+        | Request          |
+	+----------------->|
+	|                  |
+	|  Success/Fail/NS |
+	|<-----------------+
+	|                  |
+	v                  v
+
+
+Type:      RAN_TENANT
+Direction: Request
+Operation: Unspeficied
+
+This message requests information about Tenancy of the RAN subsystem.
+
+Fields:
+    Tenant ID (64 bits)
+
+Message:
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                          Tenant ID                         -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--                       Tenant ID                            |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Life-cycle:
+    Controller           Agent
+        | Request          |
+	+----------------->|
+	|                  |
+	|            Reply |
+	|<-----------------+
+	|                  |
+	v                  v
+
+
+Type:      RAN_TENANT
+Direction: Reply
+Operation: Unspeficied
+
+This message reports information about Tenancy of the RAN subsystem. Setting the
+Tenant ID to zero allow to perform a request for every Tenant currently 
+registered in the system.
+
+Tenant information(TInfo) structure:
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                          Tenant ID                         -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--                       Tenant ID                            |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                       UE scheduler ID                         |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Fields:
+  Number of Tenant info (16 bits)
+
+Message:
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |      Number of Tenant info    |   Zero or more TInfo ...      |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Life-cycle:
+    Controller           Agent
+        | Request          |
+	+----------------->|
+	|                  |
+	|            Reply |
+	|<-----------------+
+	|                  |
+	v                  v
+
+
+Type:      RAN_TENANT
+Direction: Request
+Operation: Add
+
+This message requests to add a new Tenant in the RAN subsystem, along with its
+main characteristics.
+
+Message:
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                          Tenant ID                         -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--                       Tenant ID                            |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                       UE scheduler ID                         |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Life-cycle:
+    Controller           Agent
+        | Request          |
+	+----------------->|
+	|                  |
+	|  Success/Fail/NS |
+	|<-----------------+
+	|                  |
+	v                  v
+
+
+Type:      RAN_TENANT
+Direction: Request
+Operation: Rem
+
+This message requests to remove a Tenant from the RAN subsystem. An ID set to 
+zero should be ignored here.
+
+Message:
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                          Tenant ID                         -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--                       Tenant ID                            |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Life-cycle:
+    Controller           Agent
+        | Request          |
+	+----------------->|
+	|                  |
+	|  Success/Fail/NS |
+	|<-----------------+
+	|                  |
+	v                  v
+
+
+Type:      RAN_USER
+Direction: Request
+Operation: Unspecified
+
+This message requests to report about one or more User associaton with Tenants.
+
+Fields:
+    RNTI (16 bits), specified the desired RNTI association; if zero is set, the
+    agent should report all the current associations.
+
+Message:
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |             RNTI              | | | | | | | | | | | | | | | | |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Life-cycle:
+    Controller           Agent
+        | Request          |
+	+----------------->|
+	|                  |
+	|            Reply |
+	|<-----------------+
+	|                  |
+	v                  v
+
+
+Type:      RAN_USER
+Direction: Reply
+Operation: Unspecified
+
+This message requests to report about one or more User associaton with Tenants.
+
+Fields:
+    RNTI (16 bits)
+    Tenant ID (64 bits)
+
+User info (UInfo) structure:
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |              RNTI             |           Tenant ID        -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--                        Tenant ID                        -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--        Tenant ID           | | | | | | | | | | | | | | | | |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Message:
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |         Number of Users       |   Zero or more UInfo ...      |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Life-cycle:
+    Controller           Agent
+        | Request          |
+	+----------------->|
+	|                  |
+	|            Reply |
+	|<-----------------+
+	|                  |
+	v                  v
+
+
+Type:      RAN_USER
+Direction: Request
+Operation: Add
+
+This message requests to add a new User --> Tenant association in the RAN
+internals. This message is UInfo previously defined.
+
+Message:
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |              RNTI             |           Tenant ID        -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--                        Tenant ID                        -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--        Tenant ID           | | | | | | | | | | | | | | | | |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Life-cycle:
+    Controller           Agent
+        | Request          |
+	+----------------->|
+	|                  |
+	|  Success/Fail/NS |
+	|<-----------------+
+	|                  |
+	v                  v
+
+
+Type:      RAN_USER
+Direction: Request
+Operation: Rem
+
+This message requests to remove one User associaton from RAN.
+
+Fields:
+    RNTI (16 bits), specified the desired RNTI association; if zero is set, the
+    agent should report all the current associations.
+    Tenant ID (64 bits), the Tenant ID association to remove.
+
+Message:
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |              RNTI             |           Tenant ID        -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--                        Tenant ID                        -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--        Tenant ID           | | | | | | | | | | | | | | | | |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Life-cycle:
+    Controller           Agent
+        | Request          |
+	+----------------->|
+	|                  |
+	|  Success/Fail/NS |
+	|<-----------------+
+	|                  |
+	v                  v
+
+
+Type:      RAN_SCHED
+Direction: Request
+Operation: Unspecified
+
+This message request to query the state of one scheduler parameter; in case the
+scheduler is of User type, then also the Tenant ID field must be set in order to
+aim at the right scheduler. Just after the message there will be name of the 
+parameter you need to query.
+
+Fields:
+    Scheduler ID (32 bits)
+    Tenant ID (64 bits)
+    Type (8 bits)
+    Name length (8 bits)
+
+Message:
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                          Scheduler ID                         |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |      Type     |          Tenant ID                         -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--                       Tenant ID                         -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--            |     Name len    |        ASCII name ...       |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Life-cycle:
+    Controller           Agent
+        | Request          |
+	+----------------->|
+	|                  |
+	|            Reply |
+	|<-----------------+
+	|                  |
+	v                  v
+
+
+Type:      RAN_SCHED
+Direction: Reply
+Operation: Unspecified
+
+This message carries the reply of a previously issued request. The reply have an
+additional value filed, which allows to read the current state of the requested
+parameter.
+
+Fields:
+    Scheduler ID (32 bits)
+    Tenant ID (64 bits)
+    Type (8 bits)
+    Name length (8 bits)
+    Value length (16 bits)
+
+Message:
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                          Scheduler ID                         |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |      Type     |           Tenant ID                        -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--                       Tenant ID                         -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--            |     Name len    |        Value length         |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |          ASCII name ...         |        ASCII value ...      |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Life-cycle:
+    Controller           Agent
+        | Request          |
+	+----------------->|
+	|                  |
+	|            Reply |
+	|<-----------------+
+	|                  |
+	v                  v
+
+
+Type:      RAN_SCHED
+Direction: Request
+Operation: Set
+
+This message request to query the state of one scheduler parameter; in case the
+scheduler is of User type, then also the Tenant ID field must be set in order to
+aim at the right scheduler. Just after the message there will be name and value
+of the parameter you need to set.
+
+Fields:
+    Scheduler ID (32 bits)
+    Tenant ID (64 bits)
+    Type (8 bits)
+    Name length (8 bits)
+    Value length (16 bits)
+
+Message:
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                          Scheduler ID                         |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |      Type     |           Tenant ID                        -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--                       Tenant ID                         -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--            |     Name len    |        Value length         |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |          ASCII name ...         |        ASCII value ...      |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Life-cycle:
+    Controller           Agent
+        | Request          |
+	+----------------->|
+	|                  |
+	|  Success/Fail/NS |
+	|<-----------------+
+	|                  |
+	v                  v
+
+Kewin R.

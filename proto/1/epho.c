@@ -32,6 +32,8 @@ int epf_ho_rep(
 	rep->origin_rnti = htons(origin_rnti);
 	rep->target_rnti = htons(target_rnti);
 
+	ep_dbg_dump("F - HO Rep:   ", buf, sizeof(ep_ho_rep));
+
 	return sizeof(ep_ho_rep);
 }
 
@@ -50,6 +52,8 @@ int epp_ho_rep(
 	*origin_rnti = ntohs(rep->origin_rnti);
 	*target_rnti = ntohs(rep->target_rnti);
 
+	ep_dbg_dump("P - HO Rep:   ", buf, sizeof(ep_ho_rep));
+
 	return EP_SUCCESS;
 }
 
@@ -67,6 +71,8 @@ int epf_ho_req(
 	req->target_eNB = htonl(enb);
 	req->target_pci = htons(pci);
 	req->cause      = cause;
+
+	ep_dbg_dump("F - HO Req:   ", buf, sizeof(ep_ho_req));
 
 	return sizeof(ep_ho_req);
 }
@@ -96,6 +102,8 @@ int epp_ho_req(
 	if(cause) {
 		*cause = req->cause;
 	}
+
+	ep_dbg_dump("P - HO Req:   ", buf, sizeof(ep_ho_req));
 
 	return EP_SUCCESS;
 }

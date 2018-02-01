@@ -31,15 +31,22 @@ int epf_uemeas_rep(
 
 	rep->nof_meas = htonl(nof_meas);
 
+	ep_dbg_dump("F - UMEA Rep: ", buf, sizeof(ep_uemeas_rep));
+
 	if(ues) {
 		for(i = 0; i < nof_meas && i < max; i++) {
 			det[i].meas_id = ues[i].meas_id;
 			det[i].pci     = htons(ues[i].pci);
 			det[i].rsrp    = htons(ues[i].rsrp);
 			det[i].rsrq    = htons(ues[i].rsrq);
+
+			ep_dbg_dump(
+				"    F - UMEA UE: ", 
+				&det[i], 
+				sizeof(ep_uemeas_det));
 		}
 	}
-
+	
 	return sizeof(ep_uemeas_rep) + (sizeof(ep_uemeas_det) * i);
 }
 
@@ -57,12 +64,19 @@ int epp_uemeas_rep(
 
 	*nof_meas = ntohl(rep->nof_meas);
 
+	ep_dbg_dump("P - UMEA Rep: ", buf, sizeof(ep_uemeas_rep));
+
 	if(ues) {
 		for(i = 0; i < *nof_meas && i < max; i++) {
 			ues[i].meas_id = det[i].meas_id;
 			ues[i].pci     = ntohs(det[i].pci);
 			ues[i].rsrp    = ntohs(det[i].rsrp);
 			ues[i].rsrq    = ntohs(det[i].rsrq);
+
+			ep_dbg_dump(
+				"    P - UMEA UE: ",
+				&det[i],
+				sizeof(ep_uemeas_det));
 		}
 	}
 
@@ -87,6 +101,8 @@ int epf_uemeas_req(
 	req->interval  = htons(interval);
 	req->max_cells = htons(max_cells);
 	req->max_meas  = htons(max_meas);
+
+	ep_dbg_dump("F - UMEA Req: ", buf, sizeof(ep_uemeas_req));
 
 	return sizeof(ep_uemeas_req);
 }
@@ -125,6 +141,8 @@ int epp_uemeas_req(
 	if(max_meas) {
 		*max_meas = ntohs(req->max_meas);
 	}
+
+	ep_dbg_dump("P - UMEA Req: ", buf, sizeof(ep_uemeas_req));
 
 	return EP_SUCCESS;
 }
