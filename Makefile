@@ -25,6 +25,9 @@ export VERS=1
 all:
 	cd ./proto && make
 
+debug:
+	cd ./proto && make debug
+
 clean:
 	cd ./proto && make clean
 	

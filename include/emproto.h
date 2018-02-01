@@ -17,8 +17,8 @@
  *    EMPOWER AGENT PROTOCOLS
  *
  * Naming has not be done randomly:
- *     epf - Empower Protocol format, when you need to insert info
- *     epp - Empower Protocol parse, when you need to extract info
+ *     epf - Empower Protocol format, when you need to format into a message
+ *     epp - Empower Protocol parse, when you need to parse from a message
  *
  */
 
@@ -30,6 +30,7 @@ extern "C"
 {
 #endif /* __cplusplus */
 
+#include "emproto/epdbg.h"
 #include "emproto/v1/epdefs.h"
 
 #ifdef __cplusplus

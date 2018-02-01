@@ -210,4 +210,40 @@ important changes occurs in the layer.
         |                  |             |  mac_rep reply   |
         +------------------+             +------------------+
 
+
+  HANDOVER
+  
+File: epho.h 
+
+Handover messages contains information to manage an Handover operation which is
+assumed to be carried on with X2 interface between two eNB instances. The 
+message is designed to be an one-time-only operation attempt; no triggers or 
+intervals are considered in the protocols or agent cycle (but you can always 
+invoke the mechanism from an high level logic).
+
+A negative reply from the eNB is sent by the one which receive the original 
+request (the source eNB), while the positive reply is sent by the eNB which 
+performs the HO (the target eNB). This way the controller is aware of errors,
+or if the operation has been performed successfully in the target eNB.
+
+        Source eNB Agent                 Controller
+        +------------------+             +------------------+
+        |                  |             |                  |
+        |                  |             | ho               |
+        | Handle <------------------------- request         |
+        |  ho request      |             |                  |
+	|                  |             |                  |
+        +------------------+             |                  |
+               |                         |  Handle          |
+               | x2 interactions         |  ho reply        |
+               v                         +----^-------------+
+        Target eNB Agent                      |
+        +------------------+                  |
+        |                  |                  |
+        |                  |                  |
+        | ho               |                  |
+        |  reply -----------------------------+
+        |                  |
+        +------------------+
+
 Kewin R.

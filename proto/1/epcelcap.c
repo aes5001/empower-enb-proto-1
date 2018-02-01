@@ -38,6 +38,8 @@ int epf_ccap_rep(
 		rep->UL_prbs    = cell->UL_prbs;
 	}
 
+	ep_dbg_dump("F - CCAP Rep: ", buf, sizeof(ep_ccap_rep));
+
 	return sizeof(ep_ccap_rep);
 }
 
@@ -54,6 +56,8 @@ int epp_ccap_rep(
 	cell->UL_earfcn  = ntohs(rep->UL_earfcn);
 	cell->UL_prbs    = rep->UL_prbs;
 
+	ep_dbg_dump("P - CCAP Rep: ", buf, sizeof(ep_ccap_rep));
+
 	return EP_SUCCESS;
 }
 
@@ -63,11 +67,15 @@ int epf_ccap_req(char * buf, unsigned int size)
 
 	rep->dummy = 0;
 
+	ep_dbg_dump("F - CCAP Req: ", buf, sizeof(ep_ccap_req));
+
 	return sizeof(ep_ccap_req);
 }
 
 int epp_ccap_req(char * buf, unsigned int size)
 {
+	ep_dbg_dump("P - CCAP Req: ", buf, 0);
+
 	return EP_SUCCESS;
 }
 

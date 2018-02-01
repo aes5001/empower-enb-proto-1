@@ -47,8 +47,8 @@ occurs in the agent sub-system, which are:
     send a feedback to the controller.
     
     Possible operation issued with schedule-events:
-        - ADD, for request messages, to start the functionalityt
-        - REM, for request messages, to stop the functionality
+        - ADD, for request messages, to add a functionality
+        - REM, for request messages, to remove a functionality
         - SUCCESS, for reply messages, in case of successful operation
         - FAIL, for reply messages, in case of failed operation
         - NOT_SUPPORTED, for reply messages, in case the requested functionality
@@ -116,6 +116,7 @@ Let's see some quick example of such organization:
     Data:
         No data
 
+
   MESSAGES and PROTOCOL BEHAVIOR
 
 Here following there is a resume of protocol action and their type as it is
@@ -136,6 +137,10 @@ currently handled by the agent subsystem:
 | Ue report         |          |          |    X     |
 +-------------------+----------+----------+----------+
 | Ue measure        |          |          |    X     |
++-------------------+----------+----------+----------+
+| Handover          |    X     |          |          |
++-------------------+----------+----------+----------+
+| RAN               |    X     |          |          |
 +-------------------+----------+----------+----------+
 
 Kewin R.

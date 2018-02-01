@@ -30,12 +30,18 @@ int epf_ecap_rep(
 	rep->cap       = htonl(cap);
 	rep->nof_cells = htonl(nof_cells);
 
+	ep_dbg_dump("F - ECAP Rep: ", buf, sizeof(ep_ecap_rep));
+
 	for(i = 0; i < nof_cells && i < EP_ENCAP_MAX_CELLS; i++) {
 		cel[i].pci       = htons(cells[i].pci);
 		cel[i].DL_earfcn = htons(cells[i].DL_earfcn);
 		cel[i].DL_prbs   = cells[i].DL_prbs;
 		cel[i].UL_earfcn = htons(cells[i].UL_earfcn);
 		cel[i].UL_prbs   = cells[i].UL_prbs;
+
+		ep_dbg_dump("    F - ECAP Cell: ",
+			buf + sizeof(ep_ecap_rep) + (sizeof(ep_ccap_rep) * i),
+			sizeof(ep_ccap_rep));
 	}
 
 	return sizeof(ep_ecap_rep) + (sizeof(ep_ccap_rep) * i);
@@ -54,6 +60,8 @@ int epp_ecap_rep(
 	*cap       = ntohl(rep->cap);
 	*nof_cells = ntohl(rep->nof_cells);
 
+	ep_dbg_dump("P - ECAP Rep: ", buf, sizeof(ep_ecap_rep));
+
 	for(i = 0; i < *nof_cells && i < EP_ENCAP_MAX_CELLS; i++) {
 		cells[i].pci      = ntohs(cel[i].pci);
 		cells[i].cap      = ntohl(cel[i].cap);
@@ -61,6 +69,10 @@ int epp_ecap_rep(
 		cells[i].DL_prbs  = cel[i].DL_prbs;
 		cells[i].UL_earfcn= ntohs(cel[i].UL_earfcn);
 		cells[i].UL_prbs  = cel[i].UL_prbs;
+
+		ep_dbg_dump("    P - ECAP Cell: ", 
+			buf + sizeof(ep_ecap_rep) + (sizeof(ep_ccap_rep) * i),
+			sizeof(ep_ccap_rep));
 	}
 
 	return EP_SUCCESS;
@@ -72,11 +84,15 @@ int epf_ecap_req(char * buf, unsigned int size)
 
 	rep->dummy = 0;
 
+	ep_dbg_dump("F - ECAP Req: ", buf, sizeof(ep_ecap_req));
+
 	return sizeof(ep_ecap_req);
 }
 
 int epp_ecap_req(char * buf, unsigned int size)
 {
+	ep_dbg_dump("P - ECAP Req: ", buf, 0);
+
 	return EP_SUCCESS;
 }
 

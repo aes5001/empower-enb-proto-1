@@ -23,11 +23,15 @@ extern "C"
 
 typedef enum __ep_operation_type {
 	EP_OPERATION_UNSPECIFIED   = 0, /* Do not care of this field */
-	EP_OPERATION_SUCCESS       = 1, /* Success */
-	EP_OPERATION_FAIL          = 2, /* Failure */
-	EP_OPERATION_NOT_SUPPORTED = 3, /* Not supported */
-	EP_OPERATION_ADD           = 4, /* Add something */
-	EP_OPERATION_REM           = 5  /* Remove something */
+	EP_OPERATION_SUCCESS       = 1, /* Success                   */
+	EP_OPERATION_FAIL          = 2, /* Failure                   */
+	EP_OPERATION_NOT_SUPPORTED = 3, /* Not supported             */
+	EP_OPERATION_ADD           = 4, /* Add something             */
+	EP_OPERATION_REM           = 5, /* Remove something          */
+	EP_OPERATION_SET           = 6, /* Set something             */
+	EP_OPERATION_UNSET         = 7, /* Unset something           */
+	EP_OPERATION_START         = 8, /* Start something           */
+	EP_OPERATION_STOP          = 9, /* Stop something            */
 } ep_op_type;
 
 #ifdef __cplusplus

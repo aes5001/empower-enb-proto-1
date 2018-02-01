@@ -36,23 +36,27 @@ extern "C"
 
 /* Type of the message */
 typedef enum __ep_message_type {
-	EP_TYPE_INVALID_MSG  = 0,
-	EP_TYPE_SINGLE_MSG   = 1,
-	EP_TYPE_SCHEDULE_MSG = 2,
-	EP_TYPE_TRIGGER_MSG  = 3,
-	EP_TYPE_EXTENDED     = 0xff
+	EP_TYPE_INVALID_MSG   = 0,
+	EP_TYPE_SINGLE_MSG    = 1,
+	EP_TYPE_SCHEDULE_MSG  = 2,
+	EP_TYPE_TRIGGER_MSG   = 3,
+	EP_TYPE_EXTENDED      = 0xff
 } ep_msg_type;
 
 /* Action operated by the message */
 typedef enum __ep_action_type {
-	EP_ACT_INVALID       = 0, /* Invalid */
-	EP_ACT_HELLO         = 1, /* Hello */
-	EP_ACT_ECAP          = 2, /* eNB capabilities */
-	EP_ACT_CCAP          = 3, /* Cell capabilities */
-	EP_ACT_UE_REPORT     = 4, /* UE report */
-	EP_ACT_UE_MEASURE    = 5, /* UE RRC measurements */
-	EP_ACT_MAC_REPORT    = 6, /* Report coming from MAC layer */
-	EP_ACT_HANDOVER      = 7, /* Hand an UE over another eNB */
+	EP_ACT_INVALID        = 0,  /* Invalid */
+	EP_ACT_HELLO          = 1,  /* Hello */
+	EP_ACT_ECAP           = 2,  /* eNB capabilities */
+	EP_ACT_CCAP           = 3,  /* Cell capabilities */
+	EP_ACT_UE_REPORT      = 4,  /* UE report */
+	EP_ACT_UE_MEASURE     = 5,  /* UE RRC measurements */
+	EP_ACT_MAC_REPORT     = 6,  /* Report coming from MAC layer */
+	EP_ACT_HANDOVER       = 7,  /* Hand an UE over another eNB */
+	EP_ACT_RAN_SETUP      = 9,  /* */
+	EP_ACT_RAN_TENANT     = 10, /* */
+	EP_ACT_RAN_USER       = 11, /* */
+	EP_ACT_RAN_SCHED      = 12, /* */
 } ep_act_type;
 
 #ifdef __cplusplus

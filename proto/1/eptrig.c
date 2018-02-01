@@ -27,6 +27,8 @@ int epf_trigger(
 	h->op   = (uint8_t)op;
 	h->dir  = (uint8_t)dir;
 
+	ep_dbg_dump("F - TRIG: ", buf, sizeof(ep_t_hdr));
+
 	return sizeof(ep_t_hdr);
 }
 /******************************************************************************
