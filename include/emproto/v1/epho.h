@@ -42,7 +42,7 @@ typedef struct __ep_handover_request {
 }__attribute__((packed)) ep_ho_req;
 
 typedef struct __ep_handover_reply {
-	uint16_t origin_eNB;  /* Original eNB  */
+	uint32_t origin_eNB;  /* Original eNB  */
 	uint16_t origin_pci;  /* Original PCI  */
 	uint16_t origin_rnti; /* Original RNTI */
 	uint16_t target_rnti; /* Target RNTI   */
