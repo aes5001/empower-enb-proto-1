@@ -117,7 +117,11 @@ int epf_single_ho_rep_fail(
 	unsigned int size,
 	uint32_t     enb_id,
 	uint16_t     cell_id,
-	uint32_t     mod_id)
+	uint32_t     mod_id,
+	uint32_t     origin_eNB,
+	uint16_t     origin_pci,
+	uint16_t     origin_rnti,
+	uint16_t     target_rnti)
 {
 	int ms = 0;
 
@@ -136,7 +140,14 @@ int epf_single_ho_rep_fail(
 		EP_OPERATION_FAIL,
 		EP_DIR_REPLY);
 
-	ms += epf_ho_rep(buf + ms, size - ms, 0, 0, 0, 0);
+	ms += epf_ho_rep(
+		buf + ms, 
+		size - ms,
+		origin_eNB, 
+		origin_pci, 
+		origin_rnti, 
+		target_rnti);
+
 	epf_msg_length(buf, size, ms);
 
 	return ms;
@@ -147,7 +158,11 @@ int epf_single_ho_rep_ns(
 	unsigned int size,
 	uint32_t     enb_id,
 	uint16_t     cell_id,
-	uint32_t     mod_id)
+	uint32_t     mod_id,
+	uint32_t     origin_eNB,
+	uint16_t     origin_pci,
+	uint16_t     origin_rnti,
+	uint16_t     target_rnti)
 {
 	int ms = 0;
 
@@ -166,7 +181,14 @@ int epf_single_ho_rep_ns(
 		EP_OPERATION_NOT_SUPPORTED,
 		EP_DIR_REPLY);
 
-	ms += epf_ho_rep(buf + ms, size - ms, 0, 0, 0, 0);
+	ms += epf_ho_rep(
+		buf + ms, 
+		size - ms, 
+		origin_eNB,
+		origin_pci,
+		origin_rnti,
+		target_rnti);
+
 	epf_msg_length(buf, size, ms);
 
 	return ms;

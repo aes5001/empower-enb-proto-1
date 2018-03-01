@@ -60,7 +60,11 @@ int epf_single_ho_rep_fail(
 	unsigned int size,
 	uint32_t     enb_id,
 	uint16_t     cell_id,
-	uint32_t     mod_id);
+	uint32_t     mod_id,
+	uint32_t     origin_eNB,
+	uint16_t     origin_pci,
+	uint16_t     origin_rnti,
+	uint16_t     target_rnti);
 
 /* Format an handover "not-supported" reply.
  * Returns the size of the message, or a negative error number.
@@ -70,7 +74,11 @@ int epf_single_ho_rep_ns(
 	unsigned int size,
 	uint32_t     enb_id,
 	uint16_t     cell_id,
-	uint32_t     mod_id);
+	uint32_t     mod_id,
+	uint32_t     origin_eNB,
+	uint16_t     origin_pci,
+	uint16_t     origin_rnti,
+	uint16_t     target_rnti);
 
 /* Format an handover positive reply.
  * Returns the size of the message, or a negative error number.
