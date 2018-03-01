@@ -119,13 +119,13 @@ typedef struct __ep_ran_setup {
  */
 
 /* NOTE: This limits the number of Tenants per message! */
-#define RAN_TENANT_MAX		8
+#define EP_RAN_TENANT_MAX       8
 /* NOTE: This limits the number of Users per message! */
-#define RAN_USER_MAX		64
+#define EP_RAN_USER_MAX         64
 /* NOTE: This limits the number of character per scheduler parameter name! */
-#define RAN_NAME_MAX		32
+#define EP_RAN_NAME_MAX         32
 /* NOTE: This limits the number of character per scheduler parameter value! */
-#define RAN_VALUE_MAX		8192
+#define EP_RAN_VALUE_MAX        8192
 
 typedef struct __ep_ran_sched_param_details {
 	char *   name;		/* Name of the parameter */

@@ -80,7 +80,7 @@ int epf_ran_tenant_rep(
 
 	r->nof_tenants = htons(nof);
 	
-	for (i = 0; i < nof && i < RAN_TENANT_MAX; i++) {
+	for (i = 0; i < nof && i < EP_RAN_TENANT_MAX; i++) {
 		d[i].id    = htobe64(dets[i].id);
 		d[i].sched = htonl(dets[i].sched);
 	}
@@ -101,7 +101,7 @@ int epp_ran_tenant_rep(
 
 	*nof = ntohs(r->nof_tenants);
 
-	for (i = 0; i < *nof && i < RAN_TENANT_MAX; i++) {
+	for (i = 0; i < *nof && i < EP_RAN_TENANT_MAX; i++) {
 		dets[i].id    = be64toh(d[i].id);
 		dets[i].sched = ntohl(d[i].sched);
 	}
@@ -195,7 +195,7 @@ int epf_ran_user_rep(
 
 	r->nof_users = htons(nof);
 
-	for (i = 0; i < nof && i < RAN_USER_MAX; i++) {
+	for (i = 0; i < nof && i < EP_RAN_USER_MAX; i++) {
 		u[i].rnti      = htons(det[i].id);
 		u[i].tenant_id = htobe64(det[i].tenant);
 	}
@@ -215,7 +215,7 @@ int epp_ran_user_rep(
 
 	*nof = ntohs(r->nof_users);
 
-	for (i = 0; i < *nof && i < RAN_USER_MAX; i++) {
+	for (i = 0; i < *nof && i < EP_RAN_USER_MAX; i++) {
 		det[i].id     = ntohs(u[i].rnti);
 		det[i].tenant = be64toh(u[i].tenant_id);
 	}
@@ -285,7 +285,7 @@ int epf_ran_sched_req(
 	uint64_t            tenant,
 	ep_ran_sparam_det * det)
 {
-	size_t        n = min(det->name_len, RAN_NAME_MAX);
+	size_t        n = min(det->name_len, EP_RAN_NAME_MAX);
 	ep_ran_sreq * r = (ep_ran_sreq *)buf;
 	char *        a = buf + sizeof(ep_ran_sreq);
 
@@ -346,8 +346,8 @@ int epf_ran_sched_rep(
 	uint64_t            tenant,
 	ep_ran_sparam_det * det)
 {
-	size_t        n = min(det->name_len,  RAN_NAME_MAX);
-	size_t        v = min(det->value_len, RAN_VALUE_MAX);
+	size_t        n = min(det->name_len,  EP_RAN_NAME_MAX);
+	size_t        v = min(det->value_len, EP_RAN_VALUE_MAX);
 	ep_ran_srep * r = (ep_ran_srep *)buf;
 	char *        a = buf + sizeof(ep_ran_srep);
 
@@ -416,8 +416,8 @@ int epf_ran_sched_set(
 	uint64_t            tenant,
 	ep_ran_sparam_det * det)
 {
-	size_t        n = min(det->name_len,  RAN_NAME_MAX);
-	size_t        v = min(det->value_len, RAN_VALUE_MAX);
+	size_t        n = min(det->name_len,  EP_RAN_NAME_MAX);
+	size_t        v = min(det->value_len, EP_RAN_VALUE_MAX);
 	ep_ran_srep * r = (ep_ran_srep *)buf;
 	char *        a = buf + sizeof(ep_ran_srep);
 
