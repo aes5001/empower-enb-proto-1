@@ -49,3 +49,10 @@ ep_act_type epp_single_type(char * buf, unsigned int size)
 
 	return (ep_act_type)h->type;
 }
+
+ep_op_type epp_single_op(char * buf, unsigned int size)
+{
+	ep_s_hdr * h = (ep_s_hdr *)(buf + sizeof(ep_hdr));
+
+	return (ep_op_type)h->op;
+}

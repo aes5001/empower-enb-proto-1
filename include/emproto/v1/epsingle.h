@@ -55,6 +55,9 @@ ep_dir_type epp_single_dir(char * buf, unsigned int size);
 /* Extracts the type from an Empower single message */
 ep_act_type epp_single_type(char * buf, unsigned int size);
 
+/* Extracts the operation from an Empower single message */
+ep_op_type epp_single_op(char * buf, unsigned int size);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
