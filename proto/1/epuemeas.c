@@ -24,7 +24,7 @@ int epf_uemeas_rep(
 	uint32_t        max,
 	ep_ue_measure * ues)
 {
-	int i = -1;
+	int i = 0;
 
 	ep_uemeas_rep * rep = (ep_uemeas_rep *) buf;
 	ep_uemeas_det * det = (ep_uemeas_det *)(buf + sizeof(ep_uemeas_rep));

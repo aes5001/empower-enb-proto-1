@@ -24,7 +24,7 @@ int epf_uerep_rep(
 	uint32_t        max_ues,
 	ep_ue_details * ues)
 {
-	int i = -1;
+	int i = 0;
 
 	ep_uerep_rep * rep = (ep_uerep_rep *)buf;
 	ep_uerep_det * det = (ep_uerep_det *)(buf + sizeof(ep_uerep_rep));
