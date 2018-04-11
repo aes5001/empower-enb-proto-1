@@ -62,12 +62,12 @@ Message:
 Life-cycle:
     Controller           Agent
         | Request          |
-	+----------------->|
-	|                  |
-	|            Reply |
-	|<-----------------+
-	|                  |
-	v                  v
+        +----------------->|
+        |                  |
+        |            Reply |
+        |<-----------------+
+        |                  |
+        v                  v
 
 
 Type:      RAN_SETUP
@@ -89,12 +89,12 @@ Message:
 Life-cycle:
     Controller           Agent
         | Request          |
-	+----------------->|
-	|                  |
-	|            Reply |
-	|<-----------------+
-	|                  |
-	v                  v
+        +----------------->|
+        |                  |
+        |            Reply |
+        |<-----------------+
+        |                  |
+        v                  v
 
 
 Type:      RAN_SETUP
@@ -117,12 +117,12 @@ Message:
 Life-cycle:
     Controller           Agent
         | Request          |
-	+----------------->|
-	|                  |
-	|  Success/Fail/NS |
-	|<-----------------+
-	|                  |
-	v                  v
+        +----------------->|
+        |                  |
+        |  Success/Fail/NS |
+        |<-----------------+
+        |                  |
+        v                  v
 
 
 Type:      RAN_TENANT
@@ -146,12 +146,12 @@ Message:
 Life-cycle:
     Controller           Agent
         | Request          |
-	+----------------->|
-	|                  |
-	|            Reply |
-	|<-----------------+
-	|                  |
-	v                  v
+        +----------------->|
+        |                  |
+        |            Reply |
+        |<-----------------+
+        |                  |
+        v                  v
 
 
 Type:      RAN_TENANT
@@ -186,12 +186,12 @@ Message:
 Life-cycle:
     Controller           Agent
         | Request          |
-	+----------------->|
-	|                  |
-	|            Reply |
-	|<-----------------+
-	|                  |
-	v                  v
+        +----------------->|
+        |                  |
+        |            Reply |
+        |<-----------------+
+        |                  |
+        v                  v
 
 
 Type:      RAN_TENANT
@@ -215,12 +215,12 @@ Message:
 Life-cycle:
     Controller           Agent
         | Request          |
-	+----------------->|
-	|                  |
-	|  Success/Fail/NS |
-	|<-----------------+
-	|                  |
-	v                  v
+        +----------------->|
+        |                  |
+        |  Success/Fail/NS |
+        |<-----------------+
+        |                  |
+        v                  v
 
 
 Type:      RAN_TENANT
@@ -242,12 +242,12 @@ Message:
 Life-cycle:
     Controller           Agent
         | Request          |
-	+----------------->|
-	|                  |
-	|  Success/Fail/NS |
-	|<-----------------+
-	|                  |
-	v                  v
+        +----------------->|
+        |                  |
+        |  Success/Fail/NS |
+        |<-----------------+
+        |                  |
+        v                  v
 
 
 Type:      RAN_USER
@@ -270,12 +270,12 @@ Message:
 Life-cycle:
     Controller           Agent
         | Request          |
-	+----------------->|
-	|                  |
-	|            Reply |
-	|<-----------------+
-	|                  |
-	v                  v
+        +----------------->|
+        |                  |
+        |            Reply |
+        |<-----------------+
+        |                  |
+        v                  v
 
 
 Type:      RAN_USER
@@ -309,12 +309,12 @@ Message:
 Life-cycle:
     Controller           Agent
         | Request          |
-	+----------------->|
-	|                  |
-	|            Reply |
-	|<-----------------+
-	|                  |
-	v                  v
+        +----------------->|
+        |                  |
+        |            Reply |
+        |<-----------------+
+        |                  |
+        v                  v
 
 
 Type:      RAN_USER
@@ -338,12 +338,12 @@ Message:
 Life-cycle:
     Controller           Agent
         | Request          |
-	+----------------->|
-	|                  |
-	|  Success/Fail/NS |
-	|<-----------------+
-	|                  |
-	v                  v
+        +----------------->|
+        |                  |
+        |  Success/Fail/NS |
+        |<-----------------+
+        |                  |
+        v                  v
 
 
 Type:      RAN_USER
@@ -371,12 +371,12 @@ Message:
 Life-cycle:
     Controller           Agent
         | Request          |
-	+----------------->|
-	|                  |
-	|  Success/Fail/NS |
-	|<-----------------+
-	|                  |
-	v                  v
+        +----------------->|
+        |                  |
+        |  Success/Fail/NS |
+        |<-----------------+
+        |                  |
+        v                  v
 
 
 Type:      RAN_SCHED
@@ -410,12 +410,12 @@ Message:
 Life-cycle:
     Controller           Agent
         | Request          |
-	+----------------->|
-	|                  |
-	|            Reply |
-	|<-----------------+
-	|                  |
-	v                  v
+        +----------------->|
+        |                  |
+        |            Reply |
+        |<-----------------+
+        |                  |
+        v                  v
 
 
 Type:      RAN_SCHED
@@ -451,12 +451,12 @@ Message:
 Life-cycle:
     Controller           Agent
         | Request          |
-	+----------------->|
-	|                  |
-	|            Reply |
-	|<-----------------+
-	|                  |
-	v                  v
+        +----------------->|
+        |                  |
+        |            Reply |
+        |<-----------------+
+        |                  |
+        v                  v
 
 
 Type:      RAN_SCHED
@@ -493,11 +493,11 @@ Message:
 Life-cycle:
     Controller           Agent
         | Request          |
-	+----------------->|
-	|                  |
-	|  Success/Fail/NS |
-	|<-----------------+
-	|                  |
-	v                  v
+        +----------------->|
+        |                  |
+        |  Success/Fail/NS |
+        |<-----------------+
+        |                  |
+        v                  v
 
 Kewin R.
