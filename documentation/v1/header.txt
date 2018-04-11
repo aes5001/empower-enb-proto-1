@@ -1,0 +1,61 @@
+
+	EmPOWER Protocol Master Header
+
+
+
+The master header is a piece of information always present in the communication
+between the controller and the agent. It resumes the essential and minimum info
+necessary for the communication to take place.
+
+The format of the header is:
+
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |     Type      |    Version    |             eNB ID         -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--          eNB ID            |            Cell ID            |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                           Module ID                           |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |         Message length        |         Sequence number    -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--      Sequence number       | | | | | | | | | | | | | | | | |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    
+Details of the fields encountered in this piece of information are:
+
+    TYPE
+        Type of the message exchanged. This starts from 1, and 0 is left as an
+        error token. Message type with value 0xff identifies and 'extension', 
+        and swap everything right of one byte.
+        
+        Types 0xff01 nad 0xff02 are two different types with the field length of
+        16-bits instead of 8-bits.
+    
+    VERSION
+        Version of the message exchanged. For this documentation it will be 
+        always set to 1. Values of 0 is left as an identificator for a "beta"
+        protocol syntax that can be ignored.
+        
+    ENB ID
+        32-bits identificator for a base station.
+        
+    CELL ID
+        16-bits identificator for a cell within a base station. This usually
+        matches the Physical Cell Id.
+        
+    MODULE ID
+        32-bits identificator of the controller-side module which is issuing the
+        query. This is the useful identificator for controller-side multiplexing
+        of functionality.
+        
+    MESSAGE LEGTH
+        16-bits field of the size of the message.
+        
+    SEQUENCE NUMBER
+        32-bits incrementing number used by enb and controller. This number is
+        not unique and can change for every Module ID. This means that multiple
+        modules can have multiple sequence numbers which can overlap. 
+
+Kewin R.
