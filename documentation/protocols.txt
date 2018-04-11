@@ -16,29 +16,15 @@ occurs in the agent sub-system, which are:
 
   - SINGLE-events
     These are simple, standalone, events, requested by the controller and 
-    notified back immediately by the agents. No additional logic is bound to 
-    such message, and the controller decide when it's time to issue the next 
-    event.
+    notified back immediately by the agents (or in the opposite direction).
+    No additional logic is bound to such message, and the controller/agent 
+    decide when it's time to issue the next event.
     
-    Possible operation issued with single-events:
-        - UNSPECIFIED, for request messages
-        - SUCCESS, in case of successful operation
-        - FAIL, in case of failed operation
-        - NOT_SUPPORTED, in case the requested functionality is not supported
-
   - SCHEDULE-events
     These are events which will be requested once, and performed multiple times
-    every interval given into the agent. Scheduled events allows to request 
-    repeatable request at known intervals.
+    every interval given into the agent/controller. Scheduled events allows to
+    have repeatable request at known intervals.
     
-    Possible operation issued with schedule-events:
-        - ADD, for request messages, to start the schedule of such event
-        - REM, for request messages, to stop the schedule of such event
-        - SUCCESS, for reply messages, in case of successful operation
-        - FAIL, for reply messages, in case of failed operation
-        - NOT_SUPPORTED, for reply messages, in case the requested functionality
-            is not supported
-
   - TRIGGER-events
     These events should ideally enable/disable a functionality in the agent.
     Such component works with threshold or particular actions which can happens
@@ -46,14 +32,6 @@ occurs in the agent sub-system, which are:
     Is up to the implementation of the wrapper decide when such component shall
     send a feedback to the controller.
     
-    Possible operation issued with schedule-events:
-        - ADD, for request messages, to add a functionality
-        - REM, for request messages, to remove a functionality
-        - SUCCESS, for reply messages, in case of successful operation
-        - FAIL, for reply messages, in case of failed operation
-        - NOT_SUPPORTED, for reply messages, in case the requested functionality
-            is not supported
-
 Such message types contains a specialized header which describes the property of
 the event to the agent subsystem. Every event then extend a particular Action 
 that will be performed in the agent. Action and events are independent from each 
@@ -130,17 +108,17 @@ currently handled by the agent subsystem:
 +-------------------+----------+----------+----------+
 | eNB capabilities  |    X     |          |          |
 +-------------------+----------+----------+----------+
+| Handover          |    X     |          |          |
++-------------------+----------+----------+----------+
 | Hello             |          |    X     |          |
 +-------------------+----------+----------+----------+
 | Mac report        |          |          |    X     |
 +-------------------+----------+----------+----------+
+| RAN               |    X     |          |          |
++-------------------+----------+----------+----------+
 | Ue report         |          |          |    X     |
 +-------------------+----------+----------+----------+
 | Ue measure        |          |          |    X     |
-+-------------------+----------+----------+----------+
-| Handover          |    X     |          |          |
-+-------------------+----------+----------+----------+
-| RAN               |    X     |          |          |
 +-------------------+----------+----------+----------+
 
 Kewin R.
