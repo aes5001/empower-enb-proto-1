@@ -1,0 +1,42 @@
+
+	EmPOWER Protocol Hello message
+
+
+
+The Hello message act as both connection initiator and keepalive pulse. 
+
+The Hello message is usually sent as the first message exchanged between a 
+controller and an agent during connection startup. The agent is the initiator
+of the conection, an request an Hello from the controller.
+
+The controller here have the possibility to reject the connection following the
+security policies desired, otherwise if the client is accepted, it returns a 
+Hello reply to the agent.
+
+Life-cycle:
+
+    Controller           Agent
+        | Request          |
+        +<-----------------|
+        |                  |
+        |            Reply |
+        |----------------->+
+        |                  |
+        v                  v
+
+Message:
+
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                             ID                                |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    
+Fields:
+
+    ID
+        A generic 32-bits field used as identificator of the Hello procedure.
+        This element is currently left to 0, but can used to move additional 
+        information during the hello message.
+       
+Kewin R.

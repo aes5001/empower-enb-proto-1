@@ -1,0 +1,74 @@
+
+	EmPOWER Protocol Handover message
+
+
+
+The Handover message aims to trigger an X2 handover in the eNB, in order to move
+the session of an User Equipment from a cell to another.
+
+Life-cycle:
+
+    Controller         Agent_src          Agent_dst
+        | Request          |                  |
+        +----------------->|                  |
+        |                  |----------------->|
+        |        Neg Reply |                  |
+        |<-----------------+                  |
+        |                  |    Neg/Pos Reply |
+        |<-----------------|------------------|
+        v                  v                  v
+
+Request:
+
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |               RNTI            |         Target eNB         -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--       Target eNB           |         Target PCI            |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |     Cause     | | | | | | | | | | | | | | | | | | | | | | | | |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    
+Fields:
+
+    RNTI
+        16-bits Radio Network Temporary Identifier of the target UE.
+        
+    TARGET ENB
+        32-bits ID of the eNB where the RNTI should be transfered to.
+        
+    TARGET PCI
+        16-bits Physical Cell Identificator of the target cell.
+        
+    CAUSE
+        8-bits field which identify the cause of Handover.
+
+Reply:
+
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                          Source eNB                           |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |            Origin PCI         |          Origin RNTI          |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |           Target RNTI         | | | | | | | | | | | | | | | | |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    
+Fields:
+
+    SOURCE ENB
+        32-bits ID of the Handover initiator.
+        
+    ORIGIN PCI
+        16-bits Physical Cell ID of the Handover initiator.
+        
+    ORIGIN RNTI
+    	16-bits original Radio Network Temporary Identifiers.
+    	
+    TARGET RNTI
+        16-bits Radio Network Temporary Identifiers assumed by the UE after the
+        Handover operation. 
+       
+Kewin R.

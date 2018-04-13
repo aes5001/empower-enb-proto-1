@@ -1,0 +1,75 @@
+
+	EmPOWER Protocol UE report message
+
+
+
+The UE report message has the task to list all those UE which are currently 
+connected through an eNB to the LTE network. Even if ISMI field is present in 
+the message, the particular agent implementation can decide to leave it filled
+with zero, since particular operations are necessary to bind IMSI to RNTI, and 
+they are not part of the standard.
+
+This message carry a complete view of the situation, and not only a difference
+between two status. This means that the UEs listed here are the current one
+connected through the eNB.
+
+Life-cycle:
+
+    Controller           Agent
+        | Request          |
+        +----------------->|
+        |                  |
+        |            Reply |
+        |<-----------------+
+        |                  |
+        v                  v
+
+Request:
+
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Reply:
+
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                         Number of UEs                         |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Fields:
+
+    NUMBER OF UES
+        A 32-bits field which identifies how many UE descriptor are following 
+        this header in this message.
+        
+UE descriptor:
+
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |              PCI              |              PLMN          -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--          PLMN              |              RNTI             |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                             IMSI                           -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--                          IMSI                              |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    
+Fields:
+
+    PCI
+        A 16-bits field which identifies the PCI where the UE is connected on.
+        
+    PLMN
+    	A 32-bits field which identifies the UE PLMN.
+    	
+   	IMSI
+   		A 64-bits field which identifies the UE International Mobile Subscriber
+   		Identity. This is not mandatory and can be left zero-filled.
+      
+Kewin R.

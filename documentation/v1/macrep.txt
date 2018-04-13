@@ -1,0 +1,66 @@
+
+	EmPOWER Protocol MAC layer Report message
+
+
+
+The MAC report message is in charge of reporting the situation of the MAC for
+a specific cell. Currently the message is limited to transmission about the 
+status of the PRB usage, but the message is not limited just to it and will be 
+extended.
+
+Life-cycle:
+
+    Controller           Agent
+        | Request          |
+        +----------------->|
+        |                  |
+        |            Reply |
+        |<-----------------+
+        |                  |
+        v                  v
+
+Request:
+
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |            Interval           | | | | | | | | | | | | | | | | |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    
+Fields:
+
+    INTERVAL
+        Interval in milliseconds after that a report should be sent to the 
+        controller. If particular events occurs before this timeout is reached,
+        the wrapper can still send a report (trigger nature).
+
+
+Reply:
+
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |    DL total   |                  DL PRBs used              -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--            |   UL total    |           UL PRBS used     -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--       UL PRBS used         | | | | | | | | | | | | | | | | |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    
+Fields:
+
+    DL TOTAL
+        8-bits fields indicating the number of total PRBs per DL subframe.
+        
+    DL PRBS USED
+        32-bits field with the sum of the PRBS used in DL. 
+        This field does not reset and can overflow, starting again from 0.
+        
+    UL TOTAL
+    	8-bits fields indicating the number of total PRBs per UL subframe.
+    	
+    UL PRBS USED
+        32-bits field with the sum of the PRBS used in UL. 
+        This field does not reset and can overflow, starting again from 0. 
+       
+Kewin R.

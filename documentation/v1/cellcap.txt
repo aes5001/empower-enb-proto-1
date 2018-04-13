@@ -1,0 +1,66 @@
+
+	EmPOWER Protocol Cell Capabilities message
+
+
+
+The Cell Capabilities message aims to retrieve the configuration of a single
+cell in the target eNB. This message context is limited to that cell only, so 
+different cell in the same eNB can have different enabled capabilities.
+
+Life-cycle:
+
+    Controller           Agent
+        | Request          |
+        +----------------->|
+        |                  |
+        |            Reply |
+        |<-----------------+
+        |                  |
+        v                  v
+
+Request:
+
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Reply:
+
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |              PCI              |        Cell capability     -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--      Cell capability       |           DL EARFCN           |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |    DL PRBs    |           UL EARFCN           |    UL PRBs    |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    
+Fields:
+
+    PCI
+        16-bits Physical Cell ID of this cell.
+        
+    CELL CAPABILITY
+        32-bits bitmask of the capabilities of this single cell.
+        See epcelcap.h to discover the map of bits --> capability.
+        
+    DL EARFCN
+        16-bits field which identifies the DL frequency where the cell is 
+        operating.
+        
+    DL PRBs
+        8-bits field which identifies the number of Physical Resource Blocks 
+        used in the DL.
+        
+    UL EARFCN
+        16-bits field which identifies the UL frequency where the cell is 
+        operating.
+        
+    UL PRBs
+        8-bits field which identifies the number of Physical Resource Blocks 
+        used in the UL.
+               
+Kewin R.
