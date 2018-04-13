@@ -55,7 +55,7 @@ Details of the fields encountered in this piece of information are:
         
     SEQUENCE NUMBER
         32-bits incrementing number used by enb and controller. This number is
-        not unique and can change for every Module ID. This means that multiple
-        modules can have multiple sequence numbers which can overlap. 
+        unique for every Module ID. This means that multiple modules will share
+        the sequence numbers, which always increments. 
 
 Kewin R.

@@ -1,0 +1,146 @@
+
+
+	EmPOWER Agent protocols life cycle
+	
+
+The default behavior have some minimal constrain in this version. The following
+schemas resume how interaction between Agent and Controller take place.
+
+
+  CONNECTION
+  
+A connection phase occurs between an Agent and a Controller. Multiple Agents can
+be embedded in a single eNB, but still they will have one connection with only 
+one controller. Connection from a single Agent to multiple Controller is not
+handled in this protocol version.
+
+During this phase the Agent first presents to the controller and, if accepted,
+it gets a positive hello reply back. In case of refusing the Agent can decide to
+try with another controller, or wait and try again after some time.
+
+If Hello is successful, the controller is expected to query the Agent about the
+base station capability (which also contains the number of cells in use), and
+then loop over the reported cells to obtains details of their functionalities.
+
+        Controller                Agent
+            |                       |
+            |             Hello req |
+            |<----------------------+ <------+
+            |                       |        |
+         Security                   |        |
+          checks                    |     Wait or
+            |                       |   change controller
+            +---------------------->|        |
+            | Hello reply           |        |
+            |                       |      n |
+            |                    Positive ---+
+            |                     reply?
+            |                       |
+            | eNB capability req    |
+            +---------------------->|
+            |                       |
+            |                   Collecting
+            |                  capabilities
+            |                       |
+            |<----------------------+
+            |    eNB capability rep |
+            |                       |
+         Discover                   |
+      number of cells               |
+          in eNB                    |
+            |                       |
+            | cell capability req   |
+  +-------> +---------------------->|
+  |         |                       |
+  |         |                   Collecting
+  |         |                  capabilities
+  |         |                       |
+  |         |<----------------------+
+  |         |   cell capability rep |
+  |         |                       |
+  | n    all the                    |     
+  +-- cells have been               |
+         queried?                   |
+            |                       |
+            
+  ENABLE/DISABLE FUNCTIONALITY
+  
+If the Agent reported it during capability discovery, the Controller can then
+decide to enable/disable a particular functionality of the eNB/cell. 
+
+In the following example you will see the UE report life cycle. This message is
+an event of Trigger nature, which means that can occurs in any time without a 
+well defined interval. When such event occurs, the agent again send a reply back
+to the Controller which is formatted in a similar way of the first positive 
+reply.
+  
+        Controller                Agent
+            |                       |
+            | UE report req         |
+            +---------------------->|
+            |                       |
+            |                     Sanity
+            |                     checks
+            |                       |
+            |<----------------------+
+            |         UE report rep |
+            |                       |
+            |                   Timeout or
+            |                  event occurs
+            |                       |
+            |<----------------------+
+            |         UE report rep |
+            |                       |
+            
+Generic rule here is to invoke a request with operation field set to ADD in 
+order to enable a functionality, and set to REM to remove the functionality from
+the system.
+
+
+  ONT-TIME OPERATIONS
+  
+Some operation which can be issued from the Controller to the Agent are one-time
+only order, which must be performed and forgotten by the Agent. The Agent can
+always reply negatively or with "not supported" message to inform that the 
+operation is not available or has failed.
+
+        Controller                Agent
+            |                       |
+            | RAN add tenant req    |
+            +---------------------->|
+            |                       |
+            |                     Sanity
+            |                     checks
+            |                       |
+            |<----------------------+
+            |    RAN add tenant rep |
+
+In the case of Handover, since it is assumed that such operation will be done on
+X2 interface following the standards and propertary mechanism, a negative reply
+from the source eNB informs the Controller that something did not work to begin
+with, while a positive/negative reply from the Handover destination eNB informs
+the controller that the X2 handover took place, but failed for some other 
+reason.
+
+This of course force tboth the source and destination eNBs to run an Agent 
+instance.
+
+        Controller                Agent                   Agent
+            |                       |                       |
+            | Handover req          |                       |
+            +---------------------->|                       |
+            |                       |                       |
+            |                     Sanity                    |
+            |                     checks                    |
+            |                       |                       |
+            |                   Falure or     n             |
+            |                 not supported? -------------->|             
+            |                       | y                     |
+            |<----------------------+                   X2 handover
+            | Handover negative rep |                       |
+            |                       |                       |
+            |<----------------------------------------------+
+            |                       |          Handover rep |
+            |                       |                       |
+                                  
+Kewin R.
