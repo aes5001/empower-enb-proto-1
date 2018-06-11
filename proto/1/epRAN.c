@@ -26,7 +26,14 @@ int epf_ran_setup_rep(char * buf, unsigned int size, ep_ran_det * det)
 {
 	ep_ran_setup * s = (ep_ran_setup *)buf;
 
+	if(size < sizeof(ep_ran_setup)) {
+		ep_dbg_log("F - RANS Rep: Not enough space!\n");
+		return -1;
+	}
+
 	s->sched_id = htonl(det->tenant_sched);
+
+	ep_dbg_dump("F - RANS Rep: ", buf, sizeof(ep_ran_setup));
 
 	return sizeof(ep_ran_setup);
 }
@@ -38,7 +45,16 @@ int epp_ran_setup_rep(char * buf, unsigned int size, ep_ran_det * det)
 {
 	ep_ran_setup * s = (ep_ran_setup *)buf;
 
-	det->tenant_sched = ntohl(s->sched_id);
+	if(size < sizeof(ep_ran_setup)) {
+		ep_dbg_log("P - RANS Rep: Not enough space!\n");
+		return EP_ERROR;
+	}
+
+	if(det) {
+		det->tenant_sched = ntohl(s->sched_id);
+	}
+
+	ep_dbg_dump("P - RANS Rep: ", buf, sizeof(ep_ran_setup));
 
 	return EP_SUCCESS;
 }
@@ -50,7 +66,14 @@ int epf_ran_tenant_req(char * buf, unsigned int size, ep_ran_tenant_det * det)
 {
 	ep_ran_treq * r = (ep_ran_treq *)buf;
 
+	if(size < sizeof(ep_ran_treq)) {
+		ep_dbg_log("F - RANT Req: Not enough space!\n");
+		return -1;
+	}
+
 	r->id = htobe64(det->id);
+
+	ep_dbg_dump("F - RANT Req: ", buf, sizeof(ep_ran_treq));
 
 	return sizeof(ep_ran_treq);
 }
@@ -62,7 +85,16 @@ int epp_ran_tenant_req(char * buf, unsigned int size, ep_ran_tenant_det * det)
 {
 	ep_ran_treq * r = (ep_ran_treq *)buf;
 
-	det->id = be64toh(r->id);
+	if(size < sizeof(ep_ran_treq)) {
+		ep_dbg_log("P - RANT Req: Not enough space!\n");
+		return EP_ERROR;
+	}
+
+	if(det) {
+		det->id = be64toh(r->id);
+	}
+
+	ep_dbg_dump("P - RANT Req: ", buf, sizeof(ep_ran_treq));
 
 	return sizeof(ep_ran_treq);
 }
@@ -78,11 +110,23 @@ int epf_ran_tenant_rep(
 	ep_ran_trep * r = (ep_ran_trep *) buf;
 	ep_ran_tinf * d = (ep_ran_tinf *)(buf + sizeof(ep_ran_trep));
 
+	if(size < sizeof(ep_ran_trep) + (sizeof(ep_ran_tinf) * nof)) {
+		ep_dbg_log("F - RANT Rep: Not enough space!\n");
+		return -1;
+	}
+
 	r->nof_tenants = htons(nof);
 	
+	ep_dbg_dump("F - RANT Rep: ", buf, sizeof(ep_ran_trep));
+
 	for (i = 0; i < nof && i < EP_RAN_TENANT_MAX; i++) {
 		d[i].id    = htobe64(dets[i].id);
 		d[i].sched = htonl(dets[i].sched);
+
+		ep_dbg_dump(
+			"    F - RANT Info: ",
+			buf + sizeof(ep_ran_trep) + (sizeof(ep_ran_tinf) * i),
+			sizeof(ep_ran_tinf));
 	}
 
 	return sizeof(ep_ran_trep) + (sizeof(ep_ran_tinf) * (i + 1));
@@ -99,11 +143,35 @@ int epp_ran_tenant_rep(
 	ep_ran_trep * r = (ep_ran_trep *) buf;
 	ep_ran_tinf * d = (ep_ran_tinf *)(buf + sizeof(ep_ran_trep));
 
-	*nof = ntohs(r->nof_tenants);
+	if(size < sizeof(ep_ran_trep)) {
+		ep_dbg_log("P - RANT Rep: Not enough space!\n");
+		return EP_ERROR;
+	}
 
-	for (i = 0; i < *nof && i < EP_RAN_TENANT_MAX; i++) {
-		dets[i].id    = be64toh(d[i].id);
-		dets[i].sched = ntohl(d[i].sched);
+	if(size < sizeof(ep_ran_trep) + (
+		sizeof(ep_ran_tinf) * ntohs(r->nof_tenants)))
+	{
+		ep_dbg_log("P - RANT Rep: Not enough space!\n");
+		return EP_ERROR;
+	}
+
+	if(nof) {
+		*nof = ntohs(r->nof_tenants);
+	}
+
+	ep_dbg_dump("P - RANT Rep: ", buf, sizeof(ep_ran_trep));
+
+	if(dets) {
+		for (i = 0; i < *nof && i < EP_RAN_TENANT_MAX; i++) {
+			dets[i].id    = be64toh(d[i].id);
+			dets[i].sched = ntohl(d[i].sched);
+
+			ep_dbg_dump(
+				"    P - RANT Info: ",
+				buf + sizeof(ep_ran_trep) + (
+					sizeof(ep_ran_tinf) * i),
+				sizeof(ep_ran_tinf));
+		}
 	}
 
 	return EP_SUCCESS;
@@ -116,8 +184,15 @@ int epf_ran_tenant_add(char * buf, unsigned int size, ep_ran_tenant_det * det)
 {
 	ep_ran_tadd * r = (ep_ran_tadd *)buf;
 
+	if(size < sizeof(ep_ran_tadd)) {
+		ep_dbg_log("F - RANT Add: Not enough space!\n");
+		return -1;
+	}
+
 	r->id    = htobe64(det->id);
 	r->sched = htonl(det->sched);
+
+	ep_dbg_dump("F - RANT Add: ", buf, sizeof(ep_ran_tadd));
 
 	return sizeof(ep_ran_tadd);
 }
@@ -129,8 +204,17 @@ int epp_ran_tenant_add(char * buf, unsigned int size, ep_ran_tenant_det * det)
 {
 	ep_ran_tadd * r = (ep_ran_tadd *)buf;
 
-	det->id    = be64toh(r->id);
-	det->sched = ntohl(r->sched);
+	if(size < sizeof(ep_ran_tadd)) {
+		ep_dbg_log("P - RANT Add: Not enough space!\n");
+		return EP_ERROR;
+	}
+
+	if(det) {
+		det->id    = be64toh(r->id);
+		det->sched = ntohl(r->sched);
+	}
+
+	ep_dbg_dump("P - RANT Add: ", buf, sizeof(ep_ran_tadd));
 
 	return EP_SUCCESS;
 }
@@ -142,7 +226,14 @@ int epf_ran_tenant_rem(char * buf, unsigned int size, ep_ran_tenant_det * det)
 {
 	ep_ran_trem * r = (ep_ran_trem *)buf;
 
+	if(size < sizeof(ep_ran_trem)) {
+		ep_dbg_log("F - RANT Rem: Not enough space!\n");
+		return -1;
+	}
+
 	r->id = htobe64(det->id);
+
+	ep_dbg_dump("F - RANT Rem: ", buf, sizeof(ep_ran_trem));
 
 	return sizeof(ep_ran_trem);
 }
@@ -154,7 +245,16 @@ int epp_ran_tenant_rem(char * buf, unsigned int size, ep_ran_tenant_det * det)
 {
 	ep_ran_trem * r = (ep_ran_trem *)buf;
 
-	det->id = be64toh(r->id);
+	if(size < sizeof(ep_ran_trem)) {
+		ep_dbg_log("P - RANT Rem: Not enough space!\n");
+		return EP_ERROR;
+	}
+
+	if(det) {
+		det->id = be64toh(r->id);
+	}
+
+	ep_dbg_dump("P - RANT Rem: ", buf, sizeof(ep_ran_trem));
 
 	return EP_SUCCESS;
 }
@@ -166,7 +266,14 @@ int epf_ran_user_req(char * buf, unsigned int size, uint16_t rnti)
 {
 	ep_ran_ureq * r = (ep_ran_ureq *)buf;
 
+	if(size < sizeof(ep_ran_ureq)) {
+		ep_dbg_log("F - RANU Req: Not enough space!\n");
+		return -1;
+	}
+
 	r->rnti = htons(rnti);
+
+	ep_dbg_dump("F - RANU Req: ", buf, sizeof(ep_ran_ureq));
 
 	return sizeof(ep_ran_ureq);
 }
@@ -178,7 +285,16 @@ int epp_ran_user_req(char * buf, unsigned int size, uint16_t * rnti)
 {
 	ep_ran_ureq * r = (ep_ran_ureq *)buf;
 
-	*rnti = ntohs(r->rnti);
+	if(size < sizeof(ep_ran_ureq)) {
+		ep_dbg_log("P - RANU Req: Not enough space!\n");
+		return EP_ERROR;
+	}
+
+	if(rnti) {
+		*rnti = ntohs(r->rnti);
+	}
+
+	ep_dbg_dump("P - RANU Req: ", buf, sizeof(ep_ran_ureq));
 
 	return sizeof(ep_ran_ureq);
 }
@@ -193,11 +309,23 @@ int epf_ran_user_rep(
 	ep_ran_urep * r = (ep_ran_urep *) buf;
 	ep_ran_uinf * u = (ep_ran_uinf *)(buf + sizeof(ep_ran_urep));
 
+	if(size < sizeof(ep_ran_ureq) + (sizeof(ep_ran_uinf) * nof)) {
+		ep_dbg_log("F - RANU Rep: Not enough space!\n");
+		return -1;
+	}
+
 	r->nof_users = htons(nof);
+
+	ep_dbg_dump("F - RANU Rep: ", buf, sizeof(ep_ran_urep));
 
 	for (i = 0; i < nof && i < EP_RAN_USER_MAX; i++) {
 		u[i].rnti      = htons(det[i].id);
 		u[i].tenant_id = htobe64(det[i].tenant);
+
+		ep_dbg_dump(
+			"    F - RANU Info: ",
+			buf + sizeof(ep_ran_urep)  + (sizeof(ep_ran_uinf) * i),
+			sizeof(ep_ran_uinf));
 	}
 
 	return sizeof(ep_ran_ureq) + (sizeof(ep_ran_uinf) * (i + 1));
@@ -213,11 +341,35 @@ int epp_ran_user_rep(
 	ep_ran_urep * r = (ep_ran_urep *) buf;
 	ep_ran_uinf * u = (ep_ran_uinf *)(buf + sizeof(ep_ran_urep));
 
-	*nof = ntohs(r->nof_users);
+	if(size < sizeof(ep_ran_ureq)) {
+		ep_dbg_log("P - RANU Rep: Not enough space!\n");
+		return EP_ERROR;
+	}
 
-	for (i = 0; i < *nof && i < EP_RAN_USER_MAX; i++) {
-		det[i].id     = ntohs(u[i].rnti);
-		det[i].tenant = be64toh(u[i].tenant_id);
+	if(size < sizeof(ep_ran_ureq) + (
+		sizeof(ep_ran_uinf) * ntohs(r->nof_users)))
+	{
+		ep_dbg_log("P - RANU Rep: Not enough space!\n");
+		return EP_ERROR;
+	}
+
+	if(nof) {
+		*nof = ntohs(r->nof_users);
+	}
+
+	ep_dbg_dump("P - RANU Rep: ", buf, sizeof(ep_ran_urep));
+
+	if(det) {
+		for (i = 0; i < *nof && i < EP_RAN_USER_MAX; i++) {
+			det[i].id     = ntohs(u[i].rnti);
+			det[i].tenant = be64toh(u[i].tenant_id);
+
+			ep_dbg_dump(
+				"    P - RANU Info: ",
+				buf + sizeof(ep_ran_urep)  + (
+					sizeof(ep_ran_uinf) * i),
+				sizeof(ep_ran_uinf));
+		}
 	}
 
 	return EP_SUCCESS;
@@ -230,8 +382,15 @@ int epf_ran_user_add(char * buf, unsigned int size, ep_ran_user_det * det)
 {
 	ep_ran_uinf * r = (ep_ran_uinf *)buf;
 
+	if(size < sizeof(ep_ran_uinf)) {
+		ep_dbg_log("F - RANU Add: Not enough space!\n");
+		return -1;
+	}
+
 	r->rnti      = htons(det->id);
 	r->tenant_id = htobe64(det->tenant);
+
+	ep_dbg_dump("F - RANU Add: ", buf, sizeof(ep_ran_uinf));
 
 	return sizeof(ep_ran_uinf);
 }
@@ -243,8 +402,17 @@ int epp_ran_user_add(char * buf, unsigned int size, ep_ran_user_det * det)
 {
 	ep_ran_uinf * r = (ep_ran_uinf *)buf;
 
-	det->id     = ntohs(r->rnti);
-	det->tenant = be64toh(det->tenant);
+	if(size < sizeof(ep_ran_uinf)) {
+		ep_dbg_log("P - RANU Add: Not enough space!\n");
+		return EP_ERROR;
+	}
+
+	if(det) {
+		det->id     = ntohs(r->rnti);
+		det->tenant = be64toh(det->tenant);
+	}
+
+	ep_dbg_dump("P - RANU Add: ", buf, sizeof(ep_ran_uinf));
 
 	return EP_SUCCESS;
 }
@@ -256,8 +424,15 @@ int epf_ran_user_rem(char * buf, unsigned int size, ep_ran_user_det * det)
 {
 	ep_ran_uinf * r = (ep_ran_uinf *)buf;
 
+	if(size < sizeof(ep_ran_uinf)) {
+		ep_dbg_log("F - RANU Rem: Not enough space!\n");
+		return -1;
+	}
+
 	r->rnti      = htons(det->id);
 	r->tenant_id = htobe64(det->tenant);
+
+	ep_dbg_dump("F - RANU Rem: ", buf, sizeof(ep_ran_uinf));
 
 	return sizeof(ep_ran_uinf);
 }
@@ -269,8 +444,17 @@ int epp_ran_user_rem(char * buf, unsigned int size, ep_ran_user_det * det)
 {
 	ep_ran_uinf * r = (ep_ran_uinf *)buf;
 
-	det->id     = ntohs(r->rnti);
-	det->tenant = be64toh(det->tenant);
+	if(size < sizeof(ep_ran_uinf)) {
+		ep_dbg_log("P - RANU Rem: Not enough space!\n");
+		return EP_ERROR;
+	}
+
+	if(det) {
+		det->id     = ntohs(r->rnti);
+		det->tenant = be64toh(det->tenant);
+	}
+
+	ep_dbg_dump("P - RANU Rem: ", buf, sizeof(ep_ran_uinf));
 
 	return EP_SUCCESS;
 }
@@ -289,6 +473,11 @@ int epf_ran_sched_req(
 	ep_ran_sreq * r = (ep_ran_sreq *)buf;
 	char *        a = buf + sizeof(ep_ran_sreq);
 
+	if(size < sizeof(ep_ran_sreq) + det->name_len) {
+		ep_dbg_log("F - RANC Req: Not enough space!\n");
+		return -1;
+	}
+
 	r->id        = htonl(id);
 	r->tenant_id = htobe64(tenant);
 	
@@ -302,6 +491,8 @@ int epf_ran_sched_req(
 
 	/* Copy the name just after the message */
 	memcpy(a, det->name, n);
+
+	ep_dbg_dump("F - RANC Req: ", buf, sizeof(ep_ran_uinf) + det->name_len);
 
 	return (sizeof(ep_ran_sreq) + n);
 }
@@ -322,17 +513,38 @@ int epp_ran_sched_req(
 {
 	ep_ran_sreq * r = (ep_ran_sreq *)buf;
 
-	*id       = ntohl(r->id);
-	*tenant   = be64toh(r->tenant_id);
+	/* First evaluate the space for the header... */
+	if(size < sizeof(ep_ran_sreq)) {
+		ep_dbg_log("P - RANC Req: Not enough space!\n");
+		return EP_ERROR;
+	}
 
-	if (r->name_len) {
-		det->name     = buf + r->name_len;
-		det->name_len = r->name_len;
-	} else {
-		det->name     = 0;
-		det->name_len = 0;
+	/* ...then evaluate the space for the entire packet */
+	if(size < sizeof(ep_ran_sreq) + r->name_len) {
+		ep_dbg_log("P - RANC Req: Not enough space!\n");
+		return EP_ERROR;
+	}
+
+	if(id) {
+		*id       = ntohl(r->id);
+	}
+
+	if(tenant) {
+		*tenant   = be64toh(r->tenant_id);
+	}
+
+	if(det) {
+		if (r->name_len) {
+			det->name     = buf + r->name_len;
+			det->name_len = r->name_len;
+		} else {
+			det->name     = 0;
+			det->name_len = 0;
+		}
 	}
 	
+	ep_dbg_dump("P - RANC Req: ", buf, sizeof(ep_ran_sreq) + r->name_len);
+
 	return EP_SUCCESS;
 }
 
@@ -350,6 +562,12 @@ int epf_ran_sched_rep(
 	size_t        v = min(det->value_len, EP_RAN_VALUE_MAX);
 	ep_ran_srep * r = (ep_ran_srep *)buf;
 	char *        a = buf + sizeof(ep_ran_srep);
+
+	/* First evaluate the space for the header... */
+	if(size < sizeof(ep_ran_srep) + det->name_len + det->value_len) {
+		ep_dbg_log("F - RANC Rep: Not enough space!\n");
+		return -1;
+	}
 
 	r->id           = htonl(id);
 	r->tenant_id    = htobe64(tenant);
@@ -370,7 +588,12 @@ int epf_ran_sched_rep(
 	/* copy the value after the name */
 	memcpy(a, det->value, v);
 
-	return (sizeof(ep_ran_sreq) + n + v);
+	ep_dbg_dump(
+		"F - RANC Rep: ",
+		buf,
+		sizeof(ep_ran_srep) + n + v);
+
+	return (sizeof(ep_ran_srep) + n + v);
 }
 
 /* Parses a RAN scheduler parameter reply into Sched details.
@@ -392,16 +615,40 @@ int epp_ran_sched_rep(
 	ep_ran_srep * r = (ep_ran_srep *)buf;
 	char *        a = buf + sizeof(ep_ran_srep);
 
+	/* First evaluate the space for the header... */
+	if(size < sizeof(ep_ran_srep)) {
+		ep_dbg_log("P - RANC Rep: Not enough space!\n");
+		return EP_ERROR;
+	}
+
+	/* ...then evaluate the space for the entire packet */
+	if(size < sizeof(ep_ran_srep) + r->name_len + ntohs(r->value_len)) {
+		ep_dbg_log("P - RANC Rep: Not enough space!\n");
+		return EP_ERROR;
+	}
+
 	n               = r->name_len;
 	v               = ntohs(r->value_len);
 
-	*id             = ntohl(r->id);
-	*tenant         = be64toh(r->tenant_id);
+	if(id) {
+		*id     = ntohl(r->id);
+	}
 
-	det->name       = a;
-	det->name_len   = n;
-	det->value      = a + n;
-	det->value_len  = v;
+	if(tenant) {
+		*tenant = be64toh(r->tenant_id);
+	}
+
+	if(det) {
+		det->name       = a;
+		det->name_len   = n;
+		det->value      = a + n;
+		det->value_len  = v;
+	}
+
+	ep_dbg_dump(
+		"P - RANC Rep: ",
+		buf,
+		sizeof(ep_ran_srep) + det->name_len + det->value_len);
 
 	return EP_SUCCESS;
 }
@@ -421,6 +668,11 @@ int epf_ran_sched_set(
 	ep_ran_srep * r = (ep_ran_srep *)buf;
 	char *        a = buf + sizeof(ep_ran_srep);
 
+	if(size < sizeof(ep_ran_srep) + det->name_len + det->value_len) {
+		ep_dbg_log("F - RANC Set: Not enough space!\n");
+		return -1;
+	}
+
 	r->id           = htonl(id);
 	r->tenant_id    = htobe64(tenant);
 	
@@ -439,6 +691,11 @@ int epf_ran_sched_set(
 	a += n;
 	/* copy the value after the name */
 	memcpy(a, det->value, v);
+
+	ep_dbg_dump(
+		"F - RANC Set: ",
+		buf,
+		sizeof(ep_ran_srep) + n + v);
 
 	return (sizeof(ep_ran_srep) + n + v);
 }
@@ -462,16 +719,40 @@ int epp_ran_sched_set(
 	ep_ran_srep * r = (ep_ran_srep *)buf;
 	char *        a = buf + sizeof(ep_ran_srep);
 
+	/* First evaluate the space for the header... */
+	if(size < sizeof(ep_ran_srep)) {
+		ep_dbg_log("P - RANC Set: Not enough space!\n");
+		return EP_ERROR;
+	}
+
+	/* ...then evaluate the space for the entire packet */
+	if(size < sizeof(ep_ran_srep) + r->name_len + ntohs(r->value_len)) {
+		ep_dbg_log("P - RANC Set: Not enough space!\n");
+		return EP_ERROR;
+	}
+
 	n               = r->name_len;
 	v               = ntohs(r->value_len);
 
-	*id             = ntohl(r->id);
-	*tenant         = be64toh(r->tenant_id);
+	if(id) {
+		*id     = ntohl(r->id);
+	}
 
-	det->name       = a;
-	det->name_len   = n;
-	det->value      = a + n;
-	det->value_len  = v;
+	if(tenant) {
+		*tenant = be64toh(r->tenant_id);
+	}
+
+	if(det) {
+		det->name       = a;
+		det->name_len   = n;
+		det->value      = a + n;
+		det->value_len  = v;
+	}
+
+	ep_dbg_dump(
+		"P - RANC Set: ",
+		buf,
+		sizeof(ep_ran_srep) + n + v);
 
 	return EP_SUCCESS;
 }
@@ -489,10 +770,15 @@ int epf_single_ran_rep_fail(
 	uint32_t     mod_id)
 {
 	int ms = 0;
-
+	int ret= 0;
 	/* Check of given buffer size here */
 
-	ms += epf_head(
+	if(!buf) {
+		ep_dbg_log("F - Single RAN Fail: Invalid buffer!\n");
+		return -1;
+	}
+
+	ms = epf_head(
 		buf, 
 		size, 
 		EP_TYPE_SINGLE_MSG, 
@@ -500,17 +786,28 @@ int epf_single_ran_rep_fail(
 		cell_id, 
 		mod_id);
 
-	ms += epf_single(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_single(
+		buf + ret,
+		size - ret,
 		type,
 		EP_OPERATION_FAIL,
 		EP_DIR_REPLY);
 
-	/* Inject the message size */
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+
+	/* Inject the message size */
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
 int epf_single_ran_rep_ns(
@@ -522,10 +819,15 @@ int epf_single_ran_rep_ns(
 	uint32_t     mod_id)
 {
 	int ms = 0;
-
+	int ret= 0 ;
 	/* Check of given buffer size here */
 
-	ms += epf_head(
+	if(!buf) {
+		ep_dbg_log("F - Single RAN NS: Invalid buffer!\n");
+		return -1;
+	}
+
+	ms = epf_head(
 		buf,
 		size,
 		EP_TYPE_SINGLE_MSG,
@@ -533,20 +835,31 @@ int epf_single_ran_rep_ns(
 		cell_id,
 		mod_id);
 
-	ms += epf_single(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_single(
+		buf + ret,
+		size - ret,
 		type,
 		EP_OPERATION_NOT_SUPPORTED,
 		EP_DIR_REPLY);
 
-	/* Inject the message size */
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+
+	/* Inject the message size */
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
-/********** RAN Setup **********/
+/******* RAN Setup ************************************************************/
 
 int epf_single_ran_setup_req(
 	char *       buf,
@@ -556,10 +869,14 @@ int epf_single_ran_setup_req(
 	uint32_t     mod_id)
 {
 	int ms = 0;
+	int ret= 0 ;
 
-	/* Check of given buffer size here */
+	if(!buf) {
+		ep_dbg_log("F - Single RANS Req: Invalid buffer!\n");
+		return -1;
+	}
 
-	ms += epf_head(
+	ms = epf_head(
 		buf,
 		size,
 		EP_TYPE_SINGLE_MSG,
@@ -567,17 +884,28 @@ int epf_single_ran_setup_req(
 		cell_id,
 		mod_id);
 
-	ms += epf_single(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_single(
+		buf + ret,
+		size - ret,
 		EP_ACT_RAN_SETUP,
 		EP_OPERATION_UNSPECIFIED,
 		EP_DIR_REQUEST);
 
-	/* Inject the message size */
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+
+	/* Inject the message size */
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
 int epf_single_ran_setup_rep(
@@ -589,10 +917,14 @@ int epf_single_ran_setup_rep(
 	ep_ran_det * det)
 {
 	int ms = 0;
+	int ret= 0;
 
-	/* Check of given buffer size here */
+	if(!buf || !det) {
+		ep_dbg_log("F - Single RAN Rep: Invalid buffer!\n");
+		return -1;
+	}
 
-	ms += epf_head(
+	ms = epf_head(
 		buf,
 		size,
 		EP_TYPE_SINGLE_MSG,
@@ -600,22 +932,38 @@ int epf_single_ran_setup_rep(
 		cell_id,
 		mod_id);
 
-	ms += epf_single(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_single(
+		buf + ret,
+		size - ret,
 		EP_ACT_RAN_SETUP,
 		EP_OPERATION_UNSPECIFIED,
 		EP_DIR_REPLY);
 
-	ms += epf_ran_setup_rep(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_ran_setup_rep(
+		buf + ret,
+		size - ret,
 		det);
 
-	/* Inject the message size */
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+
+	/* Inject the message size */
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
 int epp_single_ran_setup_rep(
@@ -623,13 +971,18 @@ int epp_single_ran_setup_rep(
 	unsigned int size,
 	ep_ran_det * det)
 {
+	if(!buf) {
+		ep_dbg_log("P - Single RAN Rep: Invalid buffer!\n");
+		return EP_ERROR;
+	}
+
 	return epp_ran_setup_rep(
 		buf  +  sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
 		det);
 }
 
-/********** RAN Tenant **********/
+/******* RAN Tenant ***********************************************************/
 
 int epf_single_ran_ten_req(
 	char *              buf,
@@ -640,10 +993,14 @@ int epf_single_ran_ten_req(
 	ep_ran_tenant_det * det)
 {
 	int ms = 0;
+	int ret= 0;
 
-	/* Check of given buffer size here */
+	if(!buf || !det) {
+		ep_dbg_log("F - Single RANT Req: Invalid buffer!\n");
+		return -1;
+	}
 
-	ms += epf_head(
+	ms = epf_head(
 		buf,
 		size,
 		EP_TYPE_SINGLE_MSG,
@@ -651,22 +1008,38 @@ int epf_single_ran_ten_req(
 		cell_id,
 		mod_id);
 
-	ms += epf_single(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_single(
+		buf + ret,
+		size - ret,
 		EP_ACT_RAN_TENANT,
 		EP_OPERATION_UNSPECIFIED,
 		EP_DIR_REQUEST);
 
-	ms += epf_ran_tenant_req(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_ran_tenant_req(
+		buf + ret,
+		size - ret,
 		det);
 
-	/* Inject the message size */
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+
+	/* Inject the message size */
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
 int epp_single_ran_ten_req(
@@ -674,6 +1047,11 @@ int epp_single_ran_ten_req(
 	unsigned int        size,
 	ep_ran_tenant_det * det)
 {
+	if(!buf) {
+		ep_dbg_log("P - Single RANT Req: Invalid buffer!\n");
+		return EP_ERROR;
+	}
+
 	return epp_ran_tenant_req(
 		buf  +  sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
@@ -690,10 +1068,14 @@ int epf_single_ran_ten_rep(
 	ep_ran_tenant_det * det)
 {
 	int ms = 0;
+	int ret= 0;
 
-	/* Check of given buffer size here */
+	if(!buf || !det) {
+		ep_dbg_log("F - Single RANT Rep: Invalid buffer!\n");
+		return -1;
+	}
 
-	ms += epf_head(
+	ms = epf_head(
 		buf,
 		size,
 		EP_TYPE_SINGLE_MSG,
@@ -701,23 +1083,39 @@ int epf_single_ran_ten_rep(
 		cell_id,
 		mod_id);
 
-	ms += epf_single(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_single(
+		buf + ret,
+		size - ret,
 		EP_ACT_RAN_TENANT,
 		EP_OPERATION_UNSPECIFIED,
 		EP_DIR_REPLY);
 
-	ms += epf_ran_tenant_rep(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_ran_tenant_rep(
+		buf + ret,
+		size - ret,
 		nof_tenants,
 		det);
 
-	/* Inject the message size */
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+
+	/* Inject the message size */
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
 int epp_single_ran_ten_rep(
@@ -726,6 +1124,11 @@ int epp_single_ran_ten_rep(
 	uint16_t *          nof_tenants,
 	ep_ran_tenant_det * det)
 {
+	if(!buf) {
+		ep_dbg_log("P - Single RANT Rep: Invalid buffer!\n");
+		return EP_ERROR;
+	}
+
 	return epp_ran_tenant_rep(
 		buf  +  sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
@@ -742,8 +1145,14 @@ int epf_single_ran_ten_add(
 	ep_ran_tenant_det * det)
 {
 	int ms = 0;
+	int ret= 0;
 
-	ms += epf_head(
+	if(!buf || !det) {
+		ep_dbg_log("F - Single RANT Add: Invalid buffer!\n");
+		return -1;
+	}
+
+	ms = epf_head(
 		buf,
 		size,
 		EP_TYPE_SINGLE_MSG,
@@ -751,17 +1160,28 @@ int epf_single_ran_ten_add(
 		cell_id,
 		mod_id);
 
-	ms += epf_single(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_single(
+		buf + ret,
+		size - ret,
 		EP_ACT_RAN_TENANT,
 		EP_OPERATION_ADD,
 		EP_DIR_REQUEST);
 
-	/* Inject the message size */
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+
+	/* Inject the message size */
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
 int epp_single_ran_ten_add(
@@ -769,6 +1189,11 @@ int epp_single_ran_ten_add(
 	unsigned int        size, 
 	ep_ran_tenant_det * det)
 {
+	if(!buf) {
+		ep_dbg_log("P - Single RANT Add: Invalid buffer!\n");
+		return EP_ERROR;
+	}
+
 	return epp_ran_tenant_add(
 		buf  +  sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
@@ -784,8 +1209,14 @@ int epf_single_ran_ten_rem(
 	ep_ran_tenant_det * det)
 {
 	int ms = 0;
+	int ret= 0;
 
-	ms += epf_head(
+	if(!buf || !det) {
+		ep_dbg_log("F - Single RANT Rem: Invalid buffer!\n");
+		return -1;
+	}
+
+	ms = epf_head(
 		buf,
 		size,
 		EP_TYPE_SINGLE_MSG,
@@ -793,17 +1224,28 @@ int epf_single_ran_ten_rem(
 		cell_id,
 		mod_id);
 
-	ms += epf_single(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_single(
+		buf + ret,
+		size - ret,
 		EP_ACT_RAN_TENANT,
 		EP_OPERATION_REM,
 		EP_DIR_REQUEST);
 
-	/* Inject the message size */
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+
+	/* Inject the message size */
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
 int epp_single_ran_ten_rem(
@@ -811,13 +1253,18 @@ int epp_single_ran_ten_rem(
 	unsigned int        size,
 	ep_ran_tenant_det * det)
 {
+	if(!buf) {
+		ep_dbg_log("P - Single RANT Rem: Invalid buffer!\n");
+		return EP_ERROR;
+	}
+
 	return epp_ran_tenant_rem(
 		buf  +  sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
 		det);
 }
 
-/********** RAN Users **********/
+/******* RAN Users ************************************************************/
 
 int epf_single_ran_usr_req(
 	char *              buf,
@@ -828,8 +1275,14 @@ int epf_single_ran_usr_req(
 	uint16_t            rnti)
 {
 	int ms = 0;
+	int ret= 0;
 
-	ms += epf_head(
+	if(!buf) {
+		ep_dbg_log("F - Single RANU Req: Invalid buffer!\n");
+		return -1;
+	}
+
+	ms = epf_head(
 		buf,
 		size,
 		EP_TYPE_SINGLE_MSG,
@@ -837,22 +1290,38 @@ int epf_single_ran_usr_req(
 		cell_id,
 		mod_id);
 
-	ms += epf_single(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_single(
+		buf + ret,
+		size - ret,
 		EP_ACT_RAN_USER,
 		EP_OPERATION_UNSPECIFIED,
 		EP_DIR_REQUEST);
 
-	ms += epf_ran_user_req(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_ran_user_req(
+		buf + ret,
+		size - ret,
 		rnti);
 
-	/* Inject the message size */
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+
+	/* Inject the message size */
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
 int epp_single_ran_usr_req(
@@ -860,6 +1329,11 @@ int epp_single_ran_usr_req(
 	unsigned int        size,
 	uint16_t *          rnti)
 {
+	if(!buf) {
+		ep_dbg_log("P - Single RANU Req: Invalid buffer!\n");
+		return -1;
+	}
+
 	return epp_ran_user_req(
 		buf  +  sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
@@ -876,8 +1350,14 @@ int epf_single_ran_usr_rep(
 	ep_ran_user_det *   dets)
 {
 	int ms = 0;
+	int ret= 0;
 
-	ms += epf_head(
+	if(!buf || !dets) {
+		ep_dbg_log("F - Single RANU Rep: Invalid buffer!\n");
+		return -1;
+	}
+
+	ms = epf_head(
 		buf,
 		size,
 		EP_TYPE_SINGLE_MSG,
@@ -885,23 +1365,39 @@ int epf_single_ran_usr_rep(
 		cell_id,
 		mod_id);
 
-	ms += epf_single(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_single(
+		buf + ret,
+		size - ret,
 		EP_ACT_RAN_USER,
 		EP_OPERATION_UNSPECIFIED,
 		EP_DIR_REPLY);
 
-	ms += epf_ran_user_rep(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_ran_user_rep(
+		buf + ret,
+		size - ret,
 		nof_users,
 		dets);
 
-	/* Inject the message size */
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+
+	/* Inject the message size */
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
 int epp_single_ran_usr_rep(
@@ -910,6 +1406,11 @@ int epp_single_ran_usr_rep(
 	uint16_t *	    nof_users,
 	ep_ran_user_det *   dets)
 {
+	if(!buf) {
+		ep_dbg_log("P - Single RANU Rep: Invalid buffer!\n");
+		return EP_ERROR;
+	}
+
 	return epp_ran_user_rep(
 		buf  +  sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
@@ -926,8 +1427,14 @@ int epf_single_ran_usr_add(
 	ep_ran_user_det *   det)
 {
 	int ms = 0;
+	int ret= 0;
 
-	ms += epf_head(
+	if(!buf || !det) {
+		ep_dbg_log("F - Single RANU Add: Invalid buffer!\n");
+		return -1;
+	}
+
+	ms = epf_head(
 		buf,
 		size,
 		EP_TYPE_SINGLE_MSG,
@@ -935,22 +1442,38 @@ int epf_single_ran_usr_add(
 		cell_id,
 		mod_id);
 
-	ms += epf_single(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_single(
+		buf + ret,
+		size - ret,
 		EP_ACT_RAN_USER,
 		EP_OPERATION_ADD,
 		EP_DIR_REQUEST);
 
-	ms += epf_ran_user_add(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_ran_user_add(
+		buf + ret,
+		size - ret,
 		det);
 
-	/* Inject the message size */
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+
+	/* Inject the message size */
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
 int epp_single_ran_usr_add(
@@ -958,6 +1481,11 @@ int epp_single_ran_usr_add(
 	unsigned int        size,
 	ep_ran_user_det *   det)
 {
+	if(!buf) {
+		ep_dbg_log("P - Single RANU Add: Invalid buffer!\n");
+		return EP_ERROR;
+	}
+
 	return epp_ran_user_add(
 		buf  +  sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
@@ -973,8 +1501,14 @@ int epf_single_ran_usr_rem(
 	ep_ran_user_det *   det)
 {
 	int ms = 0;
+	int ret= 0;
 
-	ms += epf_head(
+	if(!buf || !det) {
+		ep_dbg_log("F - Single RANU Rem: Invalid buffer!\n");
+		return -1;
+	}
+
+	ms = epf_head(
 		buf,
 		size,
 		EP_TYPE_SINGLE_MSG,
@@ -982,22 +1516,38 @@ int epf_single_ran_usr_rem(
 		cell_id,
 		mod_id);
 
-	ms += epf_single(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_single(
+		buf + ret,
+		size - ret,
 		EP_ACT_RAN_USER,
 		EP_OPERATION_REM,
 		EP_DIR_REQUEST);
 
-	ms += epf_ran_user_rem(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_ran_user_rem(
+		buf + ret,
+		size - ret,
 		det);
 
-	/* Inject the message size */
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+
+	/* Inject the message size */
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
 int epp_single_ran_usr_rem(
@@ -1005,13 +1555,18 @@ int epp_single_ran_usr_rem(
 	unsigned int        size, 
 	ep_ran_user_det *   det)
 {
+	if(!buf) {
+		ep_dbg_log("P - Single RANU Rem: Invalid buffer!\n");
+		return EP_ERROR;
+	}
+
 	return epp_ran_user_rem(
 		buf  +  sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
 		det);
 }
 
-/********** RAN Scheduler **********/
+/******* RAN Scheduler ********************************************************/
 
 int epf_single_ran_sch_req(
 	char *              buf,
@@ -1024,8 +1579,14 @@ int epf_single_ran_sch_req(
 	ep_ran_sparam_det * det)
 {
 	int ms = 0;
+	int ret= 0;
 
-	ms += epf_head(
+	if(!buf || !det) {
+		ep_dbg_log("F - Single RANC Req: Invalid buffer!\n");
+		return -1;
+	}
+
+	ms = epf_head(
 		buf,
 		size,
 		EP_TYPE_SINGLE_MSG,
@@ -1033,24 +1594,40 @@ int epf_single_ran_sch_req(
 		cell_id,
 		mod_id);
 
-	ms += epf_single(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_single(
+		buf + ret,
+		size - ret,
 		EP_ACT_RAN_SCHED,
 		EP_OPERATION_UNSPECIFIED,
 		EP_DIR_REQUEST);
 
-	ms += epf_ran_sched_req(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_ran_sched_req(
+		buf + ret,
+		size - ret,
 		id,
 		tenant,
 		det);
 
-	/* Inject the message size */
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+
+	/* Inject the message size */
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
 int epp_single_ran_sch_req(
@@ -1060,6 +1637,11 @@ int epp_single_ran_sch_req(
 	uint64_t *          tenant,
 	ep_ran_sparam_det * det)
 {
+	if(!buf) {
+		ep_dbg_log("P - Single RANC Req: Invalid buffer!\n");
+		return EP_ERROR;
+	}
+
 	return epp_ran_sched_req(
 		buf  + sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		size - sizeof(ep_hdr) + sizeof(ep_s_hdr),
@@ -1079,8 +1661,14 @@ int epf_single_ran_sch_rep(
 	ep_ran_sparam_det * det)
 {
 	int ms = 0;
+	int ret= 0;
 
-	ms += epf_head(
+	if(!buf || !det) {
+		ep_dbg_log("F - Single RANC Rep: Invalid buffer!\n");
+		return EP_ERROR;
+	}
+
+	ms = epf_head(
 		buf,
 		size,
 		EP_TYPE_SINGLE_MSG,
@@ -1088,24 +1676,40 @@ int epf_single_ran_sch_rep(
 		cell_id,
 		mod_id);
 
-	ms += epf_single(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_single(
+		buf + ret,
+		size - ret,
 		EP_ACT_RAN_SCHED,
 		EP_OPERATION_UNSPECIFIED,
 		EP_DIR_REPLY);
 
-	ms += epf_ran_sched_rep(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_ran_sched_rep(
+		buf + ret,
+		size - ret,
 		id,
 		tenant,
 		det);
 
-	/* Inject the message size */
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+
+	/* Inject the message size */
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
 int epp_single_ran_sch_rep(
@@ -1115,6 +1719,11 @@ int epp_single_ran_sch_rep(
 	uint64_t *          tenant,
 	ep_ran_sparam_det * det)
 {
+	if(!buf) {
+		ep_dbg_log("P - Single RANC Rep: Invalid buffer!\n");
+		return EP_ERROR;
+	}
+
 	return epp_ran_sched_rep(
 		buf + sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		size - sizeof(ep_hdr) + sizeof(ep_s_hdr),
@@ -1134,8 +1743,14 @@ int epf_single_ran_sch_set(
 	ep_ran_sparam_det * det)
 {
 	int ms = 0;
+	int ret= 0;
 
-	ms += epf_head(
+	if(!buf || !det) {
+		ep_dbg_log("F - Single RANC Set: Invalid buffer!\n");
+		return -1;
+	}
+
+	ms = epf_head(
 		buf,
 		size,
 		EP_TYPE_SINGLE_MSG,
@@ -1143,24 +1758,40 @@ int epf_single_ran_sch_set(
 		cell_id,
 		mod_id);
 
-	ms += epf_single(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_single(
+		buf + ret,
+		size - ret,
 		EP_ACT_RAN_SCHED,
 		EP_OPERATION_SET,
 		EP_DIR_REQUEST);
 
-	ms += epf_ran_sched_set(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_ran_sched_set(
+		buf + ret,
+		size - ret,
 		id,
 		tenant,
 		det);
 
-	/* Inject the message size */
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+
+	/* Inject the message size */
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
 int epp_single_ran_sch_set(
@@ -1170,6 +1801,11 @@ int epp_single_ran_sch_set(
 	uint64_t *          tenant,
 	ep_ran_sparam_det * det)
 {
+	if(!buf) {
+		ep_dbg_log("P - Single RANC Set: Invalid buffer!\n");
+		return EP_ERROR;
+	}
+
 	return epp_ran_sched_set(
 		buf  + sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		size - sizeof(ep_hdr) + sizeof(ep_s_hdr),

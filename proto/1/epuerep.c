@@ -29,22 +29,25 @@ int epf_uerep_rep(
 	ep_uerep_rep * rep = (ep_uerep_rep *)buf;
 	ep_uerep_det * det = (ep_uerep_det *)(buf + sizeof(ep_uerep_rep));
 
+	if(size < sizeof(ep_uerep_rep) + (sizeof(ep_uerep_det) * nof_ues)) {
+		ep_dbg_log("F - UEREP Rep: Not enough space!\n");
+		return -1;
+	}
+
 	rep->nof_ues = htonl(nof_ues);
 
-        ep_dbg_dump("F - UREP Rep: ", buf, sizeof(ep_uerep_rep));
+	ep_dbg_dump("F - UREP Rep: ", buf, sizeof(ep_uerep_rep));
 
-	if(ues) {
-		for(i = 0; i < nof_ues && i < max_ues; i++) {
-			det[i].pci  = htons(ues[i].pci);
-			det[i].rnti = htons(ues[i].rnti);
-			det[i].plmn = htonl(ues[i].plmn);
-			det[i].imsi = htobe64(ues[i].imsi);
+	for(i = 0; i < nof_ues && i < max_ues; i++) {
+		det[i].pci  = htons(ues[i].pci);
+		det[i].rnti = htons(ues[i].rnti);
+		det[i].plmn = htonl(ues[i].plmn);
+		det[i].imsi = htobe64(ues[i].imsi);
 
-                        ep_dbg_dump(
-                                "    F - UREP UE: ", 
-                                buf + (sizeof(ep_uerep_rep) * i),
-                                sizeof(ep_uerep_det));
-		}
+		ep_dbg_dump(
+			"F - UREP Det: ",
+			buf + sizeof(ep_uerep_rep) + (sizeof(ep_uerep_det) * i),
+			sizeof(ep_uerep_det));
 	}
 
 	return sizeof(ep_uerep_rep) + (sizeof(ep_uerep_det) * i);
@@ -62,9 +65,23 @@ int epp_uerep_rep(
 	ep_uerep_rep * rep = (ep_uerep_rep *)buf;
 	ep_uerep_det * det = (ep_uerep_det *)(buf + sizeof(ep_uerep_rep));
 
-	*nof_ues = ntohl(rep->nof_ues);
+	if(size < sizeof(ep_uerep_rep)) {
+		ep_dbg_log("P - UEREP Rep: Not enough space!\n");
+		return EP_ERROR;
+	}
 
-        ep_dbg_dump("P - UREP Rep: ", buf, sizeof(ep_uerep_rep));
+	if(size < sizeof(ep_uerep_rep) + (
+		sizeof(ep_uerep_det) * rep->nof_ues))
+	{
+		ep_dbg_log("P - UEREP Rep: Not enough space!\n");
+		return EP_ERROR;
+	}
+
+	if(nof_ues) {
+		*nof_ues = ntohl(rep->nof_ues);
+	}
+
+	ep_dbg_dump("P - UREP Rep: ", buf, sizeof(ep_uerep_rep));
 
 	if(ues) {
 		for(i = 0; i < *nof_ues && i < max_ues; i++) {
@@ -73,19 +90,26 @@ int epp_uerep_rep(
 			ues[i].plmn = ntohl(det[i].plmn);
 			ues[i].imsi = be64toh(det[i].imsi);
 
-                        ep_dbg_dump(
-                                "    P - UREP UE: ",
-                                buf + (sizeof(ep_uerep_rep) * i),
-                                sizeof(ep_uerep_det));
+			ep_dbg_dump(
+				"P - UREP Det: ",
+				buf +
+					sizeof(ep_uerep_rep) +
+					(sizeof(ep_uerep_det) * i),
+				sizeof(ep_uerep_det));
 		}
 	}
-        
+
 	return EP_SUCCESS;
 }
 
 int epf_uerep_req(char * buf, unsigned int size)
 {
 	ep_uerep_req * req = (ep_uerep_req *)buf;
+
+	if(size < sizeof(ep_uerep_req)) {
+		ep_dbg_log("F - UEREP Req: Not enough space!\n");
+		return -1;
+	}
 
 	req->dummy = 0;
 
@@ -96,6 +120,11 @@ int epf_uerep_req(char * buf, unsigned int size)
 
 int epp_uerep_req(char * buf, unsigned int size)
 {
+	if(size < sizeof(ep_uerep_req)) {
+		ep_dbg_log("P - UEREP Req: Not enough space!\n");
+		return EP_ERROR;
+	}
+
 	ep_dbg_dump("P - UREP Req: ", buf, 0);
 
 	return EP_SUCCESS;
@@ -113,6 +142,12 @@ int epf_trigger_uerep_rep_fail(
 	uint32_t        mod_id)
 {
 	int ms = 0;
+	int ret= 0;
+
+	if(!buf) {
+		ep_dbg_log("F - Trigger UEREP Fail: Invalid buffer!\n");
+		return -1;
+	}
 
 	ms += epf_head(
 		buf,
@@ -122,17 +157,34 @@ int epf_trigger_uerep_rep_fail(
 		cell_id,
 		mod_id);
 
-	ms += epf_trigger(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_trigger(
+		buf + ret,
+		size - ret,
 		EP_ACT_UE_REPORT,
 		EP_OPERATION_FAIL,
 		EP_DIR_REPLY);
 
-	ms += epf_uerep_rep(buf + ms, size - ms, 0, 0, 0);
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+	ms   = epf_uerep_rep(buf + ret, size - ret, 0, 0, 0);
+
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
 int epf_trigger_uerep_rep(
@@ -146,8 +198,19 @@ int epf_trigger_uerep_rep(
 	ep_ue_details * ues)
 {
 	int ms = 0;
+	int ret= 0;
 
-	ms += epf_head(
+	if(!buf) {
+		ep_dbg_log("F - Trigger UEREP Rep: Invalid buffer!\n");
+		return -1;
+	}
+
+	if(nof_ues > 0 && !ues) {
+		ep_dbg_log("F - Trigger UEREP Rep: Invalid UEs!\n");
+		return -1;
+	}
+
+	ms = epf_head(
 		buf,
 		size,
 		EP_TYPE_TRIGGER_MSG,
@@ -155,17 +218,34 @@ int epf_trigger_uerep_rep(
 		cell_id,
 		mod_id);
 
-	ms += epf_trigger(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_trigger(
+		buf + ret,
+		size - ret,
 		EP_ACT_UE_REPORT,
 		EP_OPERATION_SUCCESS,
 		EP_DIR_REPLY);
 
-	ms += epf_uerep_rep(buf + ms, size - ms, nof_ues, max_ues, ues);
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+	ms   = epf_uerep_rep(buf + ret, size - ret, nof_ues, max_ues, ues);
+
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
 int epp_trigger_uerep_rep(
@@ -175,6 +255,11 @@ int epp_trigger_uerep_rep(
 	uint32_t        max_ues,
 	ep_ue_details * ues)
 {
+	if(!buf) {
+		ep_dbg_log("P - Trigger UEREP Rep: Invalid buffer!\n");
+		return EP_ERROR;
+	}
+
 	return epp_uerep_rep(
 		buf + sizeof(ep_hdr) + sizeof(ep_t_hdr),
 		size,
@@ -192,8 +277,14 @@ int epf_trigger_uerep_req(
 	ep_op_type   op)
 {
 	int ms = 0;
+	int ret= 0;
 
-	ms += epf_head(
+	if(!buf) {
+		ep_dbg_log("F - Trigger UEREP Req: Invalid buffer!\n");
+		return -1;
+	}
+
+	ms = epf_head(
 		buf,
 		size,
 		EP_TYPE_TRIGGER_MSG,
@@ -201,20 +292,41 @@ int epf_trigger_uerep_req(
 		cell_id,
 		mod_id);
 
-	ms += epf_trigger(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_trigger(
+		buf + ret,
+		size - ret,
 		EP_ACT_UE_REPORT,
 		op,
 		EP_DIR_REQUEST);
 
-	ms += epf_uerep_req(buf + ms, size - ms);
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+	ms   = epf_uerep_req(buf + ret, size - ret);
+
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
 int epp_trigger_uerep_req(char * buf, unsigned int size)
 {
+	if(!buf) {
+		ep_dbg_log("P - Trigger UEREP Req: Invalid buffer!\n");
+		return EP_ERROR;
+	}
+
 	return epp_uerep_req(buf, size);
 }

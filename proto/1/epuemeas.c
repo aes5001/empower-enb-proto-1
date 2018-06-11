@@ -29,24 +29,27 @@ int epf_uemeas_rep(
 	ep_uemeas_rep * rep = (ep_uemeas_rep *) buf;
 	ep_uemeas_det * det = (ep_uemeas_det *)(buf + sizeof(ep_uemeas_rep));
 
+	if(size < sizeof(ep_uemeas_rep) + (sizeof(ep_uemeas_det) + nof_meas)) {
+		ep_dbg_log("F - UMEA Rep: Not enough space!\n");
+		return -1;
+	}
+
 	rep->nof_meas = htonl(nof_meas);
 
 	ep_dbg_dump("F - UMEA Rep: ", buf, sizeof(ep_uemeas_rep));
 
-	if(ues) {
-		for(i = 0; i < nof_meas && i < max; i++) {
-			det[i].meas_id = ues[i].meas_id;
-			det[i].pci     = htons(ues[i].pci);
-			det[i].rsrp    = htons(ues[i].rsrp);
-			det[i].rsrq    = htons(ues[i].rsrq);
-
-			ep_dbg_dump(
-				"    F - UMEA UE: ", 
-				&det[i], 
-				sizeof(ep_uemeas_det));
-		}
+	for(i = 0; i < nof_meas && i < max; i++) {
+		det[i].meas_id = ues[i].meas_id;
+		det[i].pci     = htons(ues[i].pci);
+		det[i].rsrp    = htons(ues[i].rsrp);
+		det[i].rsrq    = htons(ues[i].rsrq);
 	}
-	
+
+	ep_dbg_dump(
+		"F - UMEA Det: ",
+		buf + sizeof(ep_uemeas_rep) + (sizeof(ep_uemeas_det) * i),
+		sizeof(ep_uemeas_det));
+
 	return sizeof(ep_uemeas_rep) + (sizeof(ep_uemeas_det) * i);
 }
 
@@ -62,9 +65,21 @@ int epp_uemeas_rep(
 	ep_uemeas_rep * rep = (ep_uemeas_rep *) buf;
 	ep_uemeas_det * det = (ep_uemeas_det *)(buf + sizeof(ep_uemeas_rep));
 
+	if(size < sizeof(ep_uemeas_rep)) {
+		ep_dbg_log("P - UMEA Rep: Not enough space!\n");
+		return -1;
+	}
+
+	if(size < sizeof(ep_uemeas_rep) + (
+		sizeof(ep_uemeas_det) + ntohl(rep->nof_meas)))
+	{
+		ep_dbg_log("P - UMEA Rep: Not enough space!\n");
+		return -1;
+	}
+
 	*nof_meas = ntohl(rep->nof_meas);
 
-	ep_dbg_dump("P - UMEA Rep: ", buf, sizeof(ep_uemeas_rep));
+	ep_dbg_dump("P - UMEA Rep: ", buf, size);
 
 	if(ues) {
 		for(i = 0; i < *nof_meas && i < max; i++) {
@@ -74,8 +89,10 @@ int epp_uemeas_rep(
 			ues[i].rsrq    = ntohs(det[i].rsrq);
 
 			ep_dbg_dump(
-				"    P - UMEA UE: ",
-				&det[i],
+				"P - UMEA Det: ",
+				buf +
+					sizeof(ep_uemeas_rep) +
+					(sizeof(ep_uemeas_det) * i),
 				sizeof(ep_uemeas_det));
 		}
 	}
@@ -94,6 +111,11 @@ int epf_uemeas_req(
 	int16_t       max_meas)
 {
 	ep_uemeas_req * req = (ep_uemeas_req *)buf;
+
+	if(size < sizeof(ep_uemeas_req) ) {
+		ep_dbg_log("F - UMEA Req: Not enough space!\n");
+		return -1;
+	}
 
 	req->meas_id   = meas_id;
 	req->rnti      = htons(rnti);
@@ -117,6 +139,11 @@ int epp_uemeas_req(
 	int16_t  * max_meas)
 {
 	ep_uemeas_req * req = (ep_uemeas_req *) buf;
+
+	if(size < sizeof(ep_uemeas_req) ) {
+		ep_dbg_log("P - UMEA Req: Not enough space!\n");
+		return -1;
+	}
 
 	if(meas_id) {
 		*meas_id = req->meas_id;
@@ -159,8 +186,14 @@ int epf_trigger_uemeas_rep_fail(
 	uint32_t        mod_id)
 {
 	int ms = 0;
+	int ret= 0;
 
-	ms += epf_head(
+	if(!buf) {
+		ep_dbg_log("F - Trigger UMEA Fail: Invalid buffer!\n");
+		return -1;
+	}
+
+	ms = epf_head(
 		buf,
 		size,
 		EP_TYPE_TRIGGER_MSG,
@@ -168,17 +201,33 @@ int epf_trigger_uemeas_rep_fail(
 		cell_id,
 		mod_id);
 
-	ms += epf_trigger(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_trigger(
+		buf + ret,
+		size - ret,
 		EP_ACT_UE_MEASURE,
 		EP_OPERATION_FAIL,
 		EP_DIR_REPLY);
 
-	ms += epf_uemeas_rep(buf + ms, size - ms, 0, 0, 0);
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+	ms   = epf_uemeas_rep(buf + ret, size - ret, 0, 0, 0);
+
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
 int epf_trigger_uemeas_rep(
@@ -192,8 +241,19 @@ int epf_trigger_uemeas_rep(
 	ep_ue_measure * ues)
 {
 	int ms = 0;
+	int ret= 0;
 
-	ms += epf_head(
+	if(!buf) {
+		ep_dbg_log("F - Trigger UMEA Rep: Invalid buffer!\n");
+		return -1;
+	}
+
+	if(nof_meas > 0 && !ues) {
+		ep_dbg_log("F - Trigger UMEA Rep: Invalid UEs!\n");
+		return -1;
+	}
+
+	ms = epf_head(
 		buf,
 		size,
 		EP_TYPE_TRIGGER_MSG,
@@ -201,17 +261,33 @@ int epf_trigger_uemeas_rep(
 		cell_id,
 		mod_id);
 
-	ms += epf_trigger(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_trigger(
+		buf + ret,
+		size - ret,
 		EP_ACT_UE_MEASURE,
 		EP_OPERATION_SUCCESS,
 		EP_DIR_REPLY);
 
-	ms += epf_uemeas_rep(buf + ms, size - ms, nof_meas, max, ues);
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+	ms   = epf_uemeas_rep(buf + ret, size - ret, nof_meas, max, ues);
+
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
 int epp_trigger_uemeas_rep(
@@ -221,6 +297,11 @@ int epp_trigger_uemeas_rep(
 	uint32_t        max,
 	ep_ue_measure * ues)
 {
+	if(!buf) {
+		ep_dbg_log("P - Trigger UMEA Rep: Invalid buffer!\n");
+		return -1;
+	}
+
 	return epp_uemeas_rep(
 		buf + sizeof(ep_hdr) + sizeof(ep_t_hdr),
 		size,
@@ -244,8 +325,19 @@ int epf_trigger_uemeas_req(
 	int16_t       max_meas)
 {
 	int ms = 0;
+	int ret= 0;
 
-	ms += epf_head(
+	if(!buf) {
+		ep_dbg_log("F - Trigger UMEA Req: Invalid buffer!\n");
+		return -1;
+	}
+
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_head(
 		buf,
 		size,
 		EP_TYPE_TRIGGER_MSG,
@@ -253,16 +345,26 @@ int epf_trigger_uemeas_req(
 		cell_id,
 		mod_id);
 
-	ms += epf_trigger(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_trigger(
+		buf + ret,
+		size - ret,
 		EP_ACT_UE_MEASURE,
 		op,
 		EP_DIR_REQUEST);
 
-	ms += epf_uemeas_req(
-		buf + ms,
-		size - ms,
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_uemeas_req(
+		buf + ret,
+		size - ret,
 		meas_id,
 		rnti,
 		earfcn,
@@ -270,9 +372,14 @@ int epf_trigger_uemeas_req(
 		max_cells,
 		max_meas);
 
-	epf_msg_length(buf, size, ms);
+	if(ms < 0) {
+		return ms;
+	}
 
-	return ms;
+	ret += ms;
+	epf_msg_length(buf, size, ret);
+
+	return ret;
 }
 
 int epp_trigger_uemeas_req(
@@ -285,6 +392,12 @@ int epp_trigger_uemeas_req(
 	int16_t  *   max_cells,
 	int16_t  *   max_meas)
 {
+
+	if(!buf) {
+		ep_dbg_log("P - Trigger UMEA Rep: Invalid buffer!\n");
+		return -1;
+	}
+
 	return epp_uemeas_req(
 		buf + sizeof(ep_hdr) + sizeof(ep_t_hdr),
 		size,

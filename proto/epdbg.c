@@ -32,7 +32,7 @@ void ep_dbg_init()
         char lp[256] = {0};
 
         /* Unique log per process */
-        sprintf(lp, "/tmp/emproto.%d.log", getpid());
+        sprintf(lp, "./emproto.%d.log", getpid());
 	ep_dbg_fd = fopen(lp, "w");
 
 	if (!ep_dbg_fd) {
@@ -40,6 +40,23 @@ void ep_dbg_init()
 	}
 
 	ep_dbg_ready = 1;
+}
+
+void ep_dbg(char * prologue, char * buf, int size)
+{
+	int i;
+
+	if(!ep_dbg_ready) {
+		ep_dbg_init();
+	}
+
+	ep_dbg_log(prologue);
+
+	for(i = 0; i < size; i++) {
+		ep_dbg_log("%02x ", (unsigned char)buf[i]);
+	}
+
+	ep_dbg_log("\n");
 }
 
 /* Just dump the messages somewhere...

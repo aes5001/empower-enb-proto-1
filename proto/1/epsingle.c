@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kewin Rausch
+/* Copyright (c) 2017-2018 Kewin Rausch
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,11 @@ int epf_single(
 {
 	ep_s_hdr * h = (ep_s_hdr *)(buf);
 
+	if(size < sizeof(ep_s_hdr)) {
+		ep_dbg_log("F - SING: Not enough space!\n");
+		return -1;
+	}
+
 	h->type = (uint8_t)type;
 	h->op   = (uint8_t)op;
 	h->dir  = (uint8_t)dir;
@@ -40,6 +45,11 @@ ep_dir_type epp_single_dir(char * buf, unsigned int size)
 {
 	ep_s_hdr * h = (ep_s_hdr *)(buf + sizeof(ep_hdr));
 
+	if(size < sizeof(ep_hdr) + sizeof(ep_s_hdr)) {
+		ep_dbg_log("P - Single Dir: Not enough space!\n");
+		return EP_ERROR;
+	}
+
 	return (ep_dir_type)h->dir;
 }
 
@@ -47,12 +57,22 @@ ep_act_type epp_single_type(char * buf, unsigned int size)
 {
 	ep_s_hdr * h = (ep_s_hdr *)(buf + sizeof(ep_hdr));
 
+	if(size < sizeof(ep_hdr) + sizeof(ep_s_hdr)) {
+		ep_dbg_log("P - Single Type: Not enough space!\n");
+		return EP_ACT_INVALID;
+	}
+
 	return (ep_act_type)h->type;
 }
 
 ep_op_type epp_single_op(char * buf, unsigned int size)
 {
 	ep_s_hdr * h = (ep_s_hdr *)(buf + sizeof(ep_hdr));
+
+	if(size < sizeof(ep_hdr) + sizeof(ep_s_hdr)) {
+		ep_dbg_log("P - Single Op: Not enough space!\n");
+		return EP_ERROR;
+	}
 
 	return (ep_op_type)h->op;
 }

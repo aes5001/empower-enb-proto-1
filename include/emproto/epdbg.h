@@ -33,32 +33,14 @@ extern volatile int ep_dbg_ready;
 
 /* Initialize the debugging subsystem */
 void ep_dbg_init();
+/* Debug a message into the logging file */
+void ep_dbg(char * prologue, char * buf, int size);
 /* Log something into the debugging subsystem */
 void ep_dbg_log(char * msg, ...);
 
-/* Prologue which initializes the debugging subsystem */
-#define ep_dbg_prologue()                               \
-	do {			                        \
-		if(!ep_dbg_ready) {                     \
-			ep_dbg_init();                  \
-		}                                       \
-	} while(0)
-
-#define ep_dbg_dump(p, m, s)                            \
-	do {			                        \
-		int i;                                  \
-		unsigned char * c = (unsigned char *)m; \
-		                                        \
-		ep_dbg_prologue();                      \
-		ep_dbg_log(p);                          \
-                                                        \
-		for(i = 0; i < s; i++) {                \
-			ep_dbg_log("%02x ", c[i]);      \
-		}                                       \
-		ep_dbg_log("\n");                       \
-	} while(0)
+#define ep_dbg_dump(p, m, s)	ep_dbg(p, m, s)
 #else
-#define ep_dbg_prologue()	/* ... into nothing */
+//#define ep_dbg_prologue()	/* ... into nothing */
 #define ep_dbg_log(m, ...)      /* ... into nothing */
 #define ep_dbg_dump(p, m, s)    /* ... into nothing */
 #endif

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kewin Rausch
+/* Copyright (c) 2017-2018 Kewin Rausch
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,19 @@
  ******************************************************************************/
 
 int epf_schedule(
-	char * buf, unsigned int size,
-	ep_act_type type,
-	ep_op_type  op,
-	ep_dir_type dir,
-	uint32_t    interval)
+	char *       buf,
+	unsigned int size,
+	ep_act_type  type,
+	ep_op_type   op,
+	ep_dir_type  dir,
+	uint32_t     interval)
 {
 	ep_c_hdr * h = (ep_c_hdr *)(buf);
+
+	if(size < sizeof(ep_hdr) + sizeof(ep_c_hdr)) {
+		ep_dbg_log("F - SCHED: Not enough space!\n");
+		return -1;
+	}
 
 	h->type     = (uint8_t)type;
 	h->op       = (uint8_t)op;
@@ -44,12 +50,22 @@ ep_dir_type epp_schedule_dir(char * buf, unsigned int size)
 {
 	ep_c_hdr * h = (ep_c_hdr *)(buf + sizeof(ep_hdr));
 
+	if(size < sizeof(ep_hdr) + sizeof(ep_c_hdr)) {
+		ep_dbg_log("P - SCHED Dir: Not enough space!\n");
+		return EP_ERROR;
+	}
+
 	return (ep_dir_type)h->dir;
 }
 
 uint32_t epp_sched_interval(char * buf, unsigned int size)
 {
 	ep_c_hdr * h = (ep_c_hdr *)(buf + sizeof(ep_hdr));
+
+	if(size < sizeof(ep_hdr) + sizeof(ep_c_hdr)) {
+		ep_dbg_log("P - SCHED Int: Not enough space!\n");
+		return 0;
+	}
 
 	return ntohl(h->interval);
 }
@@ -59,7 +75,8 @@ ep_act_type epp_schedule_type(char * buf, unsigned int size)
 	ep_c_hdr * h = (ep_c_hdr *)(buf + sizeof(ep_hdr));
 
 	if(size < sizeof(ep_hdr) + sizeof(ep_c_hdr)) {
-		return EP_TYPE_INVALID_MSG;
+		ep_dbg_log("P - SCHED Type: Not enough space!\n");
+		return EP_ACT_INVALID;
 	}
 
 	return (ep_act_type)h->type;
