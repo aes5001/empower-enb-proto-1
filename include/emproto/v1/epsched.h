@@ -35,11 +35,12 @@ extern "C"
  * Schedule-event messages header
  */
 
+typedef uint16_t schedule_type_t;
+
 typedef struct __ep_schedule_header {
-	uint8_t  type;
-	uint8_t  dir;       /* Direction of the message, see epdir.h */
-	uint8_t  op;        /* Operation type, see epop.h */
-	uint32_t interval;  /* Interval of time in ms */
+	schedule_type_t  type;
+	uint8_t           op;  /* Operation type, see epop.h */
+	uint32_t interval;     /* Interval of time in ms */
 }__attribute__((packed)) ep_c_hdr;
 
 /* Format a schedule-event message */
@@ -47,11 +48,7 @@ int epf_schedule(
 	char * buf, unsigned int size,
 	ep_act_type type,
 	ep_op_type  op,
-	ep_dir_type dir,
 	uint32_t    interval);
-
-/* Extracts the direction on an Empower schedule message */
-ep_dir_type epp_schedule_dir(char * buf, unsigned int size);
 
 /* Extracts the interval on an Empower schedule message */
 uint32_t    epp_sched_interval(char * buf, unsigned int size);

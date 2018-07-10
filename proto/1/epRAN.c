@@ -784,7 +784,8 @@ int epf_single_ran_rep_fail(
 		EP_TYPE_SINGLE_MSG, 
 		enb_id, 
 		cell_id, 
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REP);
 
 	if(ms < 0) {
 		return ms;
@@ -795,8 +796,7 @@ int epf_single_ran_rep_fail(
 		buf + ret,
 		size - ret,
 		type,
-		EP_OPERATION_FAIL,
-		EP_DIR_REPLY);
+		EP_OPERATION_FAIL);
 
 	if(ms < 0) {
 		return ms;
@@ -833,7 +833,8 @@ int epf_single_ran_rep_ns(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REP);
 
 	if(ms < 0) {
 		return ms;
@@ -844,8 +845,7 @@ int epf_single_ran_rep_ns(
 		buf + ret,
 		size - ret,
 		type,
-		EP_OPERATION_NOT_SUPPORTED,
-		EP_DIR_REPLY);
+		EP_OPERATION_NOT_SUPPORTED);
 
 	if(ms < 0) {
 		return ms;
@@ -882,7 +882,8 @@ int epf_single_ran_setup_req(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REQ);
 
 	if(ms < 0) {
 		return ms;
@@ -893,8 +894,7 @@ int epf_single_ran_setup_req(
 		buf + ret,
 		size - ret,
 		EP_ACT_RAN_SETUP,
-		EP_OPERATION_UNSPECIFIED,
-		EP_DIR_REQUEST);
+		EP_OPERATION_UNSPECIFIED);
 
 	if(ms < 0) {
 		return ms;
@@ -930,7 +930,8 @@ int epf_single_ran_setup_rep(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REP);
 
 	if(ms < 0) {
 		return ms;
@@ -941,8 +942,7 @@ int epf_single_ran_setup_rep(
 		buf + ret,
 		size - ret,
 		EP_ACT_RAN_SETUP,
-		EP_OPERATION_UNSPECIFIED,
-		EP_DIR_REPLY);
+		EP_OPERATION_UNSPECIFIED);
 
 	if(ms < 0) {
 		return ms;
@@ -1006,7 +1006,8 @@ int epf_single_ran_ten_req(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REQ);
 
 	if(ms < 0) {
 		return ms;
@@ -1017,8 +1018,7 @@ int epf_single_ran_ten_req(
 		buf + ret,
 		size - ret,
 		EP_ACT_RAN_TENANT,
-		EP_OPERATION_UNSPECIFIED,
-		EP_DIR_REQUEST);
+		EP_OPERATION_UNSPECIFIED);
 
 	if(ms < 0) {
 		return ms;
@@ -1081,7 +1081,8 @@ int epf_single_ran_ten_rep(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REP);
 
 	if(ms < 0) {
 		return ms;
@@ -1092,8 +1093,7 @@ int epf_single_ran_ten_rep(
 		buf + ret,
 		size - ret,
 		EP_ACT_RAN_TENANT,
-		EP_OPERATION_UNSPECIFIED,
-		EP_DIR_REPLY);
+		EP_OPERATION_UNSPECIFIED);
 
 	if(ms < 0) {
 		return ms;
@@ -1158,7 +1158,8 @@ int epf_single_ran_ten_add(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REQ);
 
 	if(ms < 0) {
 		return ms;
@@ -1169,8 +1170,7 @@ int epf_single_ran_ten_add(
 		buf + ret,
 		size - ret,
 		EP_ACT_RAN_TENANT,
-		EP_OPERATION_ADD,
-		EP_DIR_REQUEST);
+		EP_OPERATION_ADD);
 
 	if(ms < 0) {
 		return ms;
@@ -1222,7 +1222,8 @@ int epf_single_ran_ten_rem(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REQ);
 
 	if(ms < 0) {
 		return ms;
@@ -1233,8 +1234,7 @@ int epf_single_ran_ten_rem(
 		buf + ret,
 		size - ret,
 		EP_ACT_RAN_TENANT,
-		EP_OPERATION_REM,
-		EP_DIR_REQUEST);
+		EP_OPERATION_REM);
 
 	if(ms < 0) {
 		return ms;
@@ -1288,7 +1288,8 @@ int epf_single_ran_usr_req(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REQ);
 
 	if(ms < 0) {
 		return ms;
@@ -1299,8 +1300,7 @@ int epf_single_ran_usr_req(
 		buf + ret,
 		size - ret,
 		EP_ACT_RAN_USER,
-		EP_OPERATION_UNSPECIFIED,
-		EP_DIR_REQUEST);
+		EP_OPERATION_UNSPECIFIED);
 
 	if(ms < 0) {
 		return ms;
@@ -1363,7 +1363,8 @@ int epf_single_ran_usr_rep(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REP);
 
 	if(ms < 0) {
 		return ms;
@@ -1374,8 +1375,7 @@ int epf_single_ran_usr_rep(
 		buf + ret,
 		size - ret,
 		EP_ACT_RAN_USER,
-		EP_OPERATION_UNSPECIFIED,
-		EP_DIR_REPLY);
+		EP_OPERATION_UNSPECIFIED);
 
 	if(ms < 0) {
 		return ms;
@@ -1440,7 +1440,8 @@ int epf_single_ran_usr_add(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REQ);
 
 	if(ms < 0) {
 		return ms;
@@ -1451,8 +1452,7 @@ int epf_single_ran_usr_add(
 		buf + ret,
 		size - ret,
 		EP_ACT_RAN_USER,
-		EP_OPERATION_ADD,
-		EP_DIR_REQUEST);
+		EP_OPERATION_ADD);
 
 	if(ms < 0) {
 		return ms;
@@ -1514,7 +1514,8 @@ int epf_single_ran_usr_rem(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REQ);
 
 	if(ms < 0) {
 		return ms;
@@ -1525,8 +1526,7 @@ int epf_single_ran_usr_rem(
 		buf + ret,
 		size - ret,
 		EP_ACT_RAN_USER,
-		EP_OPERATION_REM,
-		EP_DIR_REQUEST);
+		EP_OPERATION_REM);
 
 	if(ms < 0) {
 		return ms;
@@ -1592,7 +1592,8 @@ int epf_single_ran_sch_req(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REQ);
 
 	if(ms < 0) {
 		return ms;
@@ -1603,8 +1604,7 @@ int epf_single_ran_sch_req(
 		buf + ret,
 		size - ret,
 		EP_ACT_RAN_SCHED,
-		EP_OPERATION_UNSPECIFIED,
-		EP_DIR_REQUEST);
+		EP_OPERATION_UNSPECIFIED);
 
 	if(ms < 0) {
 		return ms;
@@ -1674,7 +1674,8 @@ int epf_single_ran_sch_rep(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REP);
 
 	if(ms < 0) {
 		return ms;
@@ -1685,8 +1686,7 @@ int epf_single_ran_sch_rep(
 		buf + ret,
 		size - ret,
 		EP_ACT_RAN_SCHED,
-		EP_OPERATION_UNSPECIFIED,
-		EP_DIR_REPLY);
+		EP_OPERATION_UNSPECIFIED);
 
 	if(ms < 0) {
 		return ms;
@@ -1756,7 +1756,8 @@ int epf_single_ran_sch_set(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REQ);
 
 	if(ms < 0) {
 		return ms;
@@ -1767,8 +1768,7 @@ int epf_single_ran_sch_set(
 		buf + ret,
 		size - ret,
 		EP_ACT_RAN_SCHED,
-		EP_OPERATION_SET,
-		EP_DIR_REQUEST);
+		EP_OPERATION_SET);
 
 	if(ms < 0) {
 		return ms;

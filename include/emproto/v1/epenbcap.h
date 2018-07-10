@@ -31,18 +31,16 @@ extern "C"
 {
 #endif /* __cplusplus */
 
-#define EP_ENCAP_MAX_CELLS      8
-
-/* NOTE: Elements here must have power-of-two values */
+/* NOTE: Definitions of a bitmask fields */
 typedef enum __ep_enb_capabilities_types {
 	/* Can't do anything except present himself */
-	EP_ECAP_NOTHING    = 0,
+	EP_ECAP_NOTHING    = 0x0,
 	/* Can report UEs */
-	EP_ECAP_UE_REPORT  = 1,
+	EP_ECAP_UE_REPORT  = 0x1,
 	/* Can report UEs signal power */
-	EP_ECAP_UE_MEASURE = 2,
+	EP_ECAP_UE_MEASURE = 0x2,
 	/* Can hand-over UE to other eNBs */
-	EP_ECAP_HANDOVER   = 4,
+	EP_ECAP_HANDOVER   = 0x4,
 } ep_ecap_type;
 
 /*
@@ -50,8 +48,7 @@ typedef enum __ep_enb_capabilities_types {
  */
 
 typedef struct __ep_enb_capabilities_reply {
-	uint32_t cap;                          /* eNB capabilities */
-	uint32_t nof_cells;                    /* Number of cells  */
+	uint32_t cap;        /* eNB capabilities */
 	/* Cells details are appended here, at the end of eNB message */
 }__attribute__((packed)) ep_ecap_rep;
 
@@ -62,6 +59,18 @@ typedef struct __ep_enb_capabilities_request {
 /******************************************************************************
  * Operation on single-event messages                                         *
  ******************************************************************************/
+
+/* Maximum number of expected cells in an eNB capabilities message */
+#define EP_ECAP_CELL_MAX	8
+
+typedef struct __ep_enb_details {
+	/* Bitmask of the available capabilities; see 'ep_ecap_type' */
+	uint32_t    capmask;
+	/* Array of the valid cells */
+	ep_cell_det cells[EP_ECAP_CELL_MAX];
+	/* Number of valid cells */
+	uint32_t    nof_cells;
+} ep_enb_det;
 
 /* Format an eNB capabilities negative reply.
  * Returns the size of the message, or a negative error number.
@@ -82,17 +91,13 @@ int epf_single_ecap_rep(
 	uint32_t      enb_id,
 	uint16_t      cell_id,
 	uint32_t      mod_id,
-	uint32_t      cap_mask,
-	ep_cell_det * cells,
-	uint32_t      nof_cells);
+	ep_enb_det *  det);
 
 /* Parse an eNB capabilities reply looking for the desired fields */
 int epp_single_ecap_rep(
 	char *        buf,
 	unsigned int  size,
-	uint32_t *    cap_mask,
-	ep_cell_det * cells,
-	uint32_t *    nof_cells);
+	ep_enb_det *  det);
 
 /* Format an eNB capabilities request.
  * Returns the size of the message, or a negative error number.

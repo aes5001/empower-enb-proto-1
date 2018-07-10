@@ -1,0 +1,40 @@
+
+	EmPOWER Protocol Type-Length-Value
+
+
+
+The TLV tokens are a way to represent data that is forward and backward 
+compatible with the message parsers. In addition, it provides great way to 
+extend certain type of messages without having to modify lot of already existing
+headers.
+
+A type field itentifies the contents of the value, while the length field 
+informs how much bytes, after this header, are used to carry the information.
+
+Recognized TLV types are:
+
+    1 - Cell capabilities
+
+Life-cycle:
+
+    Depends on the specific message.
+
+Message:
+
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |             Type              |            Length             |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    
+Fields:
+
+    TYPE
+        A 16-bits field enumerating the possible type of TLV token used in the 
+        empower protocol.
+    
+    LENGTH
+        A 16-bits field which informs how much space in bytes will consume the 
+        TLV entry.
+
+Kewin R.

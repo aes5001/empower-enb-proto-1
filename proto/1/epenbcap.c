@@ -18,87 +18,137 @@
 #include <emproto.h>
 
 int epf_ecap_rep(
-	char * buf, unsigned int size,
-	uint32_t      cap,
-	ep_cell_det * cells,
-	uint32_t      nof_cells)
+	char *        buf, 
+	unsigned int  size,
+	ep_enb_det *  det)
 {
+	char *        c   = buf + sizeof(ep_ecap_rep);
 	int           i   = 0;
 	ep_ecap_rep * rep = (ep_ecap_rep *)buf;
-	ep_ccap_rep * cel = (ep_ccap_rep *)(buf + sizeof(ep_ecap_rep));
+	ep_ccap_TLV * ctlv;
 
-	if(size < sizeof(ep_ecap_rep) + (sizeof(ep_ccap_rep) * nof_cells)) {
+	if(size < sizeof(ep_ecap_rep)) {
 		ep_dbg_log("F - ECAP Rep: Not enough space!\n");
 		return -1;
 	}
 
-	rep->cap       = htonl(cap);
-	rep->nof_cells = htonl(nof_cells);
+	rep->cap       = htonl(det->capmask);
 
 	ep_dbg_dump("F - ECAP Rep: ", buf, sizeof(ep_ecap_rep));
 
-	for(i = 0; i < nof_cells && i < EP_ENCAP_MAX_CELLS; i++) {
-		cel[i].pci       = htons(cells[i].pci);
-		cel[i].DL_earfcn = htons(cells[i].DL_earfcn);
-		cel[i].DL_prbs   = cells[i].DL_prbs;
-		cel[i].UL_earfcn = htons(cells[i].UL_earfcn);
-		cel[i].UL_prbs   = cells[i].UL_prbs;
+	for(i = 0; i < det->nof_cells && i < EP_ECAP_CELL_MAX; i++) {
+		if(c + sizeof(ep_ccap_TLV) > buf + size) {
+			ep_dbg_log("F - ECAP Rep: Not enough space!\n");
+			return -1;
+		}
 
-		ep_dbg_dump(
-			"F - CCAP Rep: ",
-			buf + sizeof(ep_ecap_rep) + (sizeof(ep_ccap_rep) * i),
-			sizeof(ep_ccap_rep));
+		ctlv = (ep_ccap_TLV *)c;
+
+		ctlv->header.type   = EP_TLV_CELL_CAP;
+		ctlv->header.length = sizeof(ep_ccap_rep);
+
+		ctlv->body.pci      = htons(det->cells[i].pci);
+		ctlv->body.DL_earfcn= htons(det->cells[i].DL_earfcn);
+		ctlv->body.DL_prbs  = det->cells[i].DL_prbs;
+		ctlv->body.UL_earfcn= htons(det->cells[i].UL_earfcn);
+		ctlv->body.UL_prbs  = det->cells[i].UL_prbs;
+
+		ep_dbg_dump("F - CCAP TLV: ", c, sizeof(ep_ccap_TLV));
+
+		/* Point to the next token */
+		c += sizeof(ep_ccap_TLV);
 	}
 
-	return sizeof(ep_ecap_rep) + (sizeof(ep_ccap_rep) * i);
+	return sizeof(ep_ecap_rep) + (sizeof(ep_ccap_TLV) * i);
+}
+
+/* Parse a single TLV field.
+ *
+ * It assumes that the checks over the size have already been done by the 
+ * caller, and the area of memory is fine to access.
+ */
+int epp_ecap_single_TLV(char * buf, ep_enb_det * det)
+{
+	ep_TLV *      tlv = (ep_TLV *)buf;
+
+	ep_ccap_rep * ccap;
+
+	/* Decide what to do depending on the TLV type */
+	switch(tlv->type) {
+	case EP_TLV_CELL_CAP:
+		/* No more cell than this */
+		if(det->nof_cells >= EP_ECAP_CELL_MAX) {
+			ep_dbg_log("P - CCAP TLV: Hitting max cells limit!\n");
+			break;
+		}
+
+		/* Points to the TLV body */
+		ccap = (ep_ccap_rep *)(buf + sizeof(ep_TLV));
+
+		det->cells[det->nof_cells].pci       = ntohs(ccap->pci);
+		det->cells[det->nof_cells].DL_earfcn = ntohs(ccap->DL_earfcn);
+		det->cells[det->nof_cells].DL_prbs   = ccap->DL_prbs;
+		det->cells[det->nof_cells].UL_earfcn = ntohs(ccap->UL_earfcn);
+		det->cells[det->nof_cells].UL_prbs   = ccap->UL_prbs;
+
+		/* Increase the value to use as index and counter */
+		det->nof_cells++;
+
+		ep_dbg_dump("P - CCAP TLV: ", buf, sizeof(ep_ccap_TLV));
+
+		break;
+	default:
+		ep_dbg_log("P - ECAP Rep: Unknwon token %d!\n",
+			tlv->type);
+		break;
+	}
+
+	return EP_SUCCESS;
 }
 
 int epp_ecap_rep(
-	char * buf, unsigned int size,
-	uint32_t *    cap,
-	ep_cell_det * cells,
-	uint32_t *    nof_cells)
+	char *        buf, 
+	unsigned int  size,
+	ep_enb_det *  det)
 {
-	int           i   = 0;
+	char *        c   = buf + sizeof(ep_ecap_rep);
 	ep_ecap_rep * rep = (ep_ecap_rep *)buf;
-	ep_ccap_rep * cel = (ep_ccap_rep *)buf + sizeof(ep_ecap_rep);
+	ep_TLV *      tlv;
 
 	if(size < sizeof(ep_ecap_rep)) {
 		ep_dbg_log("P - ECAP Rep: Not enough space!\n");
-		return -1;
+		return EP_ERROR;
 	}
 
-	if(size < sizeof(ep_ecap_rep) + (
-		sizeof(ep_ccap_rep) * ntohl(rep->nof_cells)))
-	{
-		ep_dbg_log("P - ECAP Rep: Not enough space!\n");
-		return -1;
+	if(!det) {
+		ep_dbg_log("P - ECAP Rep: Invalid pointer!\n");
+		return EP_ERROR;
 	}
 
-	if(cap) {
-		*cap       = ntohl(rep->cap);
-	}
-
-	if(nof_cells) {
-		*nof_cells = ntohl(rep->nof_cells);
-	}
+	det->capmask = ntohl(rep->cap);
 
 	ep_dbg_dump("P - ECAP Rep: ", buf, sizeof(ep_ecap_rep));
+	
+	/* We need this set to a correct value */
+	det->nof_cells = 0;
 
-	if(cells) {
-		for(i = 0; i < *nof_cells && i < EP_ENCAP_MAX_CELLS; i++) {
-			cells[i].pci      = ntohs(cel[i].pci);
-			cells[i].cap      = ntohl(cel[i].cap);
-			cells[i].DL_earfcn= ntohs(cel[i].DL_earfcn);
-			cells[i].DL_prbs  = cel[i].DL_prbs;
-			cells[i].UL_earfcn= ntohs(cel[i].UL_earfcn);
-			cells[i].UL_prbs  = cel[i].UL_prbs;
+	/* Continue until the end of the given array */
+	while(c < buf + size) {
+		tlv = (ep_TLV *)c;
 
-			ep_dbg_dump("P - CCAP Rep: ",
-				buf + sizeof(ep_ecap_rep) + (
-					sizeof(ep_ccap_rep) * i),
-				sizeof(ep_ccap_rep));
+		/* Reading next TLV token will overflow the buffer? */
+		if(c + sizeof(ep_TLV) + tlv->length >= buf + size) {
+			ep_dbg_log("P - ECAP Rep: TLV %d > %d\n",
+				sizeof(ep_TLV) + tlv->length,
+				(buf + size) - c);
+			break;
 		}
+
+		/* Explore the single token */
+		epp_ecap_single_TLV(c, det);
+
+		/* To the next tag */
+		c += sizeof(ep_TLV) + tlv->length;
 	}
 
 	return EP_SUCCESS;
@@ -157,7 +207,8 @@ int epf_single_ecap_rep_fail(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REP);
 
 	if(ms < 0) {
 		return ms;
@@ -168,15 +219,14 @@ int epf_single_ecap_rep_fail(
 		buf + ret,
 		size - ret,
 		EP_ACT_ECAP,
-		EP_OPERATION_FAIL,
-		EP_DIR_REPLY);
+		EP_OPERATION_FAIL);
 
 	if(ms < 0) {
 		return ms;
 	}
 
 	ret += ms;
-	ms   = epf_ecap_rep(buf + ret, size - ret, 0, 0, 0);
+	ms   = epf_ecap_rep(buf + ret, size - ret, 0);
 
 	if(ms < 0) {
 		return ms;
@@ -194,9 +244,7 @@ int epf_single_ecap_rep(
 	uint32_t      enb_id,
 	uint16_t      cell_id,
 	uint32_t      mod_id,
-	uint32_t      cap_mask,
-	ep_cell_det * cells,
-	uint32_t      nof_cells)
+	ep_enb_det *  det)
 {
 	int ms = 0;
 	int ret= 0;
@@ -212,7 +260,8 @@ int epf_single_ecap_rep(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REP);
 
 	if(ms < 0) {
 		return ms;
@@ -223,15 +272,14 @@ int epf_single_ecap_rep(
 		buf + ret,
 		size - ret,
 		EP_ACT_ECAP,
-		EP_OPERATION_UNSPECIFIED,
-		EP_DIR_REPLY);
+		EP_OPERATION_UNSPECIFIED);
 
 	if(ms < 0) {
 		return ms;
 	}
 
 	ret += ms;
-	ms   = epf_ecap_rep(buf + ret, size - ret, cap_mask, cells, nof_cells);
+	ms   = epf_ecap_rep(buf + ret, size - ret, det);
 
 	if(ms < 0) {
 		return ms;
@@ -246,9 +294,7 @@ int epf_single_ecap_rep(
 int epp_single_ecap_rep(
 	char *        buf,
 	unsigned int  size,
-	uint32_t *    cap_mask,
-	ep_cell_det * cells,
-	uint32_t *    nof_cells)
+	ep_enb_det *  det)
 {
 	if(!buf) {
 		ep_dbg_log("P - Single ECAP Rep: Invalid buffer!\n");
@@ -258,9 +304,7 @@ int epp_single_ecap_rep(
 	return epp_ecap_rep(
 		buf + sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		size,
-		cap_mask,
-		cells,
-		nof_cells);
+		det);
 }
 
 int epf_single_ecap_req(
@@ -284,7 +328,8 @@ int epf_single_ecap_req(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REQ);
 
 	if(ms < 0) {
 		return ms;
@@ -295,8 +340,7 @@ int epf_single_ecap_req(
 		buf + ret,
 		size - ret,
 		EP_ACT_ECAP,
-		EP_OPERATION_UNSPECIFIED,
-		EP_DIR_REQUEST);
+		EP_OPERATION_UNSPECIFIED);
 
 	if(ms < 0) {
 		return ms;

@@ -37,13 +37,9 @@ extern "C"
 #define EP_ERROR                        -1
 #define EP_WRONG_VERSION                -2
 
-/* Size in bytes of the message prologue, which contains the next message size
- */
-#define EP_PROLOGUE_SIZE                 4
-
 #include "ephdr.h"
 #include "eptype.h"
-#include "epdir.h"
+#include "epTLV.h"
 
 #include "epsingle.h"
 #include "epsched.h"

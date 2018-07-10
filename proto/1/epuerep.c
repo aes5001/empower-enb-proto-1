@@ -155,7 +155,8 @@ int epf_trigger_uerep_rep_fail(
 		EP_TYPE_TRIGGER_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REP);
 
 	if(ms < 0) {
 		return ms;
@@ -166,8 +167,7 @@ int epf_trigger_uerep_rep_fail(
 		buf + ret,
 		size - ret,
 		EP_ACT_UE_REPORT,
-		EP_OPERATION_FAIL,
-		EP_DIR_REPLY);
+		EP_OPERATION_FAIL);
 
 	if(ms < 0) {
 		return ms;
@@ -216,7 +216,8 @@ int epf_trigger_uerep_rep(
 		EP_TYPE_TRIGGER_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REP);
 
 	if(ms < 0) {
 		return ms;
@@ -227,8 +228,7 @@ int epf_trigger_uerep_rep(
 		buf + ret,
 		size - ret,
 		EP_ACT_UE_REPORT,
-		EP_OPERATION_SUCCESS,
-		EP_DIR_REPLY);
+		EP_OPERATION_SUCCESS);
 
 	if(ms < 0) {
 		return ms;
@@ -290,7 +290,8 @@ int epf_trigger_uerep_req(
 		EP_TYPE_TRIGGER_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REQ);
 
 	if(ms < 0) {
 		return ms;
@@ -301,8 +302,7 @@ int epf_trigger_uerep_req(
 		buf + ret,
 		size - ret,
 		EP_ACT_UE_REPORT,
-		op,
-		EP_DIR_REQUEST);
+		op);
 
 	if(ms < 0) {
 		return ms;

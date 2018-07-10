@@ -168,7 +168,8 @@ int epf_single_ho_rep_fail(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REP);
 
 	if(ms < 0) {
 		return ms;
@@ -179,8 +180,7 @@ int epf_single_ho_rep_fail(
 		buf + ret,
 		size - ret,
 		EP_ACT_HANDOVER,
-		EP_OPERATION_FAIL,
-		EP_DIR_REPLY);
+		EP_OPERATION_FAIL);
 
 	if(ms < 0) {
 		return ms;
@@ -230,7 +230,8 @@ int epf_single_ho_rep_ns(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REP);
 
 	if(ms < 0) {
 		return ms;
@@ -241,8 +242,7 @@ int epf_single_ho_rep_ns(
 		buf + ret,
 		size - ret,
 		EP_ACT_HANDOVER,
-		EP_OPERATION_NOT_SUPPORTED,
-		EP_DIR_REPLY);
+		EP_OPERATION_NOT_SUPPORTED);
 
 	if(ms < 0) {
 		return ms;
@@ -293,7 +293,8 @@ int epf_single_ho_rep(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REP);
 
 	if(ms < 0) {
 		return ms;
@@ -304,8 +305,7 @@ int epf_single_ho_rep(
 		buf + ret,
 		size - ret,
 		EP_ACT_HANDOVER,
-		EP_OPERATION_SUCCESS,
-		EP_DIR_REPLY);
+		EP_OPERATION_SUCCESS);
 
 	if(ms < 0) {
 		return ms;
@@ -378,7 +378,8 @@ int epf_single_ho_req(
 		EP_TYPE_SINGLE_MSG,
 		enb_id,
 		cell_id,
-		mod_id);
+		mod_id,
+		EP_HDR_FLAG_DIR_REQ);
 
 	if(ms < 0) {
 		return ms;
@@ -389,8 +390,7 @@ int epf_single_ho_req(
 		buf + ret,
 		size - ret,
 		EP_ACT_HANDOVER,
-		EP_OPERATION_UNSPECIFIED,
-		EP_DIR_REQUEST);
+		EP_OPERATION_UNSPECIFIED);
 
 	if(ms < 0) {
 		return ms;

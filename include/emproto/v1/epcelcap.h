@@ -23,6 +23,8 @@
 
 #include <stdint.h>
 
+#include "epTLV.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -55,11 +57,17 @@ typedef struct __ep_cell_capabilities_request {
 	uint8_t dummy;
 }__attribute__((packed)) ep_ccap_req;
 
+/* TLV-style descriptor of Cell Capabilities information */
+typedef struct __ep_ccap_TLV {
+	ep_TLV      header;  /* Header of the TLV token */
+	ep_ccap_rep body;    /* Body of the TLV token */
+} __attribute__((packed)) ep_ccap_TLV;
+
 /******************************************************************************
  * Operation on single-event messages                                         *
  ******************************************************************************/
 
-typedef struct el_cell_details {
+typedef struct __ep_cell_details {
 	uint16_t pci;
 	uint32_t cap;
 	uint16_t DL_earfcn;

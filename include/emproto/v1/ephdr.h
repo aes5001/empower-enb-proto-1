@@ -34,45 +34,65 @@ extern "C"
 #endif /* __cplusplus */
 
 /* Size of the header */
-#define EP_HEADER_SIZE          sizeof(ep_hdr)
+#define EP_HEADER_SIZE         sizeof(ep_hdr)
+
+/*
+ * Values of the 'flags' field in the header:
+ *
+ * Bit 1/16: */
+#define EP_HDR_FLAG_DIR		1 /* Which bit is dedicated to  */
+#define EP_HDR_FLAG_DIR_REQ	0 /* Set to 0 marks a request */
+#define EP_HDR_FLAG_DIR_REP	1 /* Set to 1 marks a reply */
+
+typedef uint64_t enb_id_t;       /* Definition of the enb-id */
+typedef uint16_t cell_id_t;      /* Definition of the cell id */
+typedef uint32_t mod_id_t;       /* Definition of the module id */
 
 typedef struct __ep_header_id {
-	uint32_t enb_id;        /* Base station identifier */
-	uint16_t cell_id;       /* Physical cell id */
-	uint32_t mod_id;        /* Module id */
+	enb_id_t  enb_id;        /* Base station identifier */
+	cell_id_t cell_id;       /* Physical cell id */
+	mod_id_t  mod_id;        /* Module id */
 }__attribute__((packed)) ep_hdrid;
 
 typedef struct __ep_header {
 	uint8_t  type;
 	uint8_t  vers;
 	ep_hdrid id;
+	uint16_t flags;
+	uint32_t seq;            /* Sequence number */
 	/* Length of the whole packet (headers + data) */
 	uint16_t length;
-	uint32_t seq;           /* Sequence number */
 }__attribute__((packed)) ep_hdr;
 
 /* Format a master header with the desired fields.
  * Returns the size of the message, or a negative error number.
  */
 int epf_head(
-	char * buf, unsigned int size,
-	ep_msg_type type,
-	uint32_t enb_id,
-	uint16_t cell_id,
-	uint32_t mod_id);
+	char *       buf, 
+	unsigned int size,
+	ep_msg_type  type,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
+	uint16_t     flags);
 
 /* Parse a master header extracting the valuable fields.
  * Returns EP_SUCCESS, or an error code on failure.
  */
 int epp_head(
-	char * buf, unsigned int size,
+	char *        buf, 
+	unsigned int  size,
 	ep_msg_type * type,
-	uint32_t * enb_id,
-	uint16_t * cell_id,
-	uint32_t * mod_id);
+	enb_id_t *    enb_id,
+	cell_id_t *   cell_id,
+	mod_id_t *    mod_id,
+	uint16_t *    flags);
 
 /* Extracts the type from an Empower message */
 ep_msg_type epp_msg_type(char * buf, unsigned int size);
+
+/* Parses the direction of this header, either request or reply */
+int         epp_dir(char * buf, unsigned int size);
 
 /* Extracts the sequence number from the message */
 uint32_t    epp_seq(char * buf, unsigned int size);

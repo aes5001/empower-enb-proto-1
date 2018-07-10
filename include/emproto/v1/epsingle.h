@@ -36,21 +36,18 @@ extern "C"
  * Single-event messages header
  */
 
+typedef uint16_t single_type_t;
+
 typedef struct __ep_single_header {
-	uint8_t type;
-	uint8_t dir;   /* Direction of the message, see epdir.h */
-	uint8_t op;    /* Operation type, see epop.h */
+	single_type_t type;
+	uint8_t       op;    /* Operation type, see epop.h */
 }__attribute__((packed)) ep_s_hdr;
 
 /* Format a single-event message */
 int epf_single(
 	char * buf, unsigned int size,
 	ep_act_type type,
-	ep_op_type  op,
-	ep_dir_type dir);
-
-/* Extracts the direction on an Empower single message */
-ep_dir_type epp_single_dir(char * buf, unsigned int size);
+	ep_op_type  op);
 
 /* Extracts the type from an Empower single message */
 ep_act_type epp_single_type(char * buf, unsigned int size);

@@ -26,7 +26,6 @@ int epf_schedule(
 	unsigned int size,
 	ep_act_type  type,
 	ep_op_type   op,
-	ep_dir_type  dir,
 	uint32_t     interval)
 {
 	ep_c_hdr * h = (ep_c_hdr *)(buf);
@@ -38,24 +37,11 @@ int epf_schedule(
 
 	h->type     = (uint8_t)type;
 	h->op       = (uint8_t)op;
-	h->dir      = (uint8_t)dir;
 	h->interval = htonl(interval);
 	
 	ep_dbg_dump("F - SCHE: ", buf, sizeof(ep_c_hdr));
 
 	return sizeof(ep_c_hdr);
-}
-
-ep_dir_type epp_schedule_dir(char * buf, unsigned int size)
-{
-	ep_c_hdr * h = (ep_c_hdr *)(buf + sizeof(ep_hdr));
-
-	if(size < sizeof(ep_hdr) + sizeof(ep_c_hdr)) {
-		ep_dbg_log("P - SCHED Dir: Not enough space!\n");
-		return EP_ERROR;
-	}
-
-	return (ep_dir_type)h->dir;
 }
 
 uint32_t epp_sched_interval(char * buf, unsigned int size)

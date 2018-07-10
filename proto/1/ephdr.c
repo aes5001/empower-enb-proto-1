@@ -25,9 +25,10 @@ int epf_head(
 	char *       buf,
 	unsigned int size,
 	ep_msg_type  type,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id)
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
+	uint16_t     flags)
 {
 	ep_hdr * h = (ep_hdr *)buf;
 
@@ -46,6 +47,7 @@ int epf_head(
 	h->id.enb_id  = htonl(enb_id);
 	h->id.cell_id = htons(cell_id);
 	h->id.mod_id  = htonl(mod_id);
+	h->flags      = flags;
 
 	ep_dbg_dump("F - HDR:  ", buf, sizeof(ep_hdr));
 
@@ -53,11 +55,13 @@ int epf_head(
 }
 
 int epp_head(
-	char * buf, unsigned int size,
+	char *        buf, 
+	unsigned int  size,
 	ep_msg_type * type,
-	uint32_t * enb_id,
-	uint16_t * cell_id,
-	uint32_t * mod_id)
+	enb_id_t *    enb_id,
+	cell_id_t *   cell_id,
+	mod_id_t *    mod_id,
+	uint16_t *    flags)
 {
 	ep_hdr * h = (ep_hdr *)buf;
 
@@ -72,6 +76,7 @@ int epp_head(
 	}
 
 	if(h->vers != EMPOWER_PROTOCOL_VERS) {
+		ep_dbg_log("P - HDR: Different protocol version!\n");
 		return EP_WRONG_VERSION;
 	}
 
@@ -89,6 +94,10 @@ int epp_head(
 
 	if(mod_id) {
 		*mod_id  = ntohl(h->id.mod_id);
+	}
+
+	if(flags) {
+		*flags   = h->flags;
 	}
 
 	ep_dbg_dump("P - HDR:  ", buf, sizeof(ep_hdr));
@@ -111,6 +120,24 @@ ep_msg_type epp_msg_type(char * buf, unsigned int size)
 	}
 
 	return (ep_msg_type)h->type;
+}
+
+int epp_dir(char * buf, unsigned int size)
+{
+	ep_hdr * h = (ep_hdr *)buf;
+
+	if(!buf) {
+		ep_dbg_log("F - HDR: Invalid buffer!\n");
+		return EP_ERROR;
+	}
+
+	if(size < sizeof(ep_hdr)) {
+		ep_dbg_log("P - HDR type: Not enough space!\n");
+		return EP_ERROR;
+	}
+
+	/* Return straigth the direction from the right flag position */
+	return (h->flags & EP_HDR_FLAG_DIR);
 }
 
 uint32_t epp_seq(char * buf, unsigned int size)

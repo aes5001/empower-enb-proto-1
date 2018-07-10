@@ -18,8 +18,7 @@
 int epf_single(
 	char * buf, unsigned int size,
 	ep_act_type type,
-	ep_op_type  op,
-	ep_dir_type dir)
+	ep_op_type  op)
 {
 	ep_s_hdr * h = (ep_s_hdr *)(buf);
 
@@ -30,7 +29,6 @@ int epf_single(
 
 	h->type = (uint8_t)type;
 	h->op   = (uint8_t)op;
-	h->dir  = (uint8_t)dir;
 
 	ep_dbg_dump("F - SING: ", buf, sizeof(ep_s_hdr));
 
@@ -40,18 +38,6 @@ int epf_single(
 /******************************************************************************
  * Public API                                                                 *
  ******************************************************************************/
-
-ep_dir_type epp_single_dir(char * buf, unsigned int size)
-{
-	ep_s_hdr * h = (ep_s_hdr *)(buf + sizeof(ep_hdr));
-
-	if(size < sizeof(ep_hdr) + sizeof(ep_s_hdr)) {
-		ep_dbg_log("P - Single Dir: Not enough space!\n");
-		return EP_ERROR;
-	}
-
-	return (ep_dir_type)h->dir;
-}
 
 ep_act_type epp_single_type(char * buf, unsigned int size)
 {

@@ -18,8 +18,7 @@
 int epf_trigger(
 	char * buf, unsigned int size,
 	ep_act_type type,
-	ep_op_type  op,
-	ep_dir_type dir)
+	ep_op_type  op)
 {
 	ep_t_hdr * h = (ep_t_hdr *)(buf);
 
@@ -30,7 +29,6 @@ int epf_trigger(
 
 	h->type = (uint8_t)type;
 	h->op   = (uint8_t)op;
-	h->dir  = (uint8_t)dir;
 
 	ep_dbg_dump("F - TRIG: ", buf, sizeof(ep_t_hdr));
 
@@ -39,18 +37,6 @@ int epf_trigger(
 /******************************************************************************
  * Public API                                                                 *
  ******************************************************************************/
-
-ep_dir_type epp_trigger_dir(char * buf, unsigned int size)
-{
-	ep_t_hdr * h = (ep_t_hdr *)(buf + sizeof(ep_hdr));
-
-	if(size < sizeof(ep_hdr) + sizeof(ep_t_hdr)) {
-		ep_dbg_log("F - TRIG Dir: Not enough space!\n");
-		return EP_ERROR;
-	}
-
-	return (ep_dir_type)h->dir;
-}
 
 ep_op_type epp_trigger_op(char * buf, unsigned int size)
 {

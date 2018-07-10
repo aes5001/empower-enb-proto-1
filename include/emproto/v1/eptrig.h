@@ -32,30 +32,23 @@ extern "C"
 {
 #endif /* __cplusplus */
 
-/*
- * Possible types of schedule messages that can occurs
- */
-
+typedef uint16_t trigger_type_t;
 
 /*
- * Schedule-event messages header
+ * Trigger-event messages header
  */
 
 typedef struct __ep_trigger_header {
-	uint8_t type;
-	uint8_t dir;  /* Direction of the message, see epdir.h */
-	uint8_t op;   /* Operation type, see epop.h */
+	trigger_type_t type;
+	uint8_t        op;    /* Operation type, see epop.h */
 }__attribute__((packed)) ep_t_hdr;
 
 /* Format a trigger-event message */
 int epf_trigger(
-	char * buf, unsigned int size,
-	ep_act_type type,
-	ep_op_type  op,
-	ep_dir_type dir);
-
-/* Extracts the direction on an Empower trigger message */
-ep_dir_type epp_trigger_dir(char * buf, unsigned int size);
+	char *       buf, 
+	unsigned int size,
+	ep_act_type  type,
+	ep_op_type   op);
 
 /* Parse the operation type for a trigger message */
 ep_op_type  epp_trigger_op(char * buf, unsigned int size);

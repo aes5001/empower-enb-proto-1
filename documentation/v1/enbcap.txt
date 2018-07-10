@@ -8,6 +8,17 @@ Base Station level. Such capabilities are basically what the eNB is presenting
 as services to the controller, which can be later activated/deactivated and 
 tuned to the desired configuration.
 
+Simple capabilities of the eNB comes in a bitmask, while more detailed ones will
+be attached to the end of the message as TLV packets. Type-Length-Value packets
+are and extensible way to represent data, organized in such way that unknown
+types are simply skipped during message evaluation.
+
+The possible TLV entry that you can expect here are:
+
+    - Cell capability: 
+      They carries capabilities offered by a cell hosted in the eNB.
+      See 'cellcap' documentation file for more details.
+
 Life-cycle:
 
     Controller           Agent
@@ -34,7 +45,7 @@ Reply:
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                         Capabilities                          |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                        Number of cells                        |
+    |                   Zero or more TLV entries                    |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     
 Fields:
@@ -42,9 +53,5 @@ Fields:
     CAPABILITIES
         A 32-bits bitmask which identify the active capabilities in this eNB.
         See epenbcap.h to discover the map of bits --> capability.
-        
-    NUM. OF CELLS
-        A 32-bits field which informs how many cells are currently visible to 
-        the controller.
-       
+
 Kewin R.
