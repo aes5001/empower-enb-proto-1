@@ -27,7 +27,7 @@ int epf_trigger(
 		return -1;
 	}
 
-	h->type = (uint8_t)type;
+	h->type = htons(type);
 	h->op   = (uint8_t)op;
 
 	ep_dbg_dump("F - TRIG: ", buf, sizeof(ep_t_hdr));

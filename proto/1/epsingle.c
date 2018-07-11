@@ -27,7 +27,7 @@ int epf_single(
 		return -1;
 	}
 
-	h->type = (uint8_t)type;
+	h->type = htons(type);
 	h->op   = (uint8_t)op;
 
 	ep_dbg_dump("F - SING: ", buf, sizeof(ep_s_hdr));

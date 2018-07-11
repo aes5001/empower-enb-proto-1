@@ -39,8 +39,8 @@ typedef uint16_t schedule_type_t;
 
 typedef struct __ep_schedule_header {
 	schedule_type_t  type;
-	uint8_t           op;  /* Operation type, see epop.h */
-	uint32_t interval;     /* Interval of time in ms */
+	uint8_t          op;       /* Operation type, see epop.h */
+	uint32_t         interval; /* Interval of time in ms */
 }__attribute__((packed)) ep_c_hdr;
 
 /* Format a schedule-event message */

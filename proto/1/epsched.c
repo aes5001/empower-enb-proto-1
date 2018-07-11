@@ -35,7 +35,7 @@ int epf_schedule(
 		return -1;
 	}
 
-	h->type     = (uint8_t)type;
+	h->type     = htons(type);
 	h->op       = (uint8_t)op;
 	h->interval = htonl(interval);
 	
