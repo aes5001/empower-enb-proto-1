@@ -44,8 +44,8 @@ int epf_ecap_rep(
 
 		ctlv = (ep_ccap_TLV *)c;
 
-		ctlv->header.type   = EP_TLV_CELL_CAP;
-		ctlv->header.length = sizeof(ep_ccap_rep);
+		ctlv->header.type   = htons(EP_TLV_CELL_CAP);
+		ctlv->header.length = htons(sizeof(ep_ccap_rep));
 
 		ctlv->body.pci      = htons(det->cells[i].pci);
 		ctlv->body.DL_earfcn= htons(det->cells[i].DL_earfcn);
@@ -74,7 +74,7 @@ int epp_ecap_single_TLV(char * buf, ep_enb_det * det)
 	ep_ccap_rep * ccap;
 
 	/* Decide what to do depending on the TLV type */
-	switch(tlv->type) {
+	switch(ntohs(tlv->type)) {
 	case EP_TLV_CELL_CAP:
 		/* No more cell than this */
 		if(det->nof_cells >= EP_ECAP_CELL_MAX) {
@@ -137,9 +137,9 @@ int epp_ecap_rep(
 		tlv = (ep_TLV *)c;
 
 		/* Reading next TLV token will overflow the buffer? */
-		if(c + sizeof(ep_TLV) + tlv->length >= buf + size) {
+		if(c + sizeof(ep_TLV) + ntohs(tlv->length) >= buf + size) {
 			ep_dbg_log("P - ECAP Rep: TLV %d > %d\n",
-				sizeof(ep_TLV) + tlv->length,
+				ntohs(sizeof(ep_TLV)) + tlv->length,
 				(buf + size) - c);
 			break;
 		}
@@ -148,7 +148,7 @@ int epp_ecap_rep(
 		epp_ecap_single_TLV(c, det);
 
 		/* To the next tag */
-		c += sizeof(ep_TLV) + tlv->length;
+		c += sizeof(ep_TLV) + ntohs(tlv->length);
 	}
 
 	return EP_SUCCESS;
