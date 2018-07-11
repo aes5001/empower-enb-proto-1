@@ -14,13 +14,15 @@ The format of the header is:
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |     Type      |    Version    |             eNB ID         -->|
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |<--                          eNB ID                         -->|
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |<--          eNB ID            |            Cell ID            |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Module ID                           |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |         Message length        |         Sequence number    -->|
+    |D| | | | | | | | | | | | | | | |       Sequence number      -->|
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |<--      Sequence number       | | | | | | | | | | | | | | | | |
+    |<--     Sequence number        |         Message length        |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     
 Details of the fields encountered in this piece of information are:
@@ -39,7 +41,7 @@ Details of the fields encountered in this piece of information are:
         protocol syntax that can be ignored.
         
     ENB ID
-        32-bits identificator for a base station.
+        64-bits identificator for a base station.
         
     CELL ID
         16-bits identificator for a cell within a base station. This usually
@@ -49,6 +51,10 @@ Details of the fields encountered in this piece of information are:
         32-bits identificator of the controller-side module which is issuing the
         query. This is the useful identificator for controller-side multiplexing
         of functionality.
+
+    FLAGS
+        a 16-bits field containing various flags of the message. Such flags are:
+            D - Direction flag, 0 for request, 1 for replies
         
     MESSAGE LEGTH
         16-bits field of the size of the message.

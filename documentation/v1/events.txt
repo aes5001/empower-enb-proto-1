@@ -12,19 +12,16 @@ events which can occur in the system.
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |     Type      |   Direction   |   Operation   | | | | | | | | |
+    |              Type             |   Operation   | | | | | | | | |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    
+
 Details of the fields encountered in single event header are:
 
     TYPE
-        Type of event occurring.
-        
-    DIRECTION
-        Which direction is actually taking the message, request or reply.
-        
+        16-bits type of event occurring.
+
     OPERATION
-        Specific operation in progess.
+        8bits specific operation in progess.
 
 
   SCHDULE EVENT
@@ -32,24 +29,22 @@ Details of the fields encountered in single event header are:
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |     Type      |   Direction   |   Operation   |            -->|
+    |              Type             |   Operation   |   Interval -->|
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |<--                Interval                    | | | | | | | | |
+    |<--                    Interval                | | | | | | | | |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     
 Details of the fields encountered in schedule event header are:
 
     TYPE
-        Type of event occurring.
-        
-    DIRECTION
-        Which direction is actually taking the message, request or reply.
-        
+        16-bits type of event occurring.
+
     OPERATION
-        Specific operation in progess.
-        
+        8-bits specific operation in progess.
+
     INTERVAL
-        Interval when this event is scheduled; the value is in milliseconds.
+        32-bits interval when this event is scheduled; the value is in
+        milliseconds.
 
 
   SCHEDULE EVENT
@@ -57,18 +52,15 @@ Details of the fields encountered in schedule event header are:
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |     Type      |   Direction   |   Operation   | | | | | | | | |
+    |     Type                      |   Operation   | | | | | | | | |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     
 Details of the fields encountered in trigger event message are:
 
     TYPE
-        Type of event occurring.
-        
-    DIRECTION
-        Which direction is actually taking the message, request or reply.
-        
+        16-bits type of event occurring.
+
     OPERATION
-        Specific operation in progess.
-        
+        8-bits specific operation in progess.
+
 Kewin R.
