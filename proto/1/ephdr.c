@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#define _DEFAULT_SOURCE
+#include <endian.h>
 #include <netinet/in.h>
 
 #include <emproto.h>
@@ -44,7 +46,7 @@ int epf_head(
 
 	h->type       = (uint8_t)type;
 	h->vers       = (uint8_t)EMPOWER_PROTOCOL_VERS;
-	h->id.enb_id  = htonl(enb_id);
+	h->id.enb_id  = htobe64(enb_id);
 	h->id.cell_id = htons(cell_id);
 	h->id.mod_id  = htonl(mod_id);
 	h->flags      = flags;
@@ -85,7 +87,7 @@ int epp_head(
 	}
 
 	if(enb_id) {
-		*enb_id  = ntohl(h->id.enb_id);
+		*enb_id  = be64toh(h->id.enb_id);
 	}
 
 	if(cell_id) {
