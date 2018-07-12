@@ -48,7 +48,7 @@ ep_act_type epp_single_type(char * buf, unsigned int size)
 		return EP_ACT_INVALID;
 	}
 
-	return (ep_act_type)h->type;
+	return htons((ep_act_type)h->type);
 }
 
 ep_op_type epp_single_op(char * buf, unsigned int size)

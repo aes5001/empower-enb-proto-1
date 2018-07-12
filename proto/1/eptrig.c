@@ -59,5 +59,5 @@ ep_act_type epp_trigger_type(char * buf, unsigned int size)
 		return EP_ACT_INVALID;
 	}
 
-	return (ep_act_type)h->type;
+	return htons((ep_act_type)h->type);
 }
