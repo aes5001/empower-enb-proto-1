@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include <emproto.h>
 
@@ -65,5 +65,5 @@ ep_act_type epp_schedule_type(char * buf, unsigned int size)
 		return EP_ACT_INVALID;
 	}
 
-	return htons((ep_act_type)h->type);
+	return ntohs((ep_act_type)h->type);
 }

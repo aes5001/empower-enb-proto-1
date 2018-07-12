@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <arpa/inet.h>
+
 #include <emproto.h>
 
 int epf_trigger(
@@ -59,5 +61,5 @@ ep_act_type epp_trigger_type(char * buf, unsigned int size)
 		return EP_ACT_INVALID;
 	}
 
-	return htons((ep_act_type)h->type);
+	return ntohs((ep_act_type)h->type);
 }
