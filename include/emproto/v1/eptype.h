@@ -54,7 +54,7 @@ typedef enum __ep_action_type {
 	EP_ACT_MAC_REPORT     = 6,  /* Report coming from MAC layer */
 	EP_ACT_HANDOVER       = 7,  /* Hand an UE over another eNB */
 	EP_ACT_RAN_SETUP      = 9,  /* */
-	EP_ACT_RAN_TENANT     = 10, /* */
+	EP_ACT_RAN_SLICE      = 10, /* */
 	EP_ACT_RAN_USER       = 11, /* */
 	EP_ACT_RAN_SCHED      = 12, /* */
 } ep_act_type;

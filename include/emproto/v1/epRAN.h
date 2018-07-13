@@ -30,8 +30,8 @@ extern "C"
 
 /* Possible types of schedulers handled by the RAN sharing mechanisms */
 typedef enum __ep_RAN_sched_type {
-	EP_RAN_SCHED_TENANT_TYPE = 0,
-	EP_RAN_SCHED_USER_TYPE   = 1
+	EP_RAN_SCHED_SLICE_TYPE = 0,
+	EP_RAN_SCHED_USER_TYPE  = 1
 }ep_ran_schedtype;
 
 /*
@@ -44,7 +44,7 @@ typedef enum __ep_RAN_sched_type {
 typedef struct __ep_ran_sched_rep {
 	uint32_t id;		/* ID of the scheduler */
 	uint8_t  type;		/* Type of scheduler */
-	uint64_t tenant_id;	/* ID of the tenant; valid if 'type' = 1 */
+	uint64_t slice_id;	/* ID of the Slice; valid if 'type' = 1 */
 	uint8_t  name_len;	/* Length of the name field */
 	uint16_t value_len;	/* Length of the value field */
 	/* Scheduler parameter name  will be attached here */
@@ -55,7 +55,7 @@ typedef struct __ep_ran_sched_rep {
 typedef struct __ep_ran_sched_req {
 	uint32_t id;		/* ID of the scheduler */
 	uint8_t  type;		/* Type of scheduler */
-	uint64_t tenant_id;	/* ID of the tenant; valid if 'type' = 1 */
+	uint64_t slice_id;	/* ID of the Slice; valid if 'type' = 1 */
 	uint8_t  name_len;	/* Length of the name field */
 	/* Scheduler parameter name will be attached here */
  }__attribute__((packed)) ep_ran_sreq;
@@ -65,7 +65,7 @@ typedef struct __ep_ran_sched_req {
  /* RAN User information message */
 typedef struct __ep_ran_user_info {
 	uint16_t rnti;		/* RNTI of the user */
-	uint64_t tenant_id;	/* ID of the tenant the user belong to */
+	uint64_t slice_id;	/* ID of the Slice the user belong to */
 }__attribute__((packed)) ep_ran_uinf;
 
 /* RAN User reply message */
@@ -79,47 +79,47 @@ typedef struct __ep_ran_user_req {
 	uint16_t rnti;		/* RNTI of the user */
  }__attribute__((packed)) ep_ran_ureq;
 
- /********** RAN TENANT  **********/
+ /********** RAN Slice  **********/
 
-typedef struct __ep_ran_tenant_rem {
-	uint64_t id;		/* ID of the tenant */
+typedef struct __ep_ran_slice_rem {
+	uint64_t id;		/* ID of the Slice */
 }__attribute__((packed)) ep_ran_trem;
 
-typedef struct __ep_ran_tenant_add {
-	uint64_t id;		/* ID of the tenant */
-	uint32_t sched;		/* ID of the UE scheduler of this tenant */
+typedef struct __ep_ran_slice_add {
+	uint64_t id;		/* ID of the Slice */
+	uint32_t sched;		/* ID of the UE scheduler of this Slice */
 }__attribute__((packed)) ep_ran_tadd;
 
- /* RAN Tenant info message */
-typedef struct __ep_ran_tenant_inf {
-	uint64_t id;		/* ID of the tenant */
-	uint32_t sched;		/* ID of the UE scheduler of this tenant */
+ /* RAN Slice info message */
+typedef struct __ep_ran_slice_inf {
+	uint64_t id;		/* ID of the Slice */
+	uint32_t sched;		/* ID of the UE scheduler of this Slice */
 }__attribute__((packed)) ep_ran_tinf;
 
- /* RAN Tenant reply message */
-typedef struct __ep_ran_tenant_rep {
-	uint16_t nof_tenants;	/* Number of Tenants reported */
-	/* Here the array of ep_ran_tinf which depends from 'nof_tenants' */
+ /* RAN Slice reply message */
+typedef struct __ep_ran_slice_rep {
+	uint16_t nof_slices;	/* Number of Slices reported */
+	/* Here the array of ep_ran_tinf which depends from 'nof_Slices' */
 }__attribute__((packed)) ep_ran_trep;
 
- /* RAN Tenant request message */
-typedef struct __ep_ran_tenant_req {
-	uint64_t id;		/* ID of the tenant */
+ /* RAN Slice request message */
+typedef struct __ep_ran_slice_req {
+	uint64_t id;		/* ID of the Slice */
  }__attribute__((packed)) ep_ran_treq;
 
  /********** RAN SETUP  **********/
 
  /* RAN Setup reply/set message */
 typedef struct __ep_ran_setup {
-	uint32_t sched_id;	/* ID of the top-level Tenants scheduler */
+	uint32_t sched_id;	/* ID of the top-level Slices scheduler */
 }__attribute__((packed)) ep_ran_setup;
 
 /*
  * Opaque structures:
  */
 
-/* NOTE: This limits the number of Tenants per message! */
-#define EP_RAN_TENANT_MAX       8
+/* NOTE: This limits the number of Slices per message! */
+#define EP_RAN_SLICE_MAX       8
 /* NOTE: This limits the number of Users per message! */
 #define EP_RAN_USER_MAX         64
 /* NOTE: This limits the number of character per scheduler parameter name! */
@@ -136,16 +136,16 @@ typedef struct __ep_ran_sched_param_details {
 
 typedef struct __ep_ran_user_details {
 	uint16_t id;		/* RNTI */
-	uint64_t tenant;	/* Id of the Tenant */
+	uint64_t slice;	/* Id of the Slice */
 }ep_ran_user_det;
 
-typedef struct __ep_ran_tenant_details {
-	uint64_t id;		/* Id of the Tenant */
+typedef struct __ep_ran_slice_details {
+	uint64_t id;		/* Id of the Slice */
 	uint32_t sched;		/* ID of the active User scheduler */
-} ep_ran_tenant_det;
+} ep_ran_slice_det;
 
 typedef struct __ep_ran_setup_details {
-	uint32_t tenant_sched;	/* ID of the tenant scheduler */
+	uint32_t slice_sched;	/* ID of the Slice scheduler */
 } ep_ran_det;
 
 /******************************************************************************
@@ -158,11 +158,11 @@ typedef struct __ep_ran_setup_details {
  #define epf_single_ran_setup_fail(b, s, e, c, m)	\
 	epf_single_ran_rep_fail(b, s, EP_ACT_RAN_SETUP, e, c, m)
 
-/* Format a RAN Tenant operation failed message.
+/* Format a RAN Slice operation failed message.
  * Returns the message size or -1 on error.
  */
-#define epf_single_ran_tenant_fail(b, s, e, c, m)	\
-	epf_single_ran_rep_fail(b, s, EP_ACT_RAN_TENANT, e, c, m)
+#define epf_single_ran_slice_fail(b, s, e, c, m)	\
+	epf_single_ran_rep_fail(b, s, EP_ACT_RAN_SLICE, e, c, m)
 
 /* Format a RAN User operation failed message.
  * Returns the message size or -1 on error.
@@ -193,11 +193,11 @@ int epf_single_ran_rep_fail(
  #define epf_single_ran_setup_ns(b, s, e, c, m)	\
 	epf_single_ran_rep_ns(b, s, EP_ACT_RAN_SETUP, e, c, m)
 
-/* Format a RAN Tenant operation failed message.
+/* Format a RAN Slice operation failed message.
  * Returns the message size or -1 on error.
  */
-#define epf_single_ran_tenant_ns(b, s, e, c, m)	\
-	epf_single_ran_rep_ns(b, s, EP_ACT_RAN_TENANT, e, c, m)
+#define epf_single_ran_slice_ns(b, s, e, c, m)	\
+	epf_single_ran_rep_ns(b, s, EP_ACT_RAN_SLICE, e, c, m)
 
 /* Format a RAN User operation failed message.
  * Returns the message size or -1 on error.
@@ -255,7 +255,7 @@ int epp_single_ran_setup_rep(
 
 /******************************************************************************/
 
-/* Formats a RAN tenant request message.
+/* Formats a RAN Slice request message.
  * Returns the message size or -1 on error.
  */
 int epf_single_ran_ten_req(
@@ -264,17 +264,17 @@ int epf_single_ran_ten_req(
 	uint32_t            enb_id,
 	uint16_t            cell_id,
 	uint32_t            mod_id,
-	ep_ran_tenant_det * det);
+	ep_ran_slice_det * det);
 
-/* Parses a RAN tenant request message.
+/* Parses a RAN Slice request message.
  * Returns EP_SUCCESS on success, otherwise a negative error code.
  */
 int epp_single_ran_ten_req(
 	char *              buf,
 	unsigned int        size,
-	ep_ran_tenant_det * det);
+	ep_ran_slice_det * det);
 
-/* Formats a RAN tenant reply message.
+/* Formats a RAN Slice reply message.
  * Returns the message size or -1 on error.
  */
 int epf_single_ran_ten_rep(
@@ -283,19 +283,19 @@ int epf_single_ran_ten_rep(
 	uint32_t            enb_id,
 	uint16_t            cell_id,
 	uint32_t            mod_id,
-	uint16_t            nof_tenants,
-	ep_ran_tenant_det * det);
+	uint16_t            nof_slices,
+	ep_ran_slice_det * det);
 
-/* Parses a RAN tenant reply message.
+/* Parses a RAN Slice reply message.
  * Returns EP_SUCCESS on success, otherwise a negative error code.
  */
 int epp_single_ran_ten_rep(
 	char *              buf,
 	unsigned int        size,
-	uint16_t *          nof_tenants,
-	ep_ran_tenant_det * det);
+	uint16_t *          nof_slices,
+	ep_ran_slice_det * det);
 
-/* Formats a RAN tenant add message.
+/* Formats a RAN Slice add message.
  * Returns the message size or -1 on error.
  */
 int epf_single_ran_ten_add(
@@ -304,17 +304,17 @@ int epf_single_ran_ten_add(
 	uint32_t            enb_id,
 	uint16_t            cell_id,
 	uint32_t            mod_id,
-	ep_ran_tenant_det * det);
+	ep_ran_slice_det * det);
 
-/* Parses a RAN tenant add message.
+/* Parses a RAN Slice add message.
  * Returns EP_SUCCESS on success, otherwise a negative error code.
  */
 int epp_single_ran_ten_add(
 	char *              buf,
 	unsigned int        size,
-	ep_ran_tenant_det * det);
+	ep_ran_slice_det * det);
 
-/* Formats a RAN tenant remove message.
+/* Formats a RAN Slice remove message.
  * Returns the message size or -1 on error.
  */
 int epf_single_ran_ten_rem(
@@ -323,15 +323,15 @@ int epf_single_ran_ten_rem(
 	uint32_t            enb_id,
 	uint16_t            cell_id,
 	uint32_t            mod_id,
-	ep_ran_tenant_det * det);
+	ep_ran_slice_det * det);
 
-/* Parses a RAN tenant remove message.
+/* Parses a RAN Slice remove message.
  * Returns EP_SUCCESS on success, otherwise a negative error code.
  */
 int epp_single_ran_ten_rem(
 	char *              buf,
 	unsigned int        size,
-	ep_ran_tenant_det * det);
+	ep_ran_slice_det * det);
 
 /******************************************************************************/
 
@@ -425,7 +425,7 @@ int epf_single_ran_sch_req(
 	uint16_t            cell_id,
 	uint32_t            mod_id,
 	uint32_t            id,
-	uint64_t            tenant,
+	uint64_t            slice,
 	ep_ran_sparam_det * det);
 
 /* Parses a RAN scheduler parameter request message.
@@ -441,7 +441,7 @@ int epp_single_ran_sch_req(
 	char *              buf,
 	unsigned int        size,
 	uint32_t *          id,
-	uint64_t *          tenant,
+	uint64_t *          slice,
 	ep_ran_sparam_det * det);
 
 /* Formats a RAN scheduler parameter reply message.
@@ -454,7 +454,7 @@ int epf_single_ran_sch_rep(
 	uint16_t            cell_id,
 	uint32_t            mod_id,
 	uint32_t            id,
-	uint64_t            tenant,
+	uint64_t            slice,
 	ep_ran_sparam_det * det);
 
 /* Parses a RAN scheduler parameter reply message.
@@ -470,7 +470,7 @@ int epp_single_ran_sch_rep(
 	char *              buf,
 	unsigned int        size,
 	uint32_t *          id,
-	uint64_t *          tenant,
+	uint64_t *          slice,
 	ep_ran_sparam_det * det);
 
 /* Formats a RAN scheduler parameter set message.
@@ -483,7 +483,7 @@ int epf_single_ran_sch_set(
 	uint16_t            cell_id,
 	uint32_t            mod_id,
 	uint32_t            id,
-	uint64_t            tenant,
+	uint64_t            slice,
 	ep_ran_sparam_det * det);
 
 /* Parses a RAN scheduler parameter set message.
@@ -499,7 +499,7 @@ int epp_single_ran_sch_set(
 	char *              buf,
 	unsigned int        size,
 	uint32_t *          id,
-	uint64_t *          tenant,
+	uint64_t *          slice,
 	ep_ran_sparam_det * det);
 
 /******************************************************************************

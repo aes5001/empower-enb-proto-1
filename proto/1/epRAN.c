@@ -31,7 +31,7 @@ int epf_ran_setup_rep(char * buf, unsigned int size, ep_ran_det * det)
 		return -1;
 	}
 
-	s->sched_id = htonl(det->tenant_sched);
+	s->sched_id = htonl(det->slice_sched);
 
 	ep_dbg_dump("F - RANS Rep: ", buf, sizeof(ep_ran_setup));
 
@@ -51,7 +51,7 @@ int epp_ran_setup_rep(char * buf, unsigned int size, ep_ran_det * det)
 	}
 
 	if(det) {
-		det->tenant_sched = ntohl(s->sched_id);
+		det->slice_sched = ntohl(s->sched_id);
 	}
 
 	ep_dbg_dump("P - RANS Rep: ", buf, sizeof(ep_ran_setup));
@@ -59,10 +59,10 @@ int epp_ran_setup_rep(char * buf, unsigned int size, ep_ran_det * det)
 	return EP_SUCCESS;
 }
 
-/* Formats a RAN tenant request using Tenant details.
+/* Formats a RAN slice request using Tenant details.
  * No checks are done and assumes valid buffers.
  */
-int epf_ran_tenant_req(char * buf, unsigned int size, ep_ran_tenant_det * det)
+int epf_ran_slice_req(char * buf, unsigned int size, ep_ran_slice_det * det)
 {
 	ep_ran_treq * r = (ep_ran_treq *)buf;
 
@@ -78,10 +78,10 @@ int epf_ran_tenant_req(char * buf, unsigned int size, ep_ran_tenant_det * det)
 	return sizeof(ep_ran_treq);
 }
 
-/* Parses a RAN tenant request into Tenant details.
+/* Parses a RAN slice request into Tenant details.
  * No checks are done and assumes valid buffers.
  */
-int epp_ran_tenant_req(char * buf, unsigned int size, ep_ran_tenant_det * det)
+int epp_ran_slice_req(char * buf, unsigned int size, ep_ran_slice_det * det)
 {
 	ep_ran_treq * r = (ep_ran_treq *)buf;
 
@@ -99,11 +99,11 @@ int epp_ran_tenant_req(char * buf, unsigned int size, ep_ran_tenant_det * det)
 	return sizeof(ep_ran_treq);
 }
 
-/* Formats a RAN tenant reply using Tenant details.
+/* Formats a RAN slice reply using Tenant details.
  * No checks are done and assumes valid buffers.
  */
-int epf_ran_tenant_rep(
-	char * buf, unsigned int size, uint16_t nof, ep_ran_tenant_det * dets) 
+int epf_ran_slice_rep(
+	char * buf, unsigned int size, uint16_t nof, ep_ran_slice_det * dets) 
 {
 	uint16_t i;
 
@@ -115,11 +115,11 @@ int epf_ran_tenant_rep(
 		return -1;
 	}
 
-	r->nof_tenants = htons(nof);
+	r->nof_slices = htons(nof);
 	
 	ep_dbg_dump("F - RANT Rep: ", buf, sizeof(ep_ran_trep));
 
-	for (i = 0; i < nof && i < EP_RAN_TENANT_MAX; i++) {
+	for (i = 0; i < nof && i < EP_RAN_SLICE_MAX; i++) {
 		d[i].id    = htobe64(dets[i].id);
 		d[i].sched = htonl(dets[i].sched);
 
@@ -132,11 +132,11 @@ int epf_ran_tenant_rep(
 	return sizeof(ep_ran_trep) + (sizeof(ep_ran_tinf) * (i + 1));
 }
 
-/* Parses a RAN tenant reply into Tenant details.
+/* Parses a RAN slice reply into Tenant details.
  * No checks are done and assumes valid buffers.
  */
-int epp_ran_tenant_rep(
-	char * buf, unsigned int size, uint16_t * nof, ep_ran_tenant_det * dets)
+int epp_ran_slice_rep(
+	char * buf, unsigned int size, uint16_t * nof, ep_ran_slice_det * dets)
 {
 	uint16_t i;
 
@@ -149,20 +149,20 @@ int epp_ran_tenant_rep(
 	}
 
 	if(size < sizeof(ep_ran_trep) + (
-		sizeof(ep_ran_tinf) * ntohs(r->nof_tenants)))
+		sizeof(ep_ran_tinf) * ntohs(r->nof_slices)))
 	{
 		ep_dbg_log("P - RANT Rep: Not enough space!\n");
 		return EP_ERROR;
 	}
 
 	if(nof) {
-		*nof = ntohs(r->nof_tenants);
+		*nof = ntohs(r->nof_slices);
 	}
 
 	ep_dbg_dump("P - RANT Rep: ", buf, sizeof(ep_ran_trep));
 
 	if(dets) {
-		for (i = 0; i < *nof && i < EP_RAN_TENANT_MAX; i++) {
+		for (i = 0; i < *nof && i < EP_RAN_SLICE_MAX; i++) {
 			dets[i].id    = be64toh(d[i].id);
 			dets[i].sched = ntohl(d[i].sched);
 
@@ -177,10 +177,10 @@ int epp_ran_tenant_rep(
 	return EP_SUCCESS;
 }
 
-/* Formats a RAN tenant add using Tenant details.
+/* Formats a RAN slice add using Tenant details.
  * No checks are done and assumes valid buffers.
  */
-int epf_ran_tenant_add(char * buf, unsigned int size, ep_ran_tenant_det * det)
+int epf_ran_slice_add(char * buf, unsigned int size, ep_ran_slice_det * det)
 {
 	ep_ran_tadd * r = (ep_ran_tadd *)buf;
 
@@ -197,10 +197,10 @@ int epf_ran_tenant_add(char * buf, unsigned int size, ep_ran_tenant_det * det)
 	return sizeof(ep_ran_tadd);
 }
 
-/* Parses a RAN tenant add into Tenant details.
+/* Parses a RAN slice add into Tenant details.
  * No checks are done and assumes valid buffers.
  */
-int epp_ran_tenant_add(char * buf, unsigned int size, ep_ran_tenant_det * det)
+int epp_ran_slice_add(char * buf, unsigned int size, ep_ran_slice_det * det)
 {
 	ep_ran_tadd * r = (ep_ran_tadd *)buf;
 
@@ -219,10 +219,10 @@ int epp_ran_tenant_add(char * buf, unsigned int size, ep_ran_tenant_det * det)
 	return EP_SUCCESS;
 }
 
-/* Formats a RAN tenant remove using Tenant details.
+/* Formats a RAN slice remove using Tenant details.
  * No checks are done and assumes valid buffers.
  */
-int epf_ran_tenant_rem(char * buf, unsigned int size, ep_ran_tenant_det * det)
+int epf_ran_slice_rem(char * buf, unsigned int size, ep_ran_slice_det * det)
 {
 	ep_ran_trem * r = (ep_ran_trem *)buf;
 
@@ -238,10 +238,10 @@ int epf_ran_tenant_rem(char * buf, unsigned int size, ep_ran_tenant_det * det)
 	return sizeof(ep_ran_trem);
 }
 
-/* Parses a RAN tenant remove into Tenant details.
+/* Parses a RAN slice remove into Tenant details.
  * No checks are done and assumes valid buffers.
  */
-int epp_ran_tenant_rem(char * buf, unsigned int size, ep_ran_tenant_det * det)
+int epp_ran_slice_rem(char * buf, unsigned int size, ep_ran_slice_det * det)
 {
 	ep_ran_trem * r = (ep_ran_trem *)buf;
 
@@ -320,7 +320,7 @@ int epf_ran_user_rep(
 
 	for (i = 0; i < nof && i < EP_RAN_USER_MAX; i++) {
 		u[i].rnti      = htons(det[i].id);
-		u[i].tenant_id = htobe64(det[i].tenant);
+		u[i].slice_id = htobe64(det[i].slice);
 
 		ep_dbg_dump(
 			"    F - RANU Info: ",
@@ -362,7 +362,7 @@ int epp_ran_user_rep(
 	if(det) {
 		for (i = 0; i < *nof && i < EP_RAN_USER_MAX; i++) {
 			det[i].id     = ntohs(u[i].rnti);
-			det[i].tenant = be64toh(u[i].tenant_id);
+			det[i].slice = be64toh(u[i].slice_id);
 
 			ep_dbg_dump(
 				"    P - RANU Info: ",
@@ -388,7 +388,7 @@ int epf_ran_user_add(char * buf, unsigned int size, ep_ran_user_det * det)
 	}
 
 	r->rnti      = htons(det->id);
-	r->tenant_id = htobe64(det->tenant);
+	r->slice_id = htobe64(det->slice);
 
 	ep_dbg_dump("F - RANU Add: ", buf, sizeof(ep_ran_uinf));
 
@@ -409,7 +409,7 @@ int epp_ran_user_add(char * buf, unsigned int size, ep_ran_user_det * det)
 
 	if(det) {
 		det->id     = ntohs(r->rnti);
-		det->tenant = be64toh(det->tenant);
+		det->slice = be64toh(det->slice);
 	}
 
 	ep_dbg_dump("P - RANU Add: ", buf, sizeof(ep_ran_uinf));
@@ -430,7 +430,7 @@ int epf_ran_user_rem(char * buf, unsigned int size, ep_ran_user_det * det)
 	}
 
 	r->rnti      = htons(det->id);
-	r->tenant_id = htobe64(det->tenant);
+	r->slice_id = htobe64(det->slice);
 
 	ep_dbg_dump("F - RANU Rem: ", buf, sizeof(ep_ran_uinf));
 
@@ -451,7 +451,7 @@ int epp_ran_user_rem(char * buf, unsigned int size, ep_ran_user_det * det)
 
 	if(det) {
 		det->id     = ntohs(r->rnti);
-		det->tenant = be64toh(det->tenant);
+		det->slice = be64toh(det->slice);
 	}
 
 	ep_dbg_dump("P - RANU Rem: ", buf, sizeof(ep_ran_uinf));
@@ -466,7 +466,7 @@ int epf_ran_sched_req(
 	char *              buf, 
 	unsigned int        size,
 	uint32_t            id,
-	uint64_t            tenant,
+	uint64_t            slice,
 	ep_ran_sparam_det * det)
 {
 	size_t        n = min(det->name_len, EP_RAN_NAME_MAX);
@@ -479,10 +479,10 @@ int epf_ran_sched_req(
 	}
 
 	r->id        = htonl(id);
-	r->tenant_id = htobe64(tenant);
+	r->slice_id = htobe64(slice);
 	
-	if (tenant) {
-		r->type = EP_RAN_SCHED_TENANT_TYPE;
+	if (slice) {
+		r->type = EP_RAN_SCHED_SLICE_TYPE;
 	} else {
 		r->type = EP_RAN_SCHED_USER_TYPE;
 	}
@@ -508,7 +508,7 @@ int epp_ran_sched_req(
 	char *              buf,
 	unsigned int        size,
 	uint32_t *          id,
-	uint64_t *          tenant,
+	uint64_t *          slice,
 	ep_ran_sparam_det * det)
 {
 	ep_ran_sreq * r = (ep_ran_sreq *)buf;
@@ -529,8 +529,8 @@ int epp_ran_sched_req(
 		*id       = ntohl(r->id);
 	}
 
-	if(tenant) {
-		*tenant   = be64toh(r->tenant_id);
+	if(slice) {
+		*slice   = be64toh(r->slice_id);
 	}
 
 	if(det) {
@@ -555,7 +555,7 @@ int epf_ran_sched_rep(
 	char *              buf,
 	unsigned int        size,
 	uint32_t            id,
-	uint64_t            tenant,
+	uint64_t            slice,
 	ep_ran_sparam_det * det)
 {
 	size_t        n = min(det->name_len,  EP_RAN_NAME_MAX);
@@ -570,10 +570,10 @@ int epf_ran_sched_rep(
 	}
 
 	r->id           = htonl(id);
-	r->tenant_id    = htobe64(tenant);
+	r->slice_id    = htobe64(slice);
 	
-	if (tenant) {
-		r->type = EP_RAN_SCHED_TENANT_TYPE;
+	if (slice) {
+		r->type = EP_RAN_SCHED_SLICE_TYPE;
 	} else {
 		r->type = EP_RAN_SCHED_USER_TYPE;
 	}
@@ -607,7 +607,7 @@ int epp_ran_sched_rep(
 	char *              buf,
 	unsigned int        size,
 	uint32_t *          id,
-	uint64_t *          tenant,
+	uint64_t *          slice,
 	ep_ran_sparam_det * det)
 {
 	size_t        n;
@@ -634,8 +634,8 @@ int epp_ran_sched_rep(
 		*id     = ntohl(r->id);
 	}
 
-	if(tenant) {
-		*tenant = be64toh(r->tenant_id);
+	if(slice) {
+		*slice = be64toh(r->slice_id);
 	}
 
 	if(det) {
@@ -660,7 +660,7 @@ int epf_ran_sched_set(
 	char *              buf,
 	unsigned int        size,
 	uint32_t            id,
-	uint64_t            tenant,
+	uint64_t            slice,
 	ep_ran_sparam_det * det)
 {
 	size_t        n = min(det->name_len,  EP_RAN_NAME_MAX);
@@ -674,10 +674,10 @@ int epf_ran_sched_set(
 	}
 
 	r->id           = htonl(id);
-	r->tenant_id    = htobe64(tenant);
+	r->slice_id    = htobe64(slice);
 	
-	if (tenant) {
-		r->type = EP_RAN_SCHED_TENANT_TYPE;
+	if (slice) {
+		r->type = EP_RAN_SCHED_SLICE_TYPE;
 	} else {
 		r->type = EP_RAN_SCHED_USER_TYPE;
 	}
@@ -711,7 +711,7 @@ int epp_ran_sched_set(
 	char *              buf,
 	unsigned int        size,
 	uint32_t *          id,
-	uint64_t *          tenant,
+	uint64_t *          slice,
 	ep_ran_sparam_det * det)
 {
 	size_t        n;
@@ -738,8 +738,8 @@ int epp_ran_sched_set(
 		*id     = ntohl(r->id);
 	}
 
-	if(tenant) {
-		*tenant = be64toh(r->tenant_id);
+	if(slice) {
+		*slice = be64toh(r->slice_id);
 	}
 
 	if(det) {
@@ -990,7 +990,7 @@ int epf_single_ran_ten_req(
 	uint32_t            enb_id,
 	uint16_t            cell_id,
 	uint32_t            mod_id,
-	ep_ran_tenant_det * det)
+	ep_ran_slice_det * det)
 {
 	int ms = 0;
 	int ret= 0;
@@ -1017,7 +1017,7 @@ int epf_single_ran_ten_req(
 	ms   = epf_single(
 		buf + ret,
 		size - ret,
-		EP_ACT_RAN_TENANT,
+		EP_ACT_RAN_SLICE,
 		EP_OPERATION_UNSPECIFIED);
 
 	if(ms < 0) {
@@ -1025,7 +1025,7 @@ int epf_single_ran_ten_req(
 	}
 
 	ret += ms;
-	ms   = epf_ran_tenant_req(
+	ms   = epf_ran_slice_req(
 		buf + ret,
 		size - ret,
 		det);
@@ -1045,14 +1045,14 @@ int epf_single_ran_ten_req(
 int epp_single_ran_ten_req(
 	char *              buf,
 	unsigned int        size,
-	ep_ran_tenant_det * det)
+	ep_ran_slice_det * det)
 {
 	if(!buf) {
 		ep_dbg_log("P - Single RANT Req: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 
-	return epp_ran_tenant_req(
+	return epp_ran_slice_req(
 		buf  +  sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
 		det);
@@ -1064,8 +1064,8 @@ int epf_single_ran_ten_rep(
 	uint32_t            enb_id,
 	uint16_t            cell_id,
 	uint32_t            mod_id,
-	uint16_t            nof_tenants,
-	ep_ran_tenant_det * det)
+	uint16_t            nof_slices,
+	ep_ran_slice_det * det)
 {
 	int ms = 0;
 	int ret= 0;
@@ -1092,7 +1092,7 @@ int epf_single_ran_ten_rep(
 	ms   = epf_single(
 		buf + ret,
 		size - ret,
-		EP_ACT_RAN_TENANT,
+		EP_ACT_RAN_SLICE,
 		EP_OPERATION_UNSPECIFIED);
 
 	if(ms < 0) {
@@ -1100,10 +1100,10 @@ int epf_single_ran_ten_rep(
 	}
 
 	ret += ms;
-	ms   = epf_ran_tenant_rep(
+	ms   = epf_ran_slice_rep(
 		buf + ret,
 		size - ret,
-		nof_tenants,
+		nof_slices,
 		det);
 
 	if(ms < 0) {
@@ -1121,18 +1121,18 @@ int epf_single_ran_ten_rep(
 int epp_single_ran_ten_rep(
 	char *              buf,
 	unsigned int        size,
-	uint16_t *          nof_tenants,
-	ep_ran_tenant_det * det)
+	uint16_t *          nof_slices,
+	ep_ran_slice_det * det)
 {
 	if(!buf) {
 		ep_dbg_log("P - Single RANT Rep: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 
-	return epp_ran_tenant_rep(
+	return epp_ran_slice_rep(
 		buf  +  sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
-		nof_tenants,
+		nof_slices,
 		det);
 }
 
@@ -1142,7 +1142,7 @@ int epf_single_ran_ten_add(
 	uint32_t            enb_id,
 	uint16_t            cell_id,
 	uint32_t            mod_id,
-	ep_ran_tenant_det * det)
+	ep_ran_slice_det * det)
 {
 	int ms = 0;
 	int ret= 0;
@@ -1169,7 +1169,7 @@ int epf_single_ran_ten_add(
 	ms   = epf_single(
 		buf + ret,
 		size - ret,
-		EP_ACT_RAN_TENANT,
+		EP_ACT_RAN_SLICE,
 		EP_OPERATION_ADD);
 
 	if(ms < 0) {
@@ -1187,14 +1187,14 @@ int epf_single_ran_ten_add(
 int epp_single_ran_ten_add(
 	char *              buf,
 	unsigned int        size, 
-	ep_ran_tenant_det * det)
+	ep_ran_slice_det * det)
 {
 	if(!buf) {
 		ep_dbg_log("P - Single RANT Add: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 
-	return epp_ran_tenant_add(
+	return epp_ran_slice_add(
 		buf  +  sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
 		det);
@@ -1206,7 +1206,7 @@ int epf_single_ran_ten_rem(
 	uint32_t            enb_id,
 	uint16_t            cell_id,
 	uint32_t            mod_id,
-	ep_ran_tenant_det * det)
+	ep_ran_slice_det * det)
 {
 	int ms = 0;
 	int ret= 0;
@@ -1233,7 +1233,7 @@ int epf_single_ran_ten_rem(
 	ms   = epf_single(
 		buf + ret,
 		size - ret,
-		EP_ACT_RAN_TENANT,
+		EP_ACT_RAN_SLICE,
 		EP_OPERATION_REM);
 
 	if(ms < 0) {
@@ -1251,14 +1251,14 @@ int epf_single_ran_ten_rem(
 int epp_single_ran_ten_rem(
 	char *              buf,
 	unsigned int        size,
-	ep_ran_tenant_det * det)
+	ep_ran_slice_det * det)
 {
 	if(!buf) {
 		ep_dbg_log("P - Single RANT Rem: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 
-	return epp_ran_tenant_rem(
+	return epp_ran_slice_rem(
 		buf  +  sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
 		det);
@@ -1575,7 +1575,7 @@ int epf_single_ran_sch_req(
 	uint16_t            cell_id,
 	uint32_t            mod_id,
 	uint32_t            id,
-	uint64_t            tenant,
+	uint64_t            slice,
 	ep_ran_sparam_det * det)
 {
 	int ms = 0;
@@ -1615,7 +1615,7 @@ int epf_single_ran_sch_req(
 		buf + ret,
 		size - ret,
 		id,
-		tenant,
+		slice,
 		det);
 
 	if(ms < 0) {
@@ -1634,7 +1634,7 @@ int epp_single_ran_sch_req(
 	char *              buf,
 	unsigned int        size,
 	uint32_t *          id,
-	uint64_t *          tenant,
+	uint64_t *          slice,
 	ep_ran_sparam_det * det)
 {
 	if(!buf) {
@@ -1646,7 +1646,7 @@ int epp_single_ran_sch_req(
 		buf  + sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		size - sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		id, 
-		tenant,
+		slice,
 		det);
 }
 
@@ -1657,7 +1657,7 @@ int epf_single_ran_sch_rep(
 	uint16_t            cell_id,
 	uint32_t            mod_id,
 	uint32_t            id,
-	uint64_t            tenant,
+	uint64_t            slice,
 	ep_ran_sparam_det * det)
 {
 	int ms = 0;
@@ -1697,7 +1697,7 @@ int epf_single_ran_sch_rep(
 		buf + ret,
 		size - ret,
 		id,
-		tenant,
+		slice,
 		det);
 
 	if(ms < 0) {
@@ -1716,7 +1716,7 @@ int epp_single_ran_sch_rep(
 	char *              buf,
 	unsigned int        size,
 	uint32_t *          id,
-	uint64_t *          tenant,
+	uint64_t *          slice,
 	ep_ran_sparam_det * det)
 {
 	if(!buf) {
@@ -1728,7 +1728,7 @@ int epp_single_ran_sch_rep(
 		buf + sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		size - sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		id,
-		tenant,
+		slice,
 		det);
 }
 
@@ -1739,7 +1739,7 @@ int epf_single_ran_sch_set(
 	uint16_t            cell_id,
 	uint32_t            mod_id,
 	uint32_t            id,
-	uint64_t            tenant,
+	uint64_t            slice,
 	ep_ran_sparam_det * det)
 {
 	int ms = 0;
@@ -1779,7 +1779,7 @@ int epf_single_ran_sch_set(
 		buf + ret,
 		size - ret,
 		id,
-		tenant,
+		slice,
 		det);
 
 	if(ms < 0) {
@@ -1798,7 +1798,7 @@ int epp_single_ran_sch_set(
 	char *              buf,
 	unsigned int        size,
 	uint32_t *          id,
-	uint64_t *          tenant,
+	uint64_t *          slice,
 	ep_ran_sparam_det * det)
 {
 	if(!buf) {
@@ -1810,6 +1810,6 @@ int epp_single_ran_sch_set(
 		buf  + sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		size - sizeof(ep_hdr) + sizeof(ep_s_hdr),
 		id,
-		tenant,
+		slice,
 		det);
 }
