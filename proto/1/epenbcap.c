@@ -189,9 +189,9 @@ int epp_ecap_req(char * buf, unsigned int size)
 int epf_single_ecap_rep_fail(
 	char *        buf,
 	unsigned int  size,
-	uint32_t      enb_id,
-	uint16_t      cell_id,
-	uint32_t      mod_id)
+	enb_id_t      enb_id,
+	cell_id_t     cell_id,
+	mod_id_t      mod_id)
 {
 	int ms = 0;
 	int ret= 0;
@@ -241,9 +241,9 @@ int epf_single_ecap_rep_fail(
 int epf_single_ecap_rep(
 	char *        buf,
 	unsigned int  size,
-	uint32_t      enb_id,
-	uint16_t      cell_id,
-	uint32_t      mod_id,
+	enb_id_t      enb_id,
+	cell_id_t     cell_id,
+	mod_id_t      mod_id,
 	ep_enb_det *  det)
 {
 	int ms = 0;
@@ -308,11 +308,11 @@ int epp_single_ecap_rep(
 }
 
 int epf_single_ecap_req(
-	char *       buf,
-	unsigned int size,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id)
+	char *        buf,
+	unsigned int  size,
+	enb_id_t      enb_id,
+	cell_id_t     cell_id,
+	mod_id_t      mod_id)
 {
 	int ms = 0;
 	int ret= 0;

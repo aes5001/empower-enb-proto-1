@@ -765,9 +765,9 @@ int epf_single_ran_rep_fail(
 	char *       buf,
 	unsigned int size,
 	ep_act_type  type,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id)
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id)
 {
 	int ms = 0;
 	int ret= 0;
@@ -814,9 +814,9 @@ int epf_single_ran_rep_ns(
 	char *       buf,
 	unsigned int size,
 	ep_act_type  type,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id)
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id)
 {
 	int ms = 0;
 	int ret= 0 ;
@@ -864,9 +864,9 @@ int epf_single_ran_rep_ns(
 int epf_single_ran_setup_req(
 	char *       buf,
 	unsigned int size,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id)
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id)
 {
 	int ms = 0;
 	int ret= 0 ;
@@ -911,9 +911,9 @@ int epf_single_ran_setup_req(
 int epf_single_ran_setup_rep(
 	char *       buf,
 	unsigned int size,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
 	ep_ran_det * det)
 {
 	int ms = 0;
@@ -985,11 +985,11 @@ int epp_single_ran_setup_rep(
 /******* RAN Tenant ***********************************************************/
 
 int epf_single_ran_ten_req(
-	char *              buf,
-	unsigned int        size,	
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
+	char *             buf,
+	unsigned int       size,
+	enb_id_t           enb_id,
+	cell_id_t          cell_id,
+	mod_id_t           mod_id,
 	ep_ran_slice_det * det)
 {
 	int ms = 0;
@@ -1043,8 +1043,8 @@ int epf_single_ran_ten_req(
 }
 
 int epp_single_ran_ten_req(
-	char *              buf,
-	unsigned int        size,
+	char *             buf,
+	unsigned int       size,
 	ep_ran_slice_det * det)
 {
 	if(!buf) {
@@ -1059,12 +1059,12 @@ int epp_single_ran_ten_req(
 }
 
 int epf_single_ran_ten_rep(
-	char *              buf,
-	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
-	uint16_t            nof_slices,
+	char *             buf,
+	unsigned int       size,
+	enb_id_t           enb_id,
+	cell_id_t          cell_id,
+	mod_id_t           mod_id,
+	uint16_t           nof_slices,
 	ep_ran_slice_det * det)
 {
 	int ms = 0;
@@ -1119,9 +1119,9 @@ int epf_single_ran_ten_rep(
 }
 
 int epp_single_ran_ten_rep(
-	char *              buf,
-	unsigned int        size,
-	uint16_t *          nof_slices,
+	char *             buf,
+	unsigned int       size,
+	uint16_t *         nof_slices,
 	ep_ran_slice_det * det)
 {
 	if(!buf) {
@@ -1137,11 +1137,11 @@ int epp_single_ran_ten_rep(
 }
 
 int epf_single_ran_ten_add(
-	char *              buf,
-	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
+	char *             buf,
+	unsigned int       size,
+	enb_id_t           enb_id,
+	cell_id_t          cell_id,
+	mod_id_t           mod_id,
 	ep_ran_slice_det * det)
 {
 	int ms = 0;
@@ -1185,8 +1185,8 @@ int epf_single_ran_ten_add(
 }
 
 int epp_single_ran_ten_add(
-	char *              buf,
-	unsigned int        size, 
+	char *             buf,
+	unsigned int       size, 
 	ep_ran_slice_det * det)
 {
 	if(!buf) {
@@ -1201,11 +1201,11 @@ int epp_single_ran_ten_add(
 }
 
 int epf_single_ran_ten_rem(
-	char *              buf,
-	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
+	char *             buf,
+	unsigned int       size,
+	enb_id_t           enb_id,
+	cell_id_t          cell_id,
+	mod_id_t           mod_id,
 	ep_ran_slice_det * det)
 {
 	int ms = 0;
@@ -1249,8 +1249,8 @@ int epf_single_ran_ten_rem(
 }
 
 int epp_single_ran_ten_rem(
-	char *              buf,
-	unsigned int        size,
+	char *             buf,
+	unsigned int       size,
 	ep_ran_slice_det * det)
 {
 	if(!buf) {
@@ -1267,12 +1267,12 @@ int epp_single_ran_ten_rem(
 /******* RAN Users ************************************************************/
 
 int epf_single_ran_usr_req(
-	char *              buf,
-	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
-	uint16_t            rnti)
+	char *       buf,
+	unsigned int size,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
+	uint16_t     rnti)
 {
 	int ms = 0;
 	int ret= 0;
@@ -1325,9 +1325,9 @@ int epf_single_ran_usr_req(
 }
 
 int epp_single_ran_usr_req(
-	char *              buf,
-	unsigned int        size,
-	uint16_t *          rnti)
+	char *       buf,
+	unsigned int size,
+	uint16_t *   rnti)
 {
 	if(!buf) {
 		ep_dbg_log("P - Single RANU Req: Invalid buffer!\n");
@@ -1341,13 +1341,13 @@ int epp_single_ran_usr_req(
 }
 
 int epf_single_ran_usr_rep(
-	char *              buf,
-	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
-	uint16_t            nof_users,
-	ep_ran_user_det *   dets)
+	char *            buf,
+	unsigned int      size,
+	enb_id_t          enb_id,
+	cell_id_t         cell_id,
+	mod_id_t          mod_id,
+	uint16_t          nof_users,
+	ep_ran_user_det * dets)
 {
 	int ms = 0;
 	int ret= 0;
@@ -1401,10 +1401,10 @@ int epf_single_ran_usr_rep(
 }
 
 int epp_single_ran_usr_rep(
-	char *              buf,
-	unsigned int        size,
-	uint16_t *	    nof_users,
-	ep_ran_user_det *   dets)
+	char *            buf,
+	unsigned int      size,
+	uint16_t *        nof_users,
+	ep_ran_user_det * dets)
 {
 	if(!buf) {
 		ep_dbg_log("P - Single RANU Rep: Invalid buffer!\n");
@@ -1419,12 +1419,12 @@ int epp_single_ran_usr_rep(
 }
 
 int epf_single_ran_usr_add(
-	char *              buf,
-	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
-	ep_ran_user_det *   det)
+	char *            buf,
+	unsigned int      size,
+	enb_id_t          enb_id,
+	cell_id_t         cell_id,
+	mod_id_t          mod_id,
+	ep_ran_user_det * det)
 {
 	int ms = 0;
 	int ret= 0;
@@ -1477,9 +1477,9 @@ int epf_single_ran_usr_add(
 }
 
 int epp_single_ran_usr_add(
-	char *              buf,
-	unsigned int        size,
-	ep_ran_user_det *   det)
+	char *            buf,
+	unsigned int      size,
+	ep_ran_user_det * det)
 {
 	if(!buf) {
 		ep_dbg_log("P - Single RANU Add: Invalid buffer!\n");
@@ -1493,12 +1493,12 @@ int epp_single_ran_usr_add(
 }
 
 int epf_single_ran_usr_rem(
-	char *              buf,
-	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
-	ep_ran_user_det *   det)
+	char *            buf,
+	unsigned int      size,
+	enb_id_t          enb_id,
+	cell_id_t         cell_id,
+	mod_id_t          mod_id,
+	ep_ran_user_det * det)
 {
 	int ms = 0;
 	int ret= 0;
@@ -1551,9 +1551,9 @@ int epf_single_ran_usr_rem(
 }
 
 int epp_single_ran_usr_rem(
-	char *              buf,
-	unsigned int        size, 
-	ep_ran_user_det *   det)
+	char *            buf,
+	unsigned int      size, 
+	ep_ran_user_det * det)
 {
 	if(!buf) {
 		ep_dbg_log("P - Single RANU Rem: Invalid buffer!\n");
@@ -1571,9 +1571,9 @@ int epp_single_ran_usr_rem(
 int epf_single_ran_sch_req(
 	char *              buf,
 	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
+	enb_id_t            enb_id,
+	cell_id_t           cell_id,
+	mod_id_t            mod_id,
 	uint32_t            id,
 	uint64_t            slice,
 	ep_ran_sparam_det * det)
@@ -1653,9 +1653,9 @@ int epp_single_ran_sch_req(
 int epf_single_ran_sch_rep(
 	char *              buf,
 	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
+	enb_id_t            enb_id,
+	cell_id_t           cell_id,
+	mod_id_t            mod_id,
 	uint32_t            id,
 	uint64_t            slice,
 	ep_ran_sparam_det * det)
@@ -1735,9 +1735,9 @@ int epp_single_ran_sch_rep(
 int epf_single_ran_sch_set(
 	char *              buf,
 	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
+	enb_id_t            enb_id,
+	cell_id_t           cell_id,
+	mod_id_t            mod_id,
 	uint32_t            id,
 	uint64_t            slice,
 	ep_ran_sparam_det * det)

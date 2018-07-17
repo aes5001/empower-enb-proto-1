@@ -102,11 +102,11 @@ int epp_macrep_req(char * buf, unsigned int size, uint16_t * interval)
  ******************************************************************************/
 
 int epf_trigger_macrep_rep_fail(
-	char *        buf,
-	unsigned int  size,
-	uint32_t      enb_id,
-	uint16_t      cell_id,
-	uint32_t      mod_id)
+	char *       buf,
+	unsigned int size,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id)
 {
 	int ms = 0;
 	int ret= 0;
@@ -155,11 +155,11 @@ int epf_trigger_macrep_rep_fail(
 }
 
 int epf_trigger_macrep_rep_ns(
-	char *        buf,
-	unsigned int  size,
-	uint32_t      enb_id,
-	uint16_t      cell_id,
-	uint32_t      mod_id)
+	char *       buf,
+	unsigned int size,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id)
 {
 	int ms = 0;
 	int ret= 0;
@@ -210,9 +210,9 @@ int epf_trigger_macrep_rep_ns(
 int epf_trigger_macrep_rep(
 	char *          buf,
 	unsigned int    size,
-	uint32_t        enb_id,
-	uint16_t        cell_id,
-	uint32_t        mod_id,
+	enb_id_t        enb_id,
+	cell_id_t       cell_id,
+	mod_id_t        mod_id,
 	ep_macrep_det * det)
 {
 	int ms = 0;
@@ -278,12 +278,12 @@ int epp_trigger_macrep_rep(
 }
 
 int epf_trigger_macrep_req(
-	char *          buf,
-	unsigned int    size,
-	uint32_t        enb_id,
-	uint16_t        cell_id,
-	uint32_t        mod_id,
-	uint16_t        interval)
+	char *       buf,
+	unsigned int size,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
+	uint16_t     interval)
 {
 	int ms = 0;
 	int ret= 0;

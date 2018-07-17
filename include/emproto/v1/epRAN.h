@@ -23,6 +23,8 @@
 
 #include <stdint.h>
 
+#include "eppri.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -183,9 +185,9 @@ int epf_single_ran_rep_fail(
 	char *       buf,
 	unsigned int size,
 	ep_act_type  type,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id);
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id);
 
 /* Format a RAN setup operation failed message.
  * Returns the message size or -1 on error.
@@ -218,9 +220,9 @@ int epf_single_ran_rep_ns(
 	char *       buf,
 	unsigned int size,
 	ep_act_type  type,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id);
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id);
 
 /******************************************************************************/
 
@@ -230,9 +232,9 @@ int epf_single_ran_rep_ns(
 int epf_single_ran_setup_req(
 	char *       buf,
 	unsigned int size,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id);
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id);
 
 /* Formats a RAN setup reply message.
  * Returns the message size or -1 on error.
@@ -240,9 +242,9 @@ int epf_single_ran_setup_req(
 int epf_single_ran_setup_rep(
 	char *       buf,
 	unsigned int size,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
 	ep_ran_det * ran);
 
 /* Parses a RAN setup reply message.
@@ -259,78 +261,78 @@ int epp_single_ran_setup_rep(
  * Returns the message size or -1 on error.
  */
 int epf_single_ran_ten_req(
-	char *              buf,
-	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
+	char *             buf,
+	unsigned int       size,
+	enb_id_t           enb_id,
+	cell_id_t          cell_id,
+	mod_id_t           mod_id,
 	ep_ran_slice_det * det);
 
 /* Parses a RAN Slice request message.
  * Returns EP_SUCCESS on success, otherwise a negative error code.
  */
 int epp_single_ran_ten_req(
-	char *              buf,
-	unsigned int        size,
+	char *             buf,
+	unsigned int       size,
 	ep_ran_slice_det * det);
 
 /* Formats a RAN Slice reply message.
  * Returns the message size or -1 on error.
  */
 int epf_single_ran_ten_rep(
-	char *              buf,
-	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
-	uint16_t            nof_slices,
+	char *             buf,
+	unsigned int       size,
+	enb_id_t           enb_id,
+	cell_id_t          cell_id,
+	mod_id_t           mod_id,
+	uint16_t           nof_slices,
 	ep_ran_slice_det * det);
 
 /* Parses a RAN Slice reply message.
  * Returns EP_SUCCESS on success, otherwise a negative error code.
  */
 int epp_single_ran_ten_rep(
-	char *              buf,
-	unsigned int        size,
-	uint16_t *          nof_slices,
+	char *             buf,
+	unsigned int       size,
+	uint16_t *         nof_slices,
 	ep_ran_slice_det * det);
 
 /* Formats a RAN Slice add message.
  * Returns the message size or -1 on error.
  */
 int epf_single_ran_ten_add(
-	char *              buf,
-	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
+	char *             buf,
+	unsigned int       size,
+	enb_id_t           enb_id,
+	cell_id_t          cell_id,
+	mod_id_t           mod_id,
 	ep_ran_slice_det * det);
 
 /* Parses a RAN Slice add message.
  * Returns EP_SUCCESS on success, otherwise a negative error code.
  */
 int epp_single_ran_ten_add(
-	char *              buf,
-	unsigned int        size,
+	char *             buf,
+	unsigned int       size,
 	ep_ran_slice_det * det);
 
 /* Formats a RAN Slice remove message.
  * Returns the message size or -1 on error.
  */
 int epf_single_ran_ten_rem(
-	char *              buf,
-	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
+	char *             buf,
+	unsigned int       size,
+	enb_id_t           enb_id,
+	cell_id_t          cell_id,
+	mod_id_t           mod_id,
 	ep_ran_slice_det * det);
 
 /* Parses a RAN Slice remove message.
  * Returns EP_SUCCESS on success, otherwise a negative error code.
  */
 int epp_single_ran_ten_rem(
-	char *              buf,
-	unsigned int        size,
+	char *             buf,
+	unsigned int       size,
 	ep_ran_slice_det * det);
 
 /******************************************************************************/
@@ -339,79 +341,79 @@ int epp_single_ran_ten_rem(
  * Returns the message size or -1 on error.
  */
 int epf_single_ran_usr_req(
-	char *              buf,
-	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
-	uint16_t            rnti);
+	char *       buf,
+	unsigned int size,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
+	uint16_t     rnti);
 
 /* Parses a RAN user request message.
  * Returns EP_SUCCESS on success, otherwise a negative error code.
  */
 int epp_single_ran_usr_req(
-	char *              buf,
-	unsigned int        size,
-	uint16_t *          rnti);
+	char *       buf,
+	unsigned int size,
+	uint16_t *   rnti);
 
 /* Formats a RAN user reply message.
  * Returns the message size or -1 on error.
  */
 int epf_single_ran_usr_rep(
-	char *              buf,
-	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
-	uint16_t            nof_users,
+	char *             buf,
+	unsigned int       size,
+	enb_id_t           enb_id,
+	cell_id_t          cell_id,
+	mod_id_t           mod_id,
+	uint16_t           nof_users,
 	ep_ran_user_det *  dets);
 
 /* Parses a RAN user reply message.
  * Returns EP_SUCCESS on success, otherwise a negative error code.
  */
 int epp_single_ran_usr_rep(
-	char *              buf,
-	unsigned int        size,
-	uint16_t *	    nof_users,
-	ep_ran_user_det *   dets);
+	char *            buf,
+	unsigned int      size,
+	uint16_t *        nof_users,
+	ep_ran_user_det * dets);
 
 /* Formats a RAN user add message.
  * Returns the message size or -1 on error.
  */
 int epf_single_ran_usr_add(
-	char *              buf,
-	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
-	ep_ran_user_det *   det);
+	char *            buf,
+	unsigned int      size,
+	enb_id_t          enb_id,
+	cell_id_t         cell_id,
+	mod_id_t          mod_id,
+	ep_ran_user_det * det);
 
 /* Parses a RAN user add message.
  * Returns EP_SUCCESS on success, otherwise a negative error code.
  */
 int epp_single_ran_usr_add(
-	char *              buf,
-	unsigned int        size,
-	ep_ran_user_det *   det);
+	char *            buf,
+	unsigned int      size,
+	ep_ran_user_det * det);
 
 /* Formats a RAN user remove message.
  * Returns the message size or -1 on error.
  */
 int epf_single_ran_usr_rem(
-	char *              buf,
-	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
-	ep_ran_user_det *   det);
+	char *            buf,
+	unsigned int      size,
+	enb_id_t          enb_id,
+	cell_id_t         cell_id,
+	mod_id_t          mod_id,
+	ep_ran_user_det * det);
 
 /* Parses a RAN user remove message.
  * Returns EP_SUCCESS on success, otherwise a negative error code.
  */
 int epp_single_ran_usr_rem(
-	char *              buf,
-	unsigned int        size,
-	ep_ran_user_det *   det);
+	char *            buf,
+	unsigned int      size,
+	ep_ran_user_det * det);
 
 /******************************************************************************/
 
@@ -421,9 +423,9 @@ int epp_single_ran_usr_rem(
 int epf_single_ran_sch_req(
 	char *              buf,
 	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
+	enb_id_t            enb_id,
+	cell_id_t           cell_id,
+	mod_id_t            mod_id,
 	uint32_t            id,
 	uint64_t            slice,
 	ep_ran_sparam_det * det);
@@ -450,9 +452,9 @@ int epp_single_ran_sch_req(
 int epf_single_ran_sch_rep(
 	char *              buf,
 	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
+	enb_id_t            enb_id,
+	cell_id_t           cell_id,
+	mod_id_t            mod_id,
 	uint32_t            id,
 	uint64_t            slice,
 	ep_ran_sparam_det * det);
@@ -479,9 +481,9 @@ int epp_single_ran_sch_rep(
 int epf_single_ran_sch_set(
 	char *              buf,
 	unsigned int        size,
-	uint32_t            enb_id,
-	uint16_t            cell_id,
-	uint32_t            mod_id,
+	enb_id_t            enb_id,
+	cell_id_t           cell_id,
+	mod_id_t            mod_id,
 	uint32_t            id,
 	uint64_t            slice,
 	ep_ran_sparam_det * det);

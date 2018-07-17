@@ -24,6 +24,8 @@
 
 #include <stdint.h>
 
+#include "eppri.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -49,11 +51,12 @@ typedef struct __ep_hello_request {
  * Returns the size of the message, or a negative error number.
  */
 int epf_single_hello_req(
-	char *   buf, unsigned int size,
-	uint32_t enb_id,
-	uint16_t cell_id,
-	uint32_t mod_id,
-	uint32_t id);
+	char *        buf,
+	unsigned int  size,
+	enb_id_t      enb_id,
+	cell_id_t     cell_id,
+	mod_id_t      mod_id,
+	uint32_t      id);
 
 /* Parse an Hello request message */
 int epp_single_hello_req(
@@ -64,11 +67,12 @@ int epp_single_hello_req(
  * Returns the size of the message, or a negative error number.
  */
 int epf_single_hello_rep(
-	char *   buf, unsigned int size,
-	uint32_t enb_id,
-	uint16_t cell_id,
-	uint32_t mod_id,
-	uint32_t id);
+	char *       buf, 
+	unsigned int size,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
+	uint32_t    id);
 
 /* Parse an Hello reply message */
 int epp_single_hello_rep(
@@ -83,12 +87,13 @@ int epp_single_hello_rep(
  * Returns the size of the message, or a negative error number.
  */
 int epf_sched_hello_req(
-	char * buf, unsigned int size,
-	uint32_t enb_id,
-	uint16_t cell_id,
-	uint32_t mod_id,
-	uint32_t interval,
-	uint32_t id);
+	char *       buf,
+	unsigned int size,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
+	uint32_t     interval,
+	uint32_t     id);
 
 /* Parse an Hello request message */
 int epp_sched_hello_req(
@@ -99,17 +104,19 @@ int epp_sched_hello_req(
  * Returns the size of the message, or a negative error number.
  */
 int epf_sched_hello_rep(
-	char * buf, unsigned int size,
-	uint32_t enb_id,
-	uint16_t cell_id,
-	uint32_t mod_id,
-	uint32_t interval,
-	uint32_t id);
+	char *       buf,
+	unsigned int size,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
+	uint32_t     interval,
+	uint32_t     id);
 
 /* Parse an Hello reply message */
 int epp_sched_hello_rep(
-	char * buf, unsigned int size,
-	uint32_t * id);
+	char *       buf, 
+	unsigned int size,
+	uint32_t *   id);
 
 /******************************************************************************
  * Operation on trigger-event messages                                        *

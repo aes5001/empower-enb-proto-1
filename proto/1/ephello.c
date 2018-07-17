@@ -108,9 +108,9 @@ int epp_hello_req(
 int epf_single_hello_req(
 	char *       buf,
 	unsigned int size,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
 	uint32_t     id)
 {
 	int ms = 0;
@@ -177,9 +177,9 @@ int epp_single_hello_req(
 int epf_single_hello_rep(
 	char *       buf,
 	unsigned int size,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
 	uint32_t     id)
 {
 	int ms = 0;
@@ -248,9 +248,9 @@ int epp_single_hello_rep(
 int epf_sched_hello_req(
 	char *       buf,
 	unsigned int size,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
 	uint32_t     interval,
 	uint32_t     id)
 {
@@ -318,9 +318,9 @@ int epp_sched_hello_req(
 int epf_sched_hello_rep(
 	char *       buf,
 	unsigned int size,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
 	uint32_t     interval,
 	uint32_t     id)
 {

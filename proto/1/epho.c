@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#define _DEFAULT_SOURCE
+#include <endian.h>
 #include <netinet/in.h>
 
 #include <emproto.h>
@@ -20,7 +22,7 @@
 int epf_ho_rep(
 	char *       buf,
 	unsigned int size,
-	uint32_t     origin_eNB,
+	enb_id_t     origin_eNB,
 	uint16_t     origin_pci,
 	uint16_t     origin_rnti,
 	uint16_t     target_rnti)
@@ -32,7 +34,7 @@ int epf_ho_rep(
 		return -1;
 	}
 
-	rep->origin_eNB  = htonl(origin_eNB);
+	rep->origin_eNB  = htobe64(origin_eNB);
 	rep->origin_pci  = htons(origin_pci);
 	rep->origin_rnti = htons(origin_rnti);
 	rep->target_rnti = htons(target_rnti);
@@ -45,7 +47,7 @@ int epf_ho_rep(
 int epp_ho_rep(
 	char *       buf,
 	unsigned int size,
-	uint32_t *   origin_eNB,
+	enb_id_t *   origin_eNB,
 	uint16_t *   origin_pci,
 	uint16_t *   origin_rnti,
 	uint16_t *   target_rnti)
@@ -58,7 +60,7 @@ int epp_ho_rep(
 	}
 
 	if(origin_eNB) {
-		*origin_eNB  = ntohl(rep->origin_eNB);
+		*origin_eNB  = be64toh(rep->origin_eNB);
 	}
 
 	if(origin_pci) {
@@ -82,7 +84,7 @@ int epf_ho_req(
 	char *       buf,
 	unsigned int size,
 	uint16_t     rnti,
-	uint32_t     enb,
+	enb_id_t     enb,
 	uint16_t     pci,
 	uint8_t      cause)
 {
@@ -94,7 +96,7 @@ int epf_ho_req(
 	}
 
 	req->rnti       = htons(rnti);
-	req->target_eNB = htonl(enb);
+	req->target_eNB = htobe64(enb);
 	req->target_pci = htons(pci);
 	req->cause      = cause;
 
@@ -107,7 +109,7 @@ int epp_ho_req(
 	char *       buf,
 	unsigned int size,
 	uint16_t *   rnti,
-	uint32_t *   enb,
+	enb_id_t *   enb,
 	uint16_t *   pci,
 	uint8_t *    cause)
 {
@@ -123,7 +125,7 @@ int epp_ho_req(
 	}
 
 	if(enb) {
-		*enb   = ntohl(req->target_eNB);
+		*enb   = be64toh(req->target_eNB);
 	}
 
 	if(pci) {
@@ -146,10 +148,10 @@ int epp_ho_req(
 int epf_single_ho_rep_fail(
 	char *       buf,
 	unsigned int size,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id,
-	uint32_t     origin_eNB,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
+	enb_id_t     origin_eNB,
 	uint16_t     origin_pci,
 	uint16_t     origin_rnti,
 	uint16_t     target_rnti)
@@ -208,10 +210,10 @@ int epf_single_ho_rep_fail(
 int epf_single_ho_rep_ns(
 	char *       buf,
 	unsigned int size,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id,
-	uint32_t     origin_eNB,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
+	enb_id_t     origin_eNB,
 	uint16_t     origin_pci,
 	uint16_t     origin_rnti,
 	uint16_t     target_rnti)
@@ -271,10 +273,10 @@ int epf_single_ho_rep_ns(
 int epf_single_ho_rep(
 	char *       buf,
 	unsigned int size,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id,
-	uint32_t     origin_eNB,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
+	enb_id_t     origin_eNB,
 	uint16_t     origin_pci,
 	uint16_t     origin_rnti,
 	uint16_t     target_rnti)
@@ -334,7 +336,7 @@ int epf_single_ho_rep(
 int epp_single_ho_rep(
 	char *       buf,
 	unsigned int size,
-	uint32_t *   origin_eNB,
+	enb_id_t *   origin_eNB,
 	uint16_t *   origin_pci,
 	uint16_t *   origin_rnti,
 	uint16_t *   target_rnti)
@@ -356,11 +358,11 @@ int epp_single_ho_rep(
 int epf_single_ho_req(
 	char *       buf,
 	unsigned int size,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
 	uint16_t     rnti,
-	uint32_t     enb,
+	enb_id_t     enb,
 	uint16_t     pci,
 	uint8_t      cause)
 {
@@ -414,7 +416,7 @@ int epp_single_ho_req(
 	char *       buf,
 	unsigned int size,
 	uint16_t *   rnti,
-	uint32_t *   enb,
+	enb_id_t *   enb,
 	uint16_t *   pci,
 	uint8_t *    cause)
 {

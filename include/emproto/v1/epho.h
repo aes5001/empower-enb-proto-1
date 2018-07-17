@@ -24,6 +24,8 @@
 #include <endian.h>
 #include <stdint.h>
 
+#include "eppri.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -36,13 +38,13 @@ typedef enum __ep_handover_cause {
 
 typedef struct __ep_handover_request {
 	uint16_t rnti;       /* Target RNTI */
-	uint32_t target_eNB; /* Target eNB id */
+	enb_id_t target_eNB; /* Target eNB id */
 	uint16_t target_pci; /* Target physical cell id */
 	uint8_t  cause;      /* Cause of the hand-over */
 }__attribute__((packed)) ep_ho_req;
 
 typedef struct __ep_handover_reply {
-	uint32_t origin_eNB;  /* Original eNB  */
+	enb_id_t origin_eNB;  /* Original eNB  */
 	uint16_t origin_pci;  /* Original PCI  */
 	uint16_t origin_rnti; /* Original RNTI */
 	uint16_t target_rnti; /* Target RNTI   */
@@ -58,10 +60,10 @@ typedef struct __ep_handover_reply {
 int epf_single_ho_rep_fail(
 	char *       buf,
 	unsigned int size,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id,
-	uint32_t     origin_eNB,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
+	enb_id_t     origin_eNB,
 	uint16_t     origin_pci,
 	uint16_t     origin_rnti,
 	uint16_t     target_rnti);
@@ -72,10 +74,10 @@ int epf_single_ho_rep_fail(
 int epf_single_ho_rep_ns(
 	char *       buf,
 	unsigned int size,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id,
-	uint32_t     origin_eNB,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
+	enb_id_t     origin_eNB,
 	uint16_t     origin_pci,
 	uint16_t     origin_rnti,
 	uint16_t     target_rnti);
@@ -86,10 +88,10 @@ int epf_single_ho_rep_ns(
 int epf_single_ho_rep(
 	char *       buf,
 	unsigned int size,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id,
-	uint32_t     origin_eNB,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
+	enb_id_t     origin_eNB,
 	uint16_t     origin_pci,
 	uint16_t     origin_rnti,
 	uint16_t     target_rnti);
@@ -98,7 +100,7 @@ int epf_single_ho_rep(
 int epp_single_ho_rep(
 	char *       buf,
 	unsigned int size,
-	uint32_t *   origin_eNB,
+	enb_id_t *   origin_eNB,
 	uint16_t *   origin_pci,
 	uint16_t *   origin_rnti,
 	uint16_t *   target_rnti);
@@ -109,11 +111,11 @@ int epp_single_ho_rep(
 int epf_single_ho_req(
 	char *       buf,
 	unsigned int size,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
 	uint16_t     rnti,
-	uint32_t     enb,
+	enb_id_t     enb,
 	uint16_t     pci,
 	uint8_t      cause);
 
@@ -122,7 +124,7 @@ int epp_single_ho_req(
 	char *       buf,
 	unsigned int size,
 	uint16_t *   rnti,
-	uint32_t *   enb,
+	enb_id_t *   enb,
 	uint16_t *   pci,
 	uint8_t *    cause);
 

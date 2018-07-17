@@ -25,6 +25,8 @@
 #include <endian.h>
 #include <stdint.h>
 
+#include "eppri.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -95,11 +97,11 @@ typedef struct __ep_ue_measure {
  * Returns the size of the message, or a negative error number.
  */
 int epf_trigger_uemeas_rep_fail(
-	char *          buf,
-	unsigned int    size,
-	uint32_t        enb_id,
-	uint16_t        cell_id,
-	uint32_t        mod_id);
+	char *       buf,
+	unsigned int size,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id);
 
 /* Format an UE measurement reply.
  * Returns the size of the message, or a negative error number.
@@ -107,9 +109,9 @@ int epf_trigger_uemeas_rep_fail(
 int epf_trigger_uemeas_rep(
 	char *          buf,
 	unsigned int    size,
-	uint32_t        enb_id,
-	uint16_t        cell_id,
-	uint32_t        mod_id,
+	enb_id_t        enb_id,
+	cell_id_t       cell_id,
+	mod_id_t        mod_id,
 	uint32_t        nof_meas,
 	uint32_t        max,
 	ep_ue_measure * meas);
@@ -128,9 +130,9 @@ int epp_trigger_uemeas_rep(
 int epf_trigger_uemeas_req(
 	char *       buf,
 	unsigned int size,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
 	ep_op_type   op,
 	uint8_t      meas_id,
 	uint16_t     rnti,

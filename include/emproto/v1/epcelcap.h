@@ -23,6 +23,7 @@
 
 #include <stdint.h>
 
+#include "eppri.h"
 #include "epTLV.h"
 
 #ifdef __cplusplus
@@ -82,9 +83,9 @@ typedef struct __ep_cell_details {
 int epf_single_ccap_rep_fail(
 	char *        buf,
 	unsigned int  size,
-	uint32_t      enb_id,
-	uint16_t      cell_id,
-	uint32_t      mod_id);
+	enb_id_t      enb_id,
+	cell_id_t     cell_id,
+	mod_id_t      mod_id);
 
 /* Format a cell capabilities reply.
  * Returns the size of the message, or a negative error number.
@@ -92,9 +93,9 @@ int epf_single_ccap_rep_fail(
 int epf_single_ccap_rep(
 	char *        buf,
 	unsigned int  size,
-	uint32_t      enb_id,
-	uint16_t      cell_id,
-	uint32_t      mod_id,
+	enb_id_t      enb_id,
+	cell_id_t     cell_id,
+	mod_id_t      mod_id,
 	ep_cell_det * cell);
 
 /* Parse a cell capabilities reply looking for the desired fields */
@@ -107,11 +108,11 @@ int epp_single_ccap_rep(
  * Returns the size of the message, or a negative error number.
  */
 int epf_single_ccap_req(
-	char *       buf,
-	unsigned int size,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id);
+	char *        buf,
+	unsigned int  size,
+	enb_id_t      enb_id,
+	cell_id_t     cell_id,
+	mod_id_t      mod_id);
 
 /* Parse a cell capabilities request for the desired fields */
 int epp_single_ccap_req(char * buf, unsigned int size);

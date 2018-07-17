@@ -87,11 +87,11 @@ typedef struct __ep_ue_details {
  * Returns the size of the message, or a negative error number.
  */
 int epf_trigger_uerep_rep_fail(
-	char *          buf,
-	unsigned int    size,
-	uint32_t        enb_id,
-	uint16_t        cell_id,
-	uint32_t        mod_id);
+	char *       buf,
+	unsigned int size,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id);
 
 /* Format an UE report reply.
  * Returns the size of the message, or a negative error number.
@@ -99,9 +99,9 @@ int epf_trigger_uerep_rep_fail(
 int epf_trigger_uerep_rep(
 	char *          buf,
 	unsigned int    size,
-	uint32_t        enb_id,
-	uint16_t        cell_id,
-	uint32_t        mod_id,
+	enb_id_t        enb_id,
+	cell_id_t       cell_id,
+	mod_id_t        mod_id,
 	uint32_t        nof_ues,
 	uint32_t        max_ues,
 	ep_ue_details * ues);
@@ -120,9 +120,9 @@ int epp_trigger_uerep_rep(
 int epf_trigger_uerep_req(
 	char *       buf,
 	unsigned int size,
-	uint32_t     enb_id,
-	uint16_t     cell_id,
-	uint32_t     mod_id,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
 	ep_op_type   op);
 
 /* Parse an UE report request for the desired fields */

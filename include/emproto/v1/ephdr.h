@@ -26,6 +26,7 @@
 
 #include <stdint.h>
 
+#include "eppri.h"
 #include "eptype.h"
 
 #ifdef __cplusplus
@@ -43,10 +44,6 @@ extern "C"
 #define EP_HDR_FLAG_DIR		1 /* Which bit is dedicated to  */
 #define EP_HDR_FLAG_DIR_REQ	0 /* Set to 0 marks a request */
 #define EP_HDR_FLAG_DIR_REP	1 /* Set to 1 marks a reply */
-
-typedef uint64_t enb_id_t;       /* Definition of the enb-id */
-typedef uint16_t cell_id_t;      /* Definition of the cell id */
-typedef uint32_t mod_id_t;       /* Definition of the module id */
 
 typedef struct __ep_header_id {
 	enb_id_t  enb_id;        /* Base station identifier */

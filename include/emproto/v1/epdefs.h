@@ -37,6 +37,7 @@ extern "C"
 #define EP_ERROR                        -1
 #define EP_WRONG_VERSION                -2
 
+#include "eppri.h"
 #include "ephdr.h"
 #include "eptype.h"
 #include "epTLV.h"
