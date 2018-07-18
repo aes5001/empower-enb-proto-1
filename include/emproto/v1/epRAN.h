@@ -51,7 +51,7 @@ typedef struct __ep_ran_sched_rep {
 	uint16_t value_len;	/* Length of the value field */
 	/* Scheduler parameter name  will be attached here */
 	/* Scheduler parameter value will be attached here */
-}__attribute__((packed)) ep_ran_srep;
+}__attribute__((packed)) ep_ran_crep;
 
 /* RAN scheduler parameter request message*/
 typedef struct __ep_ran_sched_req {
@@ -60,7 +60,7 @@ typedef struct __ep_ran_sched_req {
 	uint64_t slice_id;	/* ID of the Slice; valid if 'type' = 1 */
 	uint8_t  name_len;	/* Length of the name field */
 	/* Scheduler parameter name will be attached here */
- }__attribute__((packed)) ep_ran_sreq;
+ }__attribute__((packed)) ep_ran_creq;
 
  /********** RAN USER  **********/
 
@@ -85,29 +85,29 @@ typedef struct __ep_ran_user_req {
 
 typedef struct __ep_ran_slice_rem {
 	uint64_t id;		/* ID of the Slice */
-}__attribute__((packed)) ep_ran_trem;
+}__attribute__((packed)) ep_ran_srem;
 
 typedef struct __ep_ran_slice_add {
 	uint64_t id;		/* ID of the Slice */
 	uint32_t sched;		/* ID of the UE scheduler of this Slice */
-}__attribute__((packed)) ep_ran_tadd;
+}__attribute__((packed)) ep_ran_sadd;
 
  /* RAN Slice info message */
 typedef struct __ep_ran_slice_inf {
 	uint64_t id;		/* ID of the Slice */
 	uint32_t sched;		/* ID of the UE scheduler of this Slice */
-}__attribute__((packed)) ep_ran_tinf;
+}__attribute__((packed)) ep_ran_sinf;
 
  /* RAN Slice reply message */
 typedef struct __ep_ran_slice_rep {
 	uint16_t nof_slices;	/* Number of Slices reported */
 	/* Here the array of ep_ran_tinf which depends from 'nof_Slices' */
-}__attribute__((packed)) ep_ran_trep;
+}__attribute__((packed)) ep_ran_srep;
 
  /* RAN Slice request message */
 typedef struct __ep_ran_slice_req {
 	uint64_t id;		/* ID of the Slice */
- }__attribute__((packed)) ep_ran_treq;
+ }__attribute__((packed)) ep_ran_sreq;
 
  /********** RAN SETUP  **********/
 

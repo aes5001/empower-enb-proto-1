@@ -64,18 +64,18 @@ int epp_ran_setup_rep(char * buf, unsigned int size, ep_ran_det * det)
  */
 int epf_ran_slice_req(char * buf, unsigned int size, ep_ran_slice_det * det)
 {
-	ep_ran_treq * r = (ep_ran_treq *)buf;
+	ep_ran_sreq * r = (ep_ran_sreq *)buf;
 
-	if(size < sizeof(ep_ran_treq)) {
+	if(size < sizeof(ep_ran_sreq)) {
 		ep_dbg_log("F - RANT Req: Not enough space!\n");
 		return -1;
 	}
 
 	r->id = htobe64(det->id);
 
-	ep_dbg_dump("F - RANT Req: ", buf, sizeof(ep_ran_treq));
+	ep_dbg_dump("F - RANT Req: ", buf, sizeof(ep_ran_sreq));
 
-	return sizeof(ep_ran_treq);
+	return sizeof(ep_ran_sreq);
 }
 
 /* Parses a RAN slice request into Tenant details.
@@ -83,9 +83,9 @@ int epf_ran_slice_req(char * buf, unsigned int size, ep_ran_slice_det * det)
  */
 int epp_ran_slice_req(char * buf, unsigned int size, ep_ran_slice_det * det)
 {
-	ep_ran_treq * r = (ep_ran_treq *)buf;
+	ep_ran_sreq * r = (ep_ran_sreq *)buf;
 
-	if(size < sizeof(ep_ran_treq)) {
+	if(size < sizeof(ep_ran_sreq)) {
 		ep_dbg_log("P - RANT Req: Not enough space!\n");
 		return EP_ERROR;
 	}
@@ -94,9 +94,9 @@ int epp_ran_slice_req(char * buf, unsigned int size, ep_ran_slice_det * det)
 		det->id = be64toh(r->id);
 	}
 
-	ep_dbg_dump("P - RANT Req: ", buf, sizeof(ep_ran_treq));
+	ep_dbg_dump("P - RANT Req: ", buf, sizeof(ep_ran_sreq));
 
-	return sizeof(ep_ran_treq);
+	return sizeof(ep_ran_sreq);
 }
 
 /* Formats a RAN slice reply using Tenant details.
@@ -107,17 +107,17 @@ int epf_ran_slice_rep(
 {
 	uint16_t i;
 
-	ep_ran_trep * r = (ep_ran_trep *) buf;
-	ep_ran_tinf * d = (ep_ran_tinf *)(buf + sizeof(ep_ran_trep));
+	ep_ran_srep * r = (ep_ran_srep *) buf;
+	ep_ran_sinf * d = (ep_ran_sinf *)(buf + sizeof(ep_ran_srep));
 
-	if(size < sizeof(ep_ran_trep) + (sizeof(ep_ran_tinf) * nof)) {
+	if(size < sizeof(ep_ran_srep) + (sizeof(ep_ran_sinf) * nof)) {
 		ep_dbg_log("F - RANT Rep: Not enough space!\n");
 		return -1;
 	}
 
 	r->nof_slices = htons(nof);
 	
-	ep_dbg_dump("F - RANT Rep: ", buf, sizeof(ep_ran_trep));
+	ep_dbg_dump("F - RANT Rep: ", buf, sizeof(ep_ran_srep));
 
 	for (i = 0; i < nof && i < EP_RAN_SLICE_MAX; i++) {
 		d[i].id    = htobe64(dets[i].id);
@@ -125,11 +125,11 @@ int epf_ran_slice_rep(
 
 		ep_dbg_dump(
 			"    F - RANT Info: ",
-			buf + sizeof(ep_ran_trep) + (sizeof(ep_ran_tinf) * i),
-			sizeof(ep_ran_tinf));
+			buf + sizeof(ep_ran_srep) + (sizeof(ep_ran_sinf) * i),
+			sizeof(ep_ran_sinf));
 	}
 
-	return sizeof(ep_ran_trep) + (sizeof(ep_ran_tinf) * (i + 1));
+	return sizeof(ep_ran_srep) + (sizeof(ep_ran_sinf) * (i + 1));
 }
 
 /* Parses a RAN slice reply into Tenant details.
@@ -140,16 +140,16 @@ int epp_ran_slice_rep(
 {
 	uint16_t i;
 
-	ep_ran_trep * r = (ep_ran_trep *) buf;
-	ep_ran_tinf * d = (ep_ran_tinf *)(buf + sizeof(ep_ran_trep));
+	ep_ran_srep * r = (ep_ran_srep *) buf;
+	ep_ran_sinf * d = (ep_ran_sinf *)(buf + sizeof(ep_ran_srep));
 
-	if(size < sizeof(ep_ran_trep)) {
+	if(size < sizeof(ep_ran_srep)) {
 		ep_dbg_log("P - RANT Rep: Not enough space!\n");
 		return EP_ERROR;
 	}
 
-	if(size < sizeof(ep_ran_trep) + (
-		sizeof(ep_ran_tinf) * ntohs(r->nof_slices)))
+	if(size < sizeof(ep_ran_srep) + (
+		sizeof(ep_ran_sinf) * ntohs(r->nof_slices)))
 	{
 		ep_dbg_log("P - RANT Rep: Not enough space!\n");
 		return EP_ERROR;
@@ -159,7 +159,7 @@ int epp_ran_slice_rep(
 		*nof = ntohs(r->nof_slices);
 	}
 
-	ep_dbg_dump("P - RANT Rep: ", buf, sizeof(ep_ran_trep));
+	ep_dbg_dump("P - RANT Rep: ", buf, sizeof(ep_ran_srep));
 
 	if(dets) {
 		for (i = 0; i < *nof && i < EP_RAN_SLICE_MAX; i++) {
@@ -168,9 +168,9 @@ int epp_ran_slice_rep(
 
 			ep_dbg_dump(
 				"    P - RANT Info: ",
-				buf + sizeof(ep_ran_trep) + (
-					sizeof(ep_ran_tinf) * i),
-				sizeof(ep_ran_tinf));
+				buf + sizeof(ep_ran_srep) + (
+					sizeof(ep_ran_sinf) * i),
+				sizeof(ep_ran_sinf));
 		}
 	}
 
@@ -182,9 +182,9 @@ int epp_ran_slice_rep(
  */
 int epf_ran_slice_add(char * buf, unsigned int size, ep_ran_slice_det * det)
 {
-	ep_ran_tadd * r = (ep_ran_tadd *)buf;
+	ep_ran_sadd * r = (ep_ran_sadd *)buf;
 
-	if(size < sizeof(ep_ran_tadd)) {
+	if(size < sizeof(ep_ran_sadd)) {
 		ep_dbg_log("F - RANT Add: Not enough space!\n");
 		return -1;
 	}
@@ -192,9 +192,9 @@ int epf_ran_slice_add(char * buf, unsigned int size, ep_ran_slice_det * det)
 	r->id    = htobe64(det->id);
 	r->sched = htonl(det->sched);
 
-	ep_dbg_dump("F - RANT Add: ", buf, sizeof(ep_ran_tadd));
+	ep_dbg_dump("F - RANT Add: ", buf, sizeof(ep_ran_sadd));
 
-	return sizeof(ep_ran_tadd);
+	return sizeof(ep_ran_sadd);
 }
 
 /* Parses a RAN slice add into Tenant details.
@@ -202,9 +202,9 @@ int epf_ran_slice_add(char * buf, unsigned int size, ep_ran_slice_det * det)
  */
 int epp_ran_slice_add(char * buf, unsigned int size, ep_ran_slice_det * det)
 {
-	ep_ran_tadd * r = (ep_ran_tadd *)buf;
+	ep_ran_sadd * r = (ep_ran_sadd *)buf;
 
-	if(size < sizeof(ep_ran_tadd)) {
+	if(size < sizeof(ep_ran_sadd)) {
 		ep_dbg_log("P - RANT Add: Not enough space!\n");
 		return EP_ERROR;
 	}
@@ -214,7 +214,7 @@ int epp_ran_slice_add(char * buf, unsigned int size, ep_ran_slice_det * det)
 		det->sched = ntohl(r->sched);
 	}
 
-	ep_dbg_dump("P - RANT Add: ", buf, sizeof(ep_ran_tadd));
+	ep_dbg_dump("P - RANT Add: ", buf, sizeof(ep_ran_sadd));
 
 	return EP_SUCCESS;
 }
@@ -224,18 +224,18 @@ int epp_ran_slice_add(char * buf, unsigned int size, ep_ran_slice_det * det)
  */
 int epf_ran_slice_rem(char * buf, unsigned int size, ep_ran_slice_det * det)
 {
-	ep_ran_trem * r = (ep_ran_trem *)buf;
+	ep_ran_srem * r = (ep_ran_srem *)buf;
 
-	if(size < sizeof(ep_ran_trem)) {
+	if(size < sizeof(ep_ran_srem)) {
 		ep_dbg_log("F - RANT Rem: Not enough space!\n");
 		return -1;
 	}
 
 	r->id = htobe64(det->id);
 
-	ep_dbg_dump("F - RANT Rem: ", buf, sizeof(ep_ran_trem));
+	ep_dbg_dump("F - RANT Rem: ", buf, sizeof(ep_ran_srem));
 
-	return sizeof(ep_ran_trem);
+	return sizeof(ep_ran_srem);
 }
 
 /* Parses a RAN slice remove into Tenant details.
@@ -243,9 +243,9 @@ int epf_ran_slice_rem(char * buf, unsigned int size, ep_ran_slice_det * det)
  */
 int epp_ran_slice_rem(char * buf, unsigned int size, ep_ran_slice_det * det)
 {
-	ep_ran_trem * r = (ep_ran_trem *)buf;
+	ep_ran_srem * r = (ep_ran_srem *)buf;
 
-	if(size < sizeof(ep_ran_trem)) {
+	if(size < sizeof(ep_ran_srem)) {
 		ep_dbg_log("P - RANT Rem: Not enough space!\n");
 		return EP_ERROR;
 	}
@@ -254,7 +254,7 @@ int epp_ran_slice_rem(char * buf, unsigned int size, ep_ran_slice_det * det)
 		det->id = be64toh(r->id);
 	}
 
-	ep_dbg_dump("P - RANT Rem: ", buf, sizeof(ep_ran_trem));
+	ep_dbg_dump("P - RANT Rem: ", buf, sizeof(ep_ran_srem));
 
 	return EP_SUCCESS;
 }
@@ -470,10 +470,10 @@ int epf_ran_sched_req(
 	ep_ran_sparam_det * det)
 {
 	size_t        n = min(det->name_len, EP_RAN_NAME_MAX);
-	ep_ran_sreq * r = (ep_ran_sreq *)buf;
-	char *        a = buf + sizeof(ep_ran_sreq);
+	ep_ran_creq * r = (ep_ran_creq *)buf;
+	char *        a = buf + sizeof(ep_ran_creq);
 
-	if(size < sizeof(ep_ran_sreq) + det->name_len) {
+	if(size < sizeof(ep_ran_creq) + det->name_len) {
 		ep_dbg_log("F - RANC Req: Not enough space!\n");
 		return -1;
 	}
@@ -492,7 +492,7 @@ int epf_ran_sched_req(
 	/* Copy the name just after the message */
 	memcpy(a, det->name, n);
 
-	ep_dbg_dump("F - RANC Req: ", buf, sizeof(ep_ran_uinf) + det->name_len);
+	ep_dbg_dump("F - RANC Req: ", buf, sizeof(ep_ran_creq) + det->name_len);
 
 	return (sizeof(ep_ran_sreq) + n);
 }
@@ -511,16 +511,16 @@ int epp_ran_sched_req(
 	uint64_t *          slice,
 	ep_ran_sparam_det * det)
 {
-	ep_ran_sreq * r = (ep_ran_sreq *)buf;
+	ep_ran_creq * r = (ep_ran_creq *)buf;
 
 	/* First evaluate the space for the header... */
-	if(size < sizeof(ep_ran_sreq)) {
+	if(size < sizeof(ep_ran_creq)) {
 		ep_dbg_log("P - RANC Req: Not enough space!\n");
 		return EP_ERROR;
 	}
 
 	/* ...then evaluate the space for the entire packet */
-	if(size < sizeof(ep_ran_sreq) + r->name_len) {
+	if(size < sizeof(ep_ran_creq) + r->name_len) {
 		ep_dbg_log("P - RANC Req: Not enough space!\n");
 		return EP_ERROR;
 	}
@@ -543,7 +543,7 @@ int epp_ran_sched_req(
 		}
 	}
 	
-	ep_dbg_dump("P - RANC Req: ", buf, sizeof(ep_ran_sreq) + r->name_len);
+	ep_dbg_dump("P - RANC Req: ", buf, sizeof(ep_ran_creq) + r->name_len);
 
 	return EP_SUCCESS;
 }
@@ -560,11 +560,11 @@ int epf_ran_sched_rep(
 {
 	size_t        n = min(det->name_len,  EP_RAN_NAME_MAX);
 	size_t        v = min(det->value_len, EP_RAN_VALUE_MAX);
-	ep_ran_srep * r = (ep_ran_srep *)buf;
-	char *        a = buf + sizeof(ep_ran_srep);
+	ep_ran_crep * r = (ep_ran_crep *)buf;
+	char *        a = buf + sizeof(ep_ran_crep);
 
 	/* First evaluate the space for the header... */
-	if(size < sizeof(ep_ran_srep) + det->name_len + det->value_len) {
+	if(size < sizeof(ep_ran_crep) + det->name_len + det->value_len) {
 		ep_dbg_log("F - RANC Rep: Not enough space!\n");
 		return -1;
 	}
@@ -591,9 +591,9 @@ int epf_ran_sched_rep(
 	ep_dbg_dump(
 		"F - RANC Rep: ",
 		buf,
-		sizeof(ep_ran_srep) + n + v);
+		sizeof(ep_ran_crep) + n + v);
 
-	return (sizeof(ep_ran_srep) + n + v);
+	return (sizeof(ep_ran_crep) + n + v);
 }
 
 /* Parses a RAN scheduler parameter reply into Sched details.
@@ -612,17 +612,17 @@ int epp_ran_sched_rep(
 {
 	size_t        n;
 	size_t        v;
-	ep_ran_srep * r = (ep_ran_srep *)buf;
-	char *        a = buf + sizeof(ep_ran_srep);
+	ep_ran_crep * r = (ep_ran_crep *)buf;
+	char *        a = buf + sizeof(ep_ran_crep);
 
 	/* First evaluate the space for the header... */
-	if(size < sizeof(ep_ran_srep)) {
+	if(size < sizeof(ep_ran_crep)) {
 		ep_dbg_log("P - RANC Rep: Not enough space!\n");
 		return EP_ERROR;
 	}
 
 	/* ...then evaluate the space for the entire packet */
-	if(size < sizeof(ep_ran_srep) + r->name_len + ntohs(r->value_len)) {
+	if(size < sizeof(ep_ran_crep) + r->name_len + ntohs(r->value_len)) {
 		ep_dbg_log("P - RANC Rep: Not enough space!\n");
 		return EP_ERROR;
 	}
@@ -648,7 +648,7 @@ int epp_ran_sched_rep(
 	ep_dbg_dump(
 		"P - RANC Rep: ",
 		buf,
-		sizeof(ep_ran_srep) + det->name_len + det->value_len);
+		sizeof(ep_ran_crep) + det->name_len + det->value_len);
 
 	return EP_SUCCESS;
 }
@@ -665,10 +665,10 @@ int epf_ran_sched_set(
 {
 	size_t        n = min(det->name_len,  EP_RAN_NAME_MAX);
 	size_t        v = min(det->value_len, EP_RAN_VALUE_MAX);
-	ep_ran_srep * r = (ep_ran_srep *)buf;
-	char *        a = buf + sizeof(ep_ran_srep);
+	ep_ran_crep * r = (ep_ran_crep *)buf;
+	char *        a = buf + sizeof(ep_ran_crep);
 
-	if(size < sizeof(ep_ran_srep) + det->name_len + det->value_len) {
+	if(size < sizeof(ep_ran_crep) + det->name_len + det->value_len) {
 		ep_dbg_log("F - RANC Set: Not enough space!\n");
 		return -1;
 	}
@@ -695,9 +695,9 @@ int epf_ran_sched_set(
 	ep_dbg_dump(
 		"F - RANC Set: ",
 		buf,
-		sizeof(ep_ran_srep) + n + v);
+		sizeof(ep_ran_crep) + n + v);
 
-	return (sizeof(ep_ran_srep) + n + v);
+	return (sizeof(ep_ran_crep) + n + v);
 }
 
 /* Parses a RAN scheduler parameter set into Sched details.
@@ -716,17 +716,17 @@ int epp_ran_sched_set(
 {
 	size_t        n;
 	size_t        v;
-	ep_ran_srep * r = (ep_ran_srep *)buf;
-	char *        a = buf + sizeof(ep_ran_srep);
+	ep_ran_crep * r = (ep_ran_crep *)buf;
+	char *        a = buf + sizeof(ep_ran_crep);
 
 	/* First evaluate the space for the header... */
-	if(size < sizeof(ep_ran_srep)) {
+	if(size < sizeof(ep_ran_crep)) {
 		ep_dbg_log("P - RANC Set: Not enough space!\n");
 		return EP_ERROR;
 	}
 
 	/* ...then evaluate the space for the entire packet */
-	if(size < sizeof(ep_ran_srep) + r->name_len + ntohs(r->value_len)) {
+	if(size < sizeof(ep_ran_crep) + r->name_len + ntohs(r->value_len)) {
 		ep_dbg_log("P - RANC Set: Not enough space!\n");
 		return EP_ERROR;
 	}
@@ -752,7 +752,7 @@ int epp_ran_sched_set(
 	ep_dbg_dump(
 		"P - RANC Set: ",
 		buf,
-		sizeof(ep_ran_srep) + n + v);
+		sizeof(ep_ran_crep) + n + v);
 
 	return EP_SUCCESS;
 }

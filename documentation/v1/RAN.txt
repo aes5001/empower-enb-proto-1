@@ -1,5 +1,5 @@
 
-	EmPOWER Protocol for Radio Access Network (RAN) mechanism
+    EmPOWER Protocol for Radio Access Network (RAN) mechanism
 
 
 
@@ -13,17 +13,17 @@ Controller are the following:
 
     - RAN_SETUP, 
       operating on the top-level setup of the RAN subsystem. This means changing
-      characteristics of the subsystem which are not related with Tenancy of 
+      characteristics of the subsystem which are not related with Slicing of 
       Users.
 
-    - RAN_TENANT,
-      operating on Tenancy level in the RAN subsystem. This means getting a 
-      report of the RAN tenants, adding, removing or setting parameters on such
+    - RAN_SLICE,
+      operating on Slice level in the RAN subsystem. This means getting a 
+      report of the RAN slices, adding, removing or setting parameters on such
       elements.
 
     - RAN_USER,
       operating on User level in the RAN subsystem. This means getting a report
-      of the RAN users mapping (RNTI --> Tenant association), adding or removing
+      of the RAN users mapping (RNTI --> Slice association), adding or removing
       such entries.
 
     - RAN_SCHED,
@@ -49,7 +49,7 @@ Direction: Request
 Operation: Unspecified
 
 This message request a report of the status of the RAN subsystem. Information
-exchanged here are not related with Tenancy and Users. Except from the headers,
+exchanged here are not related with Slicing and Users. Except from the headers,
 the message is basically empty.
 
 Message:
@@ -77,13 +77,13 @@ Operation: Unspecified
 This message reports to the controller the status of the RAN subsystem.
 
 Fields:
-    Tenant scheduler ID (32 bits)
+    Slice scheduler ID (32 bits)
 
 Message:
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                     Tenant scheduler ID                       |
+    |                      Slice scheduler ID                       |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 Life-cycle:
@@ -105,13 +105,13 @@ This message allows to set some parameters which are related to the RAN
 subsystem. If not specified, 0 filled fields will usually be ignored.
 
 Fields:
-    Tenant scheduler ID (32 bits)
+    Slice scheduler ID (32 bits)
 
 Message:
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                     Tenant scheduler ID                       |
+    |                      Slice scheduler ID                       |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 Life-cycle:
@@ -125,22 +125,22 @@ Life-cycle:
         v                  v
 
 
-Type:      RAN_TENANT
+Type:      RAN_SLICE
 Direction: Request
 Operation: Unspeficied
 
-This message requests information about Tenancy of the RAN subsystem.
+This message requests information about Sicing of the RAN subsystem.
 
 Fields:
-    Tenant ID (64 bits)
+    Slice ID (64 bits)
 
 Message:
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                          Tenant ID                         -->|
+    |                           Slice ID                         -->|
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |<--                       Tenant ID                            |
+    |<--                        Slice ID                            |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 Life-cycle:
@@ -154,33 +154,33 @@ Life-cycle:
         v                  v
 
 
-Type:      RAN_TENANT
+Type:      RAN_SLICE
 Direction: Reply
 Operation: Unspeficied
 
-This message reports information about Tenancy of the RAN subsystem. Setting the
-Tenant ID to zero allow to perform a request for every Tenant currently 
+This message reports information about Slicing of the RAN subsystem. Setting the
+Slice ID to zero allow to perform a request for every Slice currently 
 registered in the system.
 
-Tenant information(TInfo) structure:
+Slice information(SInfo) structure:
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                          Tenant ID                         -->|
+    |                           Slice ID                         -->|
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |<--                       Tenant ID                            |
+    |<--                        Slice ID                            |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                       UE scheduler ID                         |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 Fields:
-  Number of Tenant info (16 bits)
+  Number of Slice info (16 bits)
 
 Message:
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |      Number of Tenant info    |   Zero or more TInfo ...      |
+    |      Number of Slice info     |   Zero or more SInfo ...      |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 Life-cycle:
@@ -194,20 +194,20 @@ Life-cycle:
         v                  v
 
 
-Type:      RAN_TENANT
+Type:      RAN_SLICE
 Direction: Request
 Operation: Add
 
-This message requests to add a new Tenant in the RAN subsystem, along with its
+This message requests to add a new Slice in the RAN subsystem, along with its
 main characteristics.
 
 Message:
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                          Tenant ID                         -->|
+    |                           Slice ID                         -->|
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |<--                       Tenant ID                            |
+    |<--                        Slice ID                            |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                       UE scheduler ID                         |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -223,20 +223,20 @@ Life-cycle:
         v                  v
 
 
-Type:      RAN_TENANT
+Type:      RAN_SLICE
 Direction: Request
 Operation: Rem
 
-This message requests to remove a Tenant from the RAN subsystem. An ID set to 
+This message requests to remove a Slice from the RAN subsystem. An ID set to 
 zero should be ignored here.
 
 Message:
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                          Tenant ID                         -->|
+    |                           Slice ID                         -->|
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |<--                       Tenant ID                            |
+    |<--                        Slice ID                            |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 Life-cycle:
@@ -254,7 +254,7 @@ Type:      RAN_USER
 Direction: Request
 Operation: Unspecified
 
-This message requests to report about one or more User associaton with Tenants.
+This message requests to report about one or more User associaton with Slices.
 
 Fields:
     RNTI (16 bits), specified the desired RNTI association; if zero is set, the
@@ -282,21 +282,21 @@ Type:      RAN_USER
 Direction: Reply
 Operation: Unspecified
 
-This message requests to report about one or more User associaton with Tenants.
+This message requests to report about one or more User associaton with Slices.
 
 Fields:
     RNTI (16 bits)
-    Tenant ID (64 bits)
+    Slice ID (64 bits)
 
 User info (UInfo) structure:
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |              RNTI             |           Tenant ID        -->|
+    |              RNTI             |           Slice ID         -->|
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |<--                        Tenant ID                        -->|
+    |<--                         Slice ID                        -->|
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |<--        Tenant ID           | | | | | | | | | | | | | | | | |
+    |<--        Slice ID           | | | | | | | | | | | | | | | | |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 Message:
@@ -321,18 +321,18 @@ Type:      RAN_USER
 Direction: Request
 Operation: Add
 
-This message requests to add a new User --> Tenant association in the RAN
+This message requests to add a new User --> Slice association in the RAN
 internals. This message is UInfo previously defined.
 
 Message:
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |              RNTI             |           Tenant ID        -->|
+    |              RNTI             |           Slice ID         -->|
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |<--                        Tenant ID                        -->|
+    |<--                         Slice ID                        -->|
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |<--        Tenant ID           | | | | | | | | | | | | | | | | |
+    |<--        Slice ID           | | | | | | | | | | | | | | | | |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 Life-cycle:
@@ -355,17 +355,17 @@ This message requests to remove one User associaton from RAN.
 Fields:
     RNTI (16 bits), specified the desired RNTI association; if zero is set, the
     agent should report all the current associations.
-    Tenant ID (64 bits), the Tenant ID association to remove.
+    Slice ID (64 bits), the Slice ID association to remove.
 
 Message:
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |              RNTI             |           Tenant ID        -->|
+    |              RNTI             |           Slice ID         -->|
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |<--                        Tenant ID                        -->|
+    |<--                        Slice ID                         -->|
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |<--        Tenant ID           | | | | | | | | | | | | | | | | |
+    |<--        Slice ID           | | | | | | | | | | | | | | | | |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 Life-cycle:
@@ -384,13 +384,13 @@ Direction: Request
 Operation: Unspecified
 
 This message request to query the state of one scheduler parameter; in case the
-scheduler is of User type, then also the Tenant ID field must be set in order to
+scheduler is of User type, then also the Slice ID field must be set in order to
 aim at the right scheduler. Just after the message there will be name of the 
 parameter you need to query.
 
 Fields:
     Scheduler ID (32 bits)
-    Tenant ID (64 bits)
+    Slice ID (64 bits)
     Type (8 bits)
     Name length (8 bits)
 
@@ -400,11 +400,11 @@ Message:
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                          Scheduler ID                         |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |      Type     |          Tenant ID                         -->|
+    |      Type     |           Slice ID                         -->|
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |<--                       Tenant ID                         -->|
+    |<--                        Slice ID                         -->|
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |<--            |     Name len    |        ASCII name ...       |
+    |<--  Slice ID  |     Name len    |        ASCII name ...       |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 Life-cycle:
@@ -428,7 +428,7 @@ parameter.
 
 Fields:
     Scheduler ID (32 bits)
-    Tenant ID (64 bits)
+    Slice ID (64 bits)
     Type (8 bits)
     Name length (8 bits)
     Value length (16 bits)
@@ -439,11 +439,11 @@ Message:
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                          Scheduler ID                         |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |      Type     |           Tenant ID                        -->|
+    |      Type     |           Slice ID                         -->|
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |<--                       Tenant ID                         -->|
+    |<--                        Slice ID                         -->|
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |<--            |     Name len    |        Value length         |
+    |<--  Slice ID  |     Name len    |        Value length         |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |          ASCII name ...         |        ASCII value ...      |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -464,13 +464,13 @@ Direction: Request
 Operation: Set
 
 This message request to query the state of one scheduler parameter; in case the
-scheduler is of User type, then also the Tenant ID field must be set in order to
+scheduler is of User type, then also the Slice ID field must be set in order to
 aim at the right scheduler. Just after the message there will be name and value
 of the parameter you need to set.
 
 Fields:
     Scheduler ID (32 bits)
-    Tenant ID (64 bits)
+    Slice ID (64 bits)
     Type (8 bits)
     Name length (8 bits)
     Value length (16 bits)
@@ -481,11 +481,11 @@ Message:
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                          Scheduler ID                         |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |      Type     |           Tenant ID                        -->|
+    |      Type     |            Slice ID                        -->|
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |<--                       Tenant ID                         -->|
+    |<--                         Slice ID                        -->|
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |<--            |     Name len    |        Value length         |
+    |<--  Slice ID  |     Name len    |        Value length         |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |          ASCII name ...         |        ASCII value ...      |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
