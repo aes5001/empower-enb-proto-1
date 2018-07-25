@@ -25,7 +25,7 @@ int epf_ccap_rep(
 	ep_ccap_rep * rep = (ep_ccap_rep *)buf;
 
 	if(size < sizeof(ep_ccap_rep)) {
-		ep_dbg_log("F - CCAP Rep: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"F - CCAP Rep: Not enough space!\n");
 		return -1;
 	}
 
@@ -43,7 +43,7 @@ int epf_ccap_rep(
 		rep->UL_prbs    = cell->UL_prbs;
 	}
 
-	ep_dbg_dump("F - CCAP Rep: ", buf, sizeof(ep_ccap_rep));
+	ep_dbg_dump(EP_DBG_2"F - CCAP Rep: ", buf, sizeof(ep_ccap_rep));
 
 	return sizeof(ep_ccap_rep);
 }
@@ -56,7 +56,7 @@ int epp_ccap_rep(
 	ep_ccap_rep * rep = (ep_ccap_rep *)buf;
 
 	if(size < sizeof(ep_ccap_rep)) {
-		ep_dbg_log("P - CCAP Rep: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"P - CCAP Rep: Not enough space!\n");
 		return EP_ERROR;
 	}
 
@@ -68,7 +68,7 @@ int epp_ccap_rep(
 		cell->UL_prbs    = rep->UL_prbs;
 	}
 
-	ep_dbg_dump("P - CCAP Rep: ", buf, sizeof(ep_ccap_rep));
+	ep_dbg_dump(EP_DBG_2"P - CCAP Rep: ", buf, sizeof(ep_ccap_rep));
 
 	return EP_SUCCESS;
 }
@@ -78,13 +78,13 @@ int epf_ccap_req(char * buf, unsigned int size)
 	ep_ccap_req * rep = (ep_ccap_req *)buf;
 
 	if(size < sizeof(ep_ccap_req)) {
-		ep_dbg_log("F - CCAP Req: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"F - CCAP Req: Not enough space!\n");
 		return -1;
 	}
 
 	rep->dummy = 0;
 
-	ep_dbg_dump("F - CCAP Req: ", buf, sizeof(ep_ccap_req));
+	ep_dbg_dump(EP_DBG_2"F - CCAP Req: ", buf, sizeof(ep_ccap_req));
 
 	return sizeof(ep_ccap_req);
 }
@@ -92,11 +92,11 @@ int epf_ccap_req(char * buf, unsigned int size)
 int epp_ccap_req(char * buf, unsigned int size)
 {
 	if(size < sizeof(ep_ccap_req)) {
-		ep_dbg_log("P - CCAP Req: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"P - CCAP Req: Not enough space!\n");
 		return EP_ERROR;
 	}
 
-	ep_dbg_dump("P - CCAP Req: ", buf, 0);
+	ep_dbg_dump(EP_DBG_2"P - CCAP Req: ", buf, 0);
 
 	return EP_SUCCESS;
 }
@@ -116,7 +116,7 @@ int epf_single_ccap_rep_fail(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Single CCAP Fail: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Single CCAP Fail: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 
@@ -169,7 +169,7 @@ int epf_single_ccap_rep(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Single CCAP Rep: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Single CCAP Rep: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 
@@ -216,7 +216,7 @@ int epp_single_ccap_rep(
 	ep_cell_det * cell)
 {
 	if(!buf) {
-		ep_dbg_log("P - Single CCAP Rep: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"P - Single CCAP Rep: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 
@@ -237,7 +237,7 @@ int epf_single_ccap_req(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Single CCAP Req: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Single CCAP Req: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 
@@ -281,7 +281,7 @@ int epf_single_ccap_req(
 int epp_single_ccap_req(char * buf, unsigned int size)
 {
 	if(!buf) {
-		ep_dbg_log("P - Single CCAP Req: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"P - Single CCAP Req: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 

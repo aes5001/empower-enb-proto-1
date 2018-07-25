@@ -25,14 +25,14 @@ int epf_trigger(
 	ep_t_hdr * h = (ep_t_hdr *)(buf);
 
 	if(size < sizeof(ep_t_hdr)) {
-		ep_dbg_log("F - TRIG: Not enough space!\n");
+		ep_dbg_log(EP_DBG_1"F - TRIG: Not enough space!\n");
 		return -1;
 	}
 
 	h->type = htons(type);
 	h->op   = (uint8_t)op;
 
-	ep_dbg_dump("F - TRIG: ", buf, sizeof(ep_t_hdr));
+	ep_dbg_dump(EP_DBG_1"F - TRIG: ", buf, sizeof(ep_t_hdr));
 
 	return sizeof(ep_t_hdr);
 }
@@ -45,7 +45,7 @@ ep_op_type epp_trigger_op(char * buf, unsigned int size)
 	ep_t_hdr * h = (ep_t_hdr *)(buf + sizeof(ep_hdr));
 
 	if(size < sizeof(ep_hdr) + sizeof(ep_t_hdr)) {
-		ep_dbg_log("F - TRIG Op: Not enough space!\n");
+		ep_dbg_log(EP_DBG_0"F - TRIG Op: Not enough space!\n");
 		return EP_TYPE_INVALID_MSG;
 	}
 
@@ -57,9 +57,11 @@ ep_act_type epp_trigger_type(char * buf, unsigned int size)
 	ep_t_hdr * h = (ep_t_hdr *)(buf + sizeof(ep_hdr));
 
 	if(size < sizeof(ep_hdr) + sizeof(ep_t_hdr)) {
-		ep_dbg_log("F - TRIG Type: Not enough space!\n");
+		ep_dbg_log(EP_DBG_0"F - TRIG Type: Not enough space!\n");
 		return EP_ACT_INVALID;
 	}
+
+	ep_dbg_log(EP_DBG_0"P - TRIG Type: %d\n", ntohs(h->type));
 
 	return ntohs(h->type);
 }

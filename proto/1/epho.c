@@ -30,7 +30,7 @@ int epf_ho_rep(
 	ep_ho_rep * rep = (ep_ho_rep *)buf;
 
 	if(size < sizeof(ep_ho_rep)) {
-		ep_dbg_log("F - HO Rep: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"F - HO Rep: Not enough space!\n");
 		return -1;
 	}
 
@@ -39,7 +39,7 @@ int epf_ho_rep(
 	rep->origin_rnti = htons(origin_rnti);
 	rep->target_rnti = htons(target_rnti);
 
-	ep_dbg_dump("F - HO Rep:   ", buf, sizeof(ep_ho_rep));
+	ep_dbg_dump(EP_DBG_2"F - HO Rep:   ", buf, sizeof(ep_ho_rep));
 
 	return sizeof(ep_ho_rep);
 }
@@ -55,7 +55,7 @@ int epp_ho_rep(
 	ep_ho_rep * rep = (ep_ho_rep *)buf;
 
 	if(size < sizeof(ep_ho_rep)) {
-		ep_dbg_log("P - HO Rep: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"P - HO Rep: Not enough space!\n");
 		return -1;
 	}
 
@@ -75,7 +75,7 @@ int epp_ho_rep(
 		*target_rnti = ntohs(rep->target_rnti);
 	}
 
-	ep_dbg_dump("P - HO Rep:   ", buf, sizeof(ep_ho_rep));
+	ep_dbg_dump(EP_DBG_2"P - HO Rep:   ", buf, sizeof(ep_ho_rep));
 
 	return EP_SUCCESS;
 }
@@ -91,7 +91,7 @@ int epf_ho_req(
 	ep_ho_req * req = (ep_ho_req *)buf;
 
 	if(size < sizeof(ep_ho_req)) {
-		ep_dbg_log("F - HO Req: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"F - HO Req: Not enough space!\n");
 		return -1;
 	}
 
@@ -100,7 +100,7 @@ int epf_ho_req(
 	req->target_pci = htons(pci);
 	req->cause      = cause;
 
-	ep_dbg_dump("F - HO Req:   ", buf, sizeof(ep_ho_req));
+	ep_dbg_dump(EP_DBG_2"F - HO Req:   ", buf, sizeof(ep_ho_req));
 
 	return sizeof(ep_ho_req);
 }
@@ -116,7 +116,7 @@ int epp_ho_req(
 	ep_ho_req * req = (ep_ho_req *)buf;
 
 	if(size < sizeof(ep_ho_req)) {
-		ep_dbg_log("P - HO Req: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"P - HO Req: Not enough space!\n");
 		return -1;
 	}
 
@@ -136,7 +136,7 @@ int epp_ho_req(
 		*cause = req->cause;
 	}
 
-	ep_dbg_dump("P - HO Req:   ", buf, sizeof(ep_ho_req));
+	ep_dbg_dump(EP_DBG_2"P - HO Req:   ", buf, sizeof(ep_ho_req));
 
 	return EP_SUCCESS;
 }
@@ -160,7 +160,7 @@ int epf_single_ho_rep_fail(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Single HO Fail: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Single HO Fail: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -222,7 +222,7 @@ int epf_single_ho_rep_ns(
 	int ret= 0 ;
 
 	if(!buf) {
-		ep_dbg_log("F - Single HO NS: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Single HO NS: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -285,7 +285,7 @@ int epf_single_ho_rep(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Single HO Rep: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Single HO Rep: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -342,7 +342,7 @@ int epp_single_ho_rep(
 	uint16_t *   target_rnti)
 {
 	if(!buf) {
-		ep_dbg_log("P - Single HO Rep: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"P - Single HO Rep: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -370,7 +370,7 @@ int epf_single_ho_req(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Single HO Req: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Single HO Req: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -421,7 +421,7 @@ int epp_single_ho_req(
 	uint8_t *    cause)
 {
 	if(!buf) {
-		ep_dbg_log("P - Single HO Req: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"P - Single HO Req: Invalid buffer!\n");
 		return -1;
 	}
 

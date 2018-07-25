@@ -25,14 +25,14 @@ int epf_single(
 	ep_s_hdr * h = (ep_s_hdr *)(buf);
 
 	if(size < sizeof(ep_s_hdr)) {
-		ep_dbg_log("F - SING: Not enough space!\n");
+		ep_dbg_log(EP_DBG_1"F - SING: Not enough space!\n");
 		return -1;
 	}
 
 	h->type = htons(type);
 	h->op   = (uint8_t)op;
 
-	ep_dbg_dump("F - SING: ", buf, sizeof(ep_s_hdr));
+	ep_dbg_dump(EP_DBG_1"F - SING: ", buf, sizeof(ep_s_hdr));
 
 	return sizeof(ep_s_hdr);
 }
@@ -46,9 +46,11 @@ ep_act_type epp_single_type(char * buf, unsigned int size)
 	ep_s_hdr * h = (ep_s_hdr *)(buf + sizeof(ep_hdr));
 
 	if(size < sizeof(ep_hdr) + sizeof(ep_s_hdr)) {
-		ep_dbg_log("P - Single Type: Not enough space!\n");
+		ep_dbg_log(EP_DBG_0"P - Single Type: Not enough space!\n");
 		return EP_ACT_INVALID;
 	}
+
+	ep_dbg_log(EP_DBG_0"P - SING Type: %d\n", ntohs(h->type));
 
 	return ntohs(h->type);
 }
@@ -58,7 +60,7 @@ ep_op_type epp_single_op(char * buf, unsigned int size)
 	ep_s_hdr * h = (ep_s_hdr *)(buf + sizeof(ep_hdr));
 
 	if(size < sizeof(ep_hdr) + sizeof(ep_s_hdr)) {
-		ep_dbg_log("P - Single Op: Not enough space!\n");
+		ep_dbg_log(EP_DBG_0"P - Single Op: Not enough space!\n");
 		return EP_ERROR;
 	}
 

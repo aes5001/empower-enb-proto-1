@@ -30,13 +30,13 @@ int epf_uerep_rep(
 	ep_uerep_det * det = (ep_uerep_det *)(buf + sizeof(ep_uerep_rep));
 
 	if(size < sizeof(ep_uerep_rep) + (sizeof(ep_uerep_det) * nof_ues)) {
-		ep_dbg_log("F - UEREP Rep: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"F - UEREP Rep: Not enough space!\n");
 		return -1;
 	}
 
 	rep->nof_ues = htonl(nof_ues);
 
-	ep_dbg_dump("F - UREP Rep: ", buf, sizeof(ep_uerep_rep));
+	ep_dbg_dump(EP_DBG_2"F - UREP Rep: ", buf, sizeof(ep_uerep_rep));
 
 	for(i = 0; i < nof_ues && i < max_ues; i++) {
 		det[i].pci  = htons(ues[i].pci);
@@ -45,8 +45,8 @@ int epf_uerep_rep(
 		det[i].imsi = htobe64(ues[i].imsi);
 
 		ep_dbg_dump(
-			"F - UREP Det: ",
-			buf + sizeof(ep_uerep_rep) + (sizeof(ep_uerep_det) * i),
+			EP_DBG_3"F - UREP Det: ",
+			(char *)(det + i),
 			sizeof(ep_uerep_det));
 	}
 
@@ -66,14 +66,14 @@ int epp_uerep_rep(
 	ep_uerep_det * det = (ep_uerep_det *)(buf + sizeof(ep_uerep_rep));
 
 	if(size < sizeof(ep_uerep_rep)) {
-		ep_dbg_log("P - UEREP Rep: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"P - UEREP Rep: Not enough space!\n");
 		return EP_ERROR;
 	}
 
 	if(size < sizeof(ep_uerep_rep) + (
 		sizeof(ep_uerep_det) * rep->nof_ues))
 	{
-		ep_dbg_log("P - UEREP Rep: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"P - UEREP Rep: Not enough space!\n");
 		return EP_ERROR;
 	}
 
@@ -81,7 +81,7 @@ int epp_uerep_rep(
 		*nof_ues = ntohl(rep->nof_ues);
 	}
 
-	ep_dbg_dump("P - UREP Rep: ", buf, sizeof(ep_uerep_rep));
+	ep_dbg_dump(EP_DBG_2"P - UREP Rep: ", buf, sizeof(ep_uerep_rep));
 
 	if(ues) {
 		for(i = 0; i < *nof_ues && i < max_ues; i++) {
@@ -91,10 +91,8 @@ int epp_uerep_rep(
 			ues[i].imsi = be64toh(det[i].imsi);
 
 			ep_dbg_dump(
-				"P - UREP Det: ",
-				buf +
-					sizeof(ep_uerep_rep) +
-					(sizeof(ep_uerep_det) * i),
+				EP_DBG_3"P - UREP Det: ",
+				(char *)(ues + i),
 				sizeof(ep_uerep_det));
 		}
 	}
@@ -107,13 +105,13 @@ int epf_uerep_req(char * buf, unsigned int size)
 	ep_uerep_req * req = (ep_uerep_req *)buf;
 
 	if(size < sizeof(ep_uerep_req)) {
-		ep_dbg_log("F - UEREP Req: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"F - UEREP Req: Not enough space!\n");
 		return -1;
 	}
 
 	req->dummy = 0;
 
-	ep_dbg_dump("F - UREP Req: ", buf, sizeof(ep_uerep_req));
+	ep_dbg_dump(EP_DBG_2"F - UREP Req: ", buf, sizeof(ep_uerep_req));
 
 	return sizeof(ep_uerep_req);
 }
@@ -121,11 +119,11 @@ int epf_uerep_req(char * buf, unsigned int size)
 int epp_uerep_req(char * buf, unsigned int size)
 {
 	if(size < sizeof(ep_uerep_req)) {
-		ep_dbg_log("P - UEREP Req: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"P - UEREP Req: Not enough space!\n");
 		return EP_ERROR;
 	}
 
-	ep_dbg_dump("P - UREP Req: ", buf, 0);
+	ep_dbg_dump(EP_DBG_2"P - UREP Req: ", buf, 0);
 
 	return EP_SUCCESS;
 }
@@ -145,7 +143,7 @@ int epf_trigger_uerep_rep_fail(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Trigger UEREP Fail: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Trigger UEREP Fail: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -201,12 +199,12 @@ int epf_trigger_uerep_rep(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Trigger UEREP Rep: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Trigger UEREP Rep: Invalid buffer!\n");
 		return -1;
 	}
 
 	if(nof_ues > 0 && !ues) {
-		ep_dbg_log("F - Trigger UEREP Rep: Invalid UEs!\n");
+		ep_dbg_log(EP_DBG_0"F - Trigger UEREP Rep: Invalid UEs!\n");
 		return -1;
 	}
 
@@ -256,7 +254,7 @@ int epp_trigger_uerep_rep(
 	ep_ue_details * ues)
 {
 	if(!buf) {
-		ep_dbg_log("P - Trigger UEREP Rep: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"P - Trigger UEREP Rep: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 
@@ -280,7 +278,7 @@ int epf_trigger_uerep_req(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Trigger UEREP Req: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Trigger UEREP Req: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -324,7 +322,7 @@ int epf_trigger_uerep_req(
 int epp_trigger_uerep_req(char * buf, unsigned int size)
 {
 	if(!buf) {
-		ep_dbg_log("P - Trigger UEREP Req: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"P - Trigger UEREP Req: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 

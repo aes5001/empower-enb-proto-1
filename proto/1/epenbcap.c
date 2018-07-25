@@ -28,17 +28,17 @@ int epf_ecap_rep(
 	ep_ccap_TLV * ctlv;
 
 	if(size < sizeof(ep_ecap_rep)) {
-		ep_dbg_log("F - ECAP Rep: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"F - ECAP Rep: Not enough space!\n");
 		return -1;
 	}
 
 	rep->cap       = htonl(det->capmask);
 
-	ep_dbg_dump("F - ECAP Rep: ", buf, sizeof(ep_ecap_rep));
+	ep_dbg_dump(EP_DBG_2"F - ECAP Rep: ", buf, sizeof(ep_ecap_rep));
 
 	for(i = 0; i < det->nof_cells && i < EP_ECAP_CELL_MAX; i++) {
 		if(c + sizeof(ep_ccap_TLV) > buf + size) {
-			ep_dbg_log("F - ECAP Rep: Not enough space!\n");
+			ep_dbg_log(EP_DBG_3"F - ECAP Rep: Not enough space!\n");
 			return -1;
 		}
 
@@ -53,13 +53,13 @@ int epf_ecap_rep(
 		ctlv->body.UL_earfcn= htons(det->cells[i].UL_earfcn);
 		ctlv->body.UL_prbs  = det->cells[i].UL_prbs;
 
-		ep_dbg_dump("F - CCAP TLV: ", c, sizeof(ep_ccap_TLV));
+		ep_dbg_dump(EP_DBG_3"F - CCAP TLV: ", c, sizeof(ep_ccap_TLV));
 
 		/* Point to the next token */
 		c += sizeof(ep_ccap_TLV);
 	}
 
-	return sizeof(ep_ecap_rep) + (sizeof(ep_ccap_TLV) * i);
+	return c - buf;
 }
 
 /* Parse a single TLV field.
@@ -78,7 +78,8 @@ int epp_ecap_single_TLV(char * buf, ep_enb_det * det)
 	case EP_TLV_CELL_CAP:
 		/* No more cell than this */
 		if(det->nof_cells >= EP_ECAP_CELL_MAX) {
-			ep_dbg_log("P - CCAP TLV: Hitting max cells limit!\n");
+			ep_dbg_log(EP_DBG_3"P - CCAP TLV: "
+				"Hitting max cells limit!\n");
 			break;
 		}
 
@@ -94,11 +95,12 @@ int epp_ecap_single_TLV(char * buf, ep_enb_det * det)
 		/* Increase the value to use as index and counter */
 		det->nof_cells++;
 
-		ep_dbg_dump("P - CCAP TLV: ", buf, sizeof(ep_ccap_TLV));
+		ep_dbg_dump(EP_DBG_3"P - CCAP TLV: ", buf, sizeof(ep_ccap_TLV));
 
 		break;
 	default:
-		ep_dbg_log("P - ECAP Rep: Unexpected token %d!\n", tlv->type);
+		ep_dbg_log(EP_DBG_3"P - ECAP Rep: Unexpected token %d!\n", 
+			tlv->type);
 		break;
 	}
 
@@ -115,18 +117,18 @@ int epp_ecap_rep(
 	ep_TLV *      tlv;
 
 	if(size < sizeof(ep_ecap_rep)) {
-		ep_dbg_log("P - ECAP Rep: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"P - ECAP Rep: Not enough space!\n");
 		return EP_ERROR;
 	}
 
 	if(!det) {
-		ep_dbg_log("P - ECAP Rep: Invalid pointer!\n");
+		ep_dbg_log(EP_DBG_2"P - ECAP Rep: Invalid pointer!\n");
 		return EP_ERROR;
 	}
 
 	det->capmask = ntohl(rep->cap);
 
-	ep_dbg_dump("P - ECAP Rep: ", buf, sizeof(ep_ecap_rep));
+	ep_dbg_dump(EP_DBG_2"P - ECAP Rep: ", buf, sizeof(ep_ecap_rep));
 	
 	/* We need this set to a correct value */
 	det->nof_cells = 0;
@@ -137,7 +139,7 @@ int epp_ecap_rep(
 
 		/* Reading next TLV token will overflow the buffer? */
 		if(c + sizeof(ep_TLV) + ntohs(tlv->length) >= buf + size) {
-			ep_dbg_log("P - ECAP Rep: TLV %d > %d\n",
+			ep_dbg_log(EP_DBG_3"P - ECAP Rep: TLV %d > %d\n",
 				ntohs(sizeof(ep_TLV)) + tlv->length,
 				(buf + size) - c);
 			break;
@@ -158,13 +160,13 @@ int epf_ecap_req(char * buf, unsigned int size)
 	ep_ecap_req * rep = (ep_ecap_req *)buf;
 
 	if(size < sizeof(ep_ecap_req)) {
-		ep_dbg_log("F - ECAP Req: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"F - ECAP Req: Not enough space!\n");
 		return -1;
 	}
 
 	rep->dummy = 0;
 
-	ep_dbg_dump("F - ECAP Req: ", buf, sizeof(ep_ecap_req));
+	ep_dbg_dump(EP_DBG_2"F - ECAP Req: ", buf, sizeof(ep_ecap_req));
 
 	return sizeof(ep_ecap_req);
 }
@@ -172,11 +174,11 @@ int epf_ecap_req(char * buf, unsigned int size)
 int epp_ecap_req(char * buf, unsigned int size)
 {
 	if(size < sizeof(ep_ecap_req)) {
-		ep_dbg_log("P - ECAP Rep: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"P - ECAP Rep: Not enough space!\n");
 		return -1;
 	}
 
-	ep_dbg_dump("P - ECAP Req: ", buf, 0);
+	ep_dbg_dump(EP_DBG_2"P - ECAP Req: ", buf, 0);
 
 	return EP_SUCCESS;
 }
@@ -196,7 +198,7 @@ int epf_single_ecap_rep_fail(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Single ECAP Fail: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Single ECAP Fail: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 
@@ -249,7 +251,7 @@ int epf_single_ecap_rep(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Single ECAP Rep: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Single ECAP Rep: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 
@@ -296,7 +298,7 @@ int epp_single_ecap_rep(
 	ep_enb_det *  det)
 {
 	if(!buf) {
-		ep_dbg_log("P - Single ECAP Rep: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"P - Single ECAP Rep: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 
@@ -317,7 +319,7 @@ int epf_single_ecap_req(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Single ECAP Req: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Single ECAP Req: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 
@@ -361,7 +363,7 @@ int epf_single_ecap_req(
 int epp_single_ecap_req(char * buf, unsigned int size)
 {
 	if(!buf) {
-		ep_dbg_log("P - Single ECAP Req: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"P - Single ECAP Req: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 

@@ -25,13 +25,13 @@ int epf_hello_rep(
 	ep_hello_rep * hr = (ep_hello_rep *)buf;
 
 	if(size < sizeof(ep_hello_rep)) {
-		ep_dbg_log("F - HELLO Rep: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"F - HELLO Rep: Not enough space!\n");
 		return -1;
 	}
 
 	hr->id = htonl(id);
 
-	ep_dbg_dump("F - HELLO Rep: ", buf, sizeof(ep_hello_rep));
+	ep_dbg_dump(EP_DBG_2"F - HELLO Rep: ", buf, sizeof(ep_hello_rep));
 
 	return sizeof(ep_hello_rep);
 }
@@ -44,7 +44,7 @@ int epp_hello_rep(
 	ep_hello_rep * hr = (ep_hello_rep *)buf;
 
 	if(size < sizeof(ep_hello_rep)) {
-		ep_dbg_log("P - HELLO Rep: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"P - HELLO Rep: Not enough space!\n");
 		return -1;
 	}
 
@@ -52,7 +52,7 @@ int epp_hello_rep(
 		*id = ntohl(hr->id);
 	}
 
-	ep_dbg_dump("P - HELLO Rep: ", buf, sizeof(ep_hello_rep));
+	ep_dbg_dump(EP_DBG_2"P - HELLO Rep: ", buf, sizeof(ep_hello_rep));
 
 	return 0;
 }
@@ -65,13 +65,13 @@ int epf_hello_req(
 	ep_hello_req * hr = (ep_hello_req *)buf;
 
 	if(size < sizeof(ep_hello_req)) {
-		ep_dbg_log("F - HELLO Req: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"F - HELLO Req: Not enough space!\n");
 		return -1;
 	}
 
 	hr->id = htonl(id);
 
-	ep_dbg_dump("F - HELLO Req: ", buf, sizeof(ep_hello_req));
+	ep_dbg_dump(EP_DBG_2"F - HELLO Req: ", buf, sizeof(ep_hello_req));
 
 	return sizeof(ep_hello_req);
 }
@@ -84,7 +84,7 @@ int epp_hello_req(
 	ep_hello_req * hr = (ep_hello_req *)buf;
 
 	if(size < sizeof(ep_hello_req)) {
-		ep_dbg_log("P - HELLO Req: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"P - HELLO Req: Not enough space!\n");
 		return -1;
 	}
 
@@ -92,7 +92,7 @@ int epp_hello_req(
 		*id = ntohl(hr->id);
 	}
 
-	ep_dbg_dump("P - HELLO Req: ", buf, sizeof(ep_hello_req));
+	ep_dbg_dump(EP_DBG_2"P - HELLO Req: ", buf, sizeof(ep_hello_req));
 
 	return 0;
 }
@@ -117,7 +117,7 @@ int epf_single_hello_req(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Single HELLO Req: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Single HELLO Req: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -164,7 +164,7 @@ int epp_single_hello_req(
 	uint32_t *   id)
 {
 	if(!buf) {
-		ep_dbg_log("P - Single HELLO Req: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"P - Single HELLO Req: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -186,7 +186,7 @@ int epf_single_hello_rep(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Single HELLO Rep: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Single HELLO Rep: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -232,7 +232,7 @@ int epp_single_hello_rep(
 	uint32_t *   id)
 {
 	if(!buf) {
-		ep_dbg_log("P - Single HELLO Rep: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"P - Single HELLO Rep: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -258,7 +258,7 @@ int epf_sched_hello_req(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Sched HELLO Req: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Sched HELLO Req: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -305,7 +305,7 @@ int epp_sched_hello_req(
 	uint32_t *   id)
 {
 	if(!buf) {
-		ep_dbg_log("P - Sched HELLO Req: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"P - Sched HELLO Req: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -328,7 +328,7 @@ int epf_sched_hello_rep(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Sched HELLO Rep: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Sched HELLO Rep: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -370,7 +370,7 @@ int epp_sched_hello_rep(
 	uint32_t *   id)
 {
 	if(!buf) {
-		ep_dbg_log("P - Sched HELLO Rep: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"P - Sched HELLO Rep: Invalid buffer!\n");
 		return -1;
 	}
 

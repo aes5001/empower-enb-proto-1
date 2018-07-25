@@ -34,7 +34,7 @@ int epf_macrep_rep(
 	rep->UL_prbs_used   = htonl(report->UL_prbs_used);
 	rep->UL_prbs_total  = report->UL_prbs_total;
 
-	ep_dbg_dump("F - MREP Rep: ", buf, sizeof(ep_macrep_rep));
+	ep_dbg_dump(EP_DBG_2"F - MREP Rep: ", buf, sizeof(ep_macrep_rep));
 
 	return sizeof(ep_macrep_rep);
 }
@@ -58,7 +58,7 @@ int epp_macrep_rep(
 		report->UL_prbs_total  = rep->UL_prbs_total;
 	}
 
-	ep_dbg_dump("P - MREP Rep: ", buf, sizeof(ep_macrep_rep));
+	ep_dbg_dump(EP_DBG_2"P - MREP Rep: ", buf, sizeof(ep_macrep_rep));
 
 	return EP_SUCCESS;
 }
@@ -68,13 +68,13 @@ int epf_macrep_req(char * buf, unsigned int size, uint16_t interval)
 	ep_macrep_req * req = (ep_macrep_req *)buf;
 
 	if(size < sizeof(ep_macrep_req)) {
-		ep_dbg_log("F - MREP Req: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"F - MREP Req: Not enough space!\n");
 		return -1;
 	}
 
 	req->interval = htons(interval);
 
-	ep_dbg_dump("F - MREP Req: ", buf, sizeof(ep_macrep_req));
+	ep_dbg_dump(EP_DBG_2"F - MREP Req: ", buf, sizeof(ep_macrep_req));
 
 	return sizeof(ep_macrep_req);
 }
@@ -84,7 +84,7 @@ int epp_macrep_req(char * buf, unsigned int size, uint16_t * interval)
 	ep_macrep_req * req = (ep_macrep_req *)buf;
 
 	if(size < sizeof(ep_macrep_req)) {
-		ep_dbg_log("P - MREP Req: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"P - MREP Req: Not enough space!\n");
 		return -1;
 	}
 
@@ -92,7 +92,7 @@ int epp_macrep_req(char * buf, unsigned int size, uint16_t * interval)
 		*interval = ntohs(req->interval);
 	}
 
-	ep_dbg_dump("P - MREP Req: ", buf, sizeof(ep_macrep_req));
+	ep_dbg_dump(EP_DBG_2"P - MREP Req: ", buf, sizeof(ep_macrep_req));
 
 	return EP_SUCCESS;
 }
@@ -112,7 +112,7 @@ int epf_trigger_macrep_rep_fail(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Single MACREP Fail: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Single MACREP Fail: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -165,7 +165,7 @@ int epf_trigger_macrep_rep_ns(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Single MACREP NS: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Single MACREP NS: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -219,7 +219,7 @@ int epf_trigger_macrep_rep(
 	int ret= 0;
 
 	if(!buf || !det) {
-		ep_dbg_log("F - Single MACREP Rep: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Single MACREP Rep: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -267,7 +267,7 @@ int epp_trigger_macrep_rep(
 	ep_macrep_det * det)
 {
 	if(!buf) {
-		ep_dbg_log("P - Single MACREP Rep: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"P - Single MACREP Rep: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -289,7 +289,7 @@ int epf_trigger_macrep_req(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Single MACREP Req: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Single MACREP Req: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -336,7 +336,7 @@ int epp_trigger_macrep_req(
 	uint16_t *      interval)
 {
 	if(!buf) {
-		ep_dbg_log("P - Single MACREP Req: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"P - Single MACREP Req: Invalid buffer!\n");
 		return -1;
 	}
 

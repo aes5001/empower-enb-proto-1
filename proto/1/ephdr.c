@@ -35,12 +35,12 @@ int epf_head(
 	ep_hdr * h = (ep_hdr *)buf;
 
 	if(!buf) {
-		ep_dbg_log("F - HDR: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - HDR: Invalid buffer!\n");
 		return -1;
 	}
 
 	if(size < sizeof(ep_hdr)) {
-		ep_dbg_log("F - HDR: Not enough space!\n");
+		ep_dbg_log(EP_DBG_0"F - HDR: Not enough space!\n");
 		return -1;
 	}
 
@@ -51,7 +51,7 @@ int epf_head(
 	h->id.mod_id  = htonl(mod_id);
 	h->flags      = flags;
 
-	ep_dbg_dump("F - HDR:  ", buf, sizeof(ep_hdr));
+	ep_dbg_dump(EP_DBG_0"F - HDR:  ", buf, sizeof(ep_hdr));
 
 	return sizeof(ep_hdr);
 }
@@ -68,17 +68,17 @@ int epp_head(
 	ep_hdr * h = (ep_hdr *)buf;
 
 	if(!buf) {
-		ep_dbg_log("P - HDR: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"P - HDR: Invalid buffer!\n");
 		return -1;
 	}
 
 	if(size < sizeof(ep_hdr)) {
-		ep_dbg_log("P - HDR: Not enough space!\n");
+		ep_dbg_log(EP_DBG_0"P - HDR: Not enough space!\n");
 		return -1;
 	}
 
 	if(h->vers != EMPOWER_PROTOCOL_VERS) {
-		ep_dbg_log("P - HDR: Different protocol version!\n");
+		ep_dbg_log(EP_DBG_0"P - HDR: Different protocol version!\n");
 		return EP_WRONG_VERSION;
 	}
 
@@ -112,12 +112,12 @@ ep_msg_type epp_msg_type(char * buf, unsigned int size)
 	ep_hdr * h = (ep_hdr *)buf;
 
 	if(!buf) {
-		ep_dbg_log("F - HDR: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - HDR: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 
 	if(size < sizeof(ep_hdr)) {
-		ep_dbg_log("P - HDR type: Not enough space!\n");
+		ep_dbg_log(EP_DBG_0"P - HDR type: Not enough space!\n");
 		return EP_ERROR;
 	}
 
@@ -129,12 +129,12 @@ int epp_dir(char * buf, unsigned int size)
 	ep_hdr * h = (ep_hdr *)buf;
 
 	if(!buf) {
-		ep_dbg_log("F - HDR: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - HDR: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 
 	if(size < sizeof(ep_hdr)) {
-		ep_dbg_log("P - HDR type: Not enough space!\n");
+		ep_dbg_log(EP_DBG_0"P - HDR type: Not enough space!\n");
 		return EP_ERROR;
 	}
 
@@ -147,12 +147,12 @@ uint32_t epp_seq(char * buf, unsigned int size)
 	ep_hdr * h = (ep_hdr *)buf;
 
 	if(!buf) {
-		ep_dbg_log("F - HDR: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - HDR: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 
 	if(size < sizeof(ep_hdr)) {
-		ep_dbg_log("P - HDR seq: Not enough space!\n");
+		ep_dbg_log(EP_DBG_0"P - HDR seq: Not enough space!\n");
 		return EP_ERROR;
 	}
 
@@ -164,12 +164,12 @@ uint16_t epp_msg_length(char * buf, unsigned int size)
 	ep_hdr * h = (ep_hdr *)buf;
 
 	if(!buf) {
-		ep_dbg_log("F - HDR: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - HDR: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 
 	if(size < sizeof(ep_hdr)) {
-		ep_dbg_log("P - HDR len: Not enough space!\n");
+		ep_dbg_log(EP_DBG_0"P - HDR len: Not enough space!\n");
 		return EP_ERROR;
 	}
 
@@ -181,12 +181,12 @@ int epf_seq(char * buf, unsigned int size, uint32_t seq)
 	ep_hdr * h = (ep_hdr *)buf;
 
 	if(!buf) {
-		ep_dbg_log("F - HDR: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - HDR: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 
 	if(size < sizeof(ep_hdr)) {
-		ep_dbg_log("F - HDR seq: Not enough space!\n");
+		ep_dbg_log(EP_DBG_0"F - HDR seq: Not enough space!\n");
 		return EP_ERROR;
 	}
 
@@ -200,12 +200,12 @@ int epf_msg_length(char * buf, unsigned int size, uint16_t len)
 	ep_hdr * h = (ep_hdr *)buf;
 
 	if(!buf) {
-		ep_dbg_log("F - HDR: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - HDR: Invalid buffer!\n");
 		return EP_ERROR;
 	}
 
 	if(size < sizeof(ep_hdr)) {
-		ep_dbg_log("F - HDR len: Not enough space!\n");
+		ep_dbg_log(EP_DBG_0"F - HDR len: Not enough space!\n");
 		return EP_ERROR;
 	}
 

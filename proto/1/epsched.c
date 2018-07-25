@@ -31,7 +31,7 @@ int epf_schedule(
 	ep_c_hdr * h = (ep_c_hdr *)(buf);
 
 	if(size < sizeof(ep_hdr) + sizeof(ep_c_hdr)) {
-		ep_dbg_log("F - SCHED: Not enough space!\n");
+		ep_dbg_log(EP_DBG_1"F - SCHED: Not enough space!\n");
 		return -1;
 	}
 
@@ -39,7 +39,7 @@ int epf_schedule(
 	h->op       = (uint8_t)op;
 	h->interval = htonl(interval);
 	
-	ep_dbg_dump("F - SCHE: ", buf, sizeof(ep_c_hdr));
+	ep_dbg_dump(EP_DBG_1"F - SCHE: ", buf, sizeof(ep_c_hdr));
 
 	return sizeof(ep_c_hdr);
 }
@@ -49,7 +49,7 @@ uint32_t epp_sched_interval(char * buf, unsigned int size)
 	ep_c_hdr * h = (ep_c_hdr *)(buf + sizeof(ep_hdr));
 
 	if(size < sizeof(ep_hdr) + sizeof(ep_c_hdr)) {
-		ep_dbg_log("P - SCHED Int: Not enough space!\n");
+		ep_dbg_log(EP_DBG_0"P - SCHED Int: Not enough space!\n");
 		return 0;
 	}
 
@@ -61,9 +61,11 @@ ep_act_type epp_schedule_type(char * buf, unsigned int size)
 	ep_c_hdr * h = (ep_c_hdr *)(buf + sizeof(ep_hdr));
 
 	if(size < sizeof(ep_hdr) + sizeof(ep_c_hdr)) {
-		ep_dbg_log("P - SCHED Type: Not enough space!\n");
+		ep_dbg_log(EP_DBG_0"P - SCHED Type: Not enough space!\n");
 		return EP_ACT_INVALID;
 	}
+
+	ep_dbg_log(EP_DBG_0"P - SCHE Type: \%dn", ntohs(h->type));
 
 	return ntohs(h->type);
 }

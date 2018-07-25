@@ -30,25 +30,25 @@ int epf_uemeas_rep(
 	ep_uemeas_det * det = (ep_uemeas_det *)(buf + sizeof(ep_uemeas_rep));
 
 	if(size < sizeof(ep_uemeas_rep) + (sizeof(ep_uemeas_det) + nof_meas)) {
-		ep_dbg_log("F - UMEA Rep: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"F - UMEA Rep: Not enough space!\n");
 		return -1;
 	}
 
 	rep->nof_meas = htonl(nof_meas);
 
-	ep_dbg_dump("F - UMEA Rep: ", buf, sizeof(ep_uemeas_rep));
+	ep_dbg_dump(EP_DBG_2"F - UMEA Rep: ", buf, sizeof(ep_uemeas_rep));
 
 	for(i = 0; i < nof_meas && i < max; i++) {
 		det[i].meas_id = ues[i].meas_id;
 		det[i].pci     = htons(ues[i].pci);
 		det[i].rsrp    = htons(ues[i].rsrp);
 		det[i].rsrq    = htons(ues[i].rsrq);
+		
+		ep_dbg_dump(
+			EP_DBG_3"F - UMEA Det: ", 
+			(char *)(det + i), 
+			sizeof(ep_uemeas_det));
 	}
-
-	ep_dbg_dump(
-		"F - UMEA Det: ",
-		buf + sizeof(ep_uemeas_rep) + (sizeof(ep_uemeas_det) * i),
-		sizeof(ep_uemeas_det));
 
 	return sizeof(ep_uemeas_rep) + (sizeof(ep_uemeas_det) * i);
 }
@@ -66,14 +66,14 @@ int epp_uemeas_rep(
 	ep_uemeas_det * det = (ep_uemeas_det *)(buf + sizeof(ep_uemeas_rep));
 
 	if(size < sizeof(ep_uemeas_rep)) {
-		ep_dbg_log("P - UMEA Rep: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"P - UMEA Rep: Not enough space!\n");
 		return -1;
 	}
 
 	if(size < sizeof(ep_uemeas_rep) + (
 		sizeof(ep_uemeas_det) + ntohl(rep->nof_meas)))
 	{
-		ep_dbg_log("P - UMEA Rep: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"P - UMEA Rep: Not enough space!\n");
 		return -1;
 	}
 
@@ -89,10 +89,8 @@ int epp_uemeas_rep(
 			ues[i].rsrq    = ntohs(det[i].rsrq);
 
 			ep_dbg_dump(
-				"P - UMEA Det: ",
-				buf +
-					sizeof(ep_uemeas_rep) +
-					(sizeof(ep_uemeas_det) * i),
+				EP_DBG_3"P - UMEA Det: ",
+				(char *)(ues + i),
 				sizeof(ep_uemeas_det));
 		}
 	}
@@ -113,7 +111,7 @@ int epf_uemeas_req(
 	ep_uemeas_req * req = (ep_uemeas_req *)buf;
 
 	if(size < sizeof(ep_uemeas_req) ) {
-		ep_dbg_log("F - UMEA Req: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"F - UMEA Req: Not enough space!\n");
 		return -1;
 	}
 
@@ -124,7 +122,7 @@ int epf_uemeas_req(
 	req->max_cells = htons(max_cells);
 	req->max_meas  = htons(max_meas);
 
-	ep_dbg_dump("F - UMEA Req: ", buf, sizeof(ep_uemeas_req));
+	ep_dbg_dump(EP_DBG_2"F - UMEA Req: ", buf, sizeof(ep_uemeas_req));
 
 	return sizeof(ep_uemeas_req);
 }
@@ -141,7 +139,7 @@ int epp_uemeas_req(
 	ep_uemeas_req * req = (ep_uemeas_req *) buf;
 
 	if(size < sizeof(ep_uemeas_req) ) {
-		ep_dbg_log("P - UMEA Req: Not enough space!\n");
+		ep_dbg_log(EP_DBG_2"P - UMEA Req: Not enough space!\n");
 		return -1;
 	}
 
@@ -169,7 +167,7 @@ int epp_uemeas_req(
 		*max_meas = ntohs(req->max_meas);
 	}
 
-	ep_dbg_dump("P - UMEA Req: ", buf, sizeof(ep_uemeas_req));
+	ep_dbg_dump(EP_DBG_2"P - UMEA Req: ", buf, sizeof(ep_uemeas_req));
 
 	return EP_SUCCESS;
 }
@@ -189,7 +187,7 @@ int epf_trigger_uemeas_rep_fail(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Trigger UMEA Fail: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Trigger UMEA Fail: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -244,12 +242,12 @@ int epf_trigger_uemeas_rep(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Trigger UMEA Rep: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Trigger UMEA Rep: Invalid buffer!\n");
 		return -1;
 	}
 
 	if(nof_meas > 0 && !ues) {
-		ep_dbg_log("F - Trigger UMEA Rep: Invalid UEs!\n");
+		ep_dbg_log(EP_DBG_0"F - Trigger UMEA Rep: Invalid UEs!\n");
 		return -1;
 	}
 
@@ -298,7 +296,7 @@ int epp_trigger_uemeas_rep(
 	ep_ue_measure * ues)
 {
 	if(!buf) {
-		ep_dbg_log("P - Trigger UMEA Rep: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"P - Trigger UMEA Rep: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -328,7 +326,7 @@ int epf_trigger_uemeas_req(
 	int ret= 0;
 
 	if(!buf) {
-		ep_dbg_log("F - Trigger UMEA Req: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"F - Trigger UMEA Req: Invalid buffer!\n");
 		return -1;
 	}
 
@@ -394,7 +392,7 @@ int epp_trigger_uemeas_req(
 {
 
 	if(!buf) {
-		ep_dbg_log("P - Trigger UMEA Rep: Invalid buffer!\n");
+		ep_dbg_log(EP_DBG_0"P - Trigger UMEA Rep: Invalid buffer!\n");
 		return -1;
 	}
 

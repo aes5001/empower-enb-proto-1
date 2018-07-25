@@ -557,7 +557,7 @@ int epf_ran_srq(char * buf, unsigned int size, slice_id_t id)
 
 	r->id = htobe64(id);
 
-	ep_dbg_dump(EP_DBG_2"F - RANS Rem Req: ", buf, sizeof(ep_ran_srem));
+	ep_dbg_dump(EP_DBG_2"F - RANS Rem Req: ", buf, sizeof(ep_ran_sinf));
 
 	return sizeof(ep_ran_sinf);
 }
@@ -601,7 +601,7 @@ int epf_ran_ssq(
 
 	r->id = htobe64(id);
 
-	ep_dbg_dump(EP_DBG_2"F - RANS Set Req: ", buf, sizeof(ep_ran_srem));
+	ep_dbg_dump(EP_DBG_2"F - RANS Set Req: ", buf, sizeof(ep_ran_sinf));
 
 	if(det) {
 		if(det->l2.usched == 0) {
