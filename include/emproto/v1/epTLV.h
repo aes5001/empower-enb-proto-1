@@ -22,6 +22,8 @@
 
 #include <stdint.h>
 
+#include "eppri.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -30,13 +32,44 @@ extern "C"
 /* types of valid TLV token for empower protocol */
 enum ep_TLV_type {
 	/* Invalid TLV token */
-	EP_TLV_INVALID = 0,
-	/* Token contains a cell capabilities information */
-	EP_TLV_CELL_CAP,
-};
+	EP_TLV_INVALID       = 0,
 
-typedef uint16_t tlv_type_t;
-typedef uint16_t tlv_length_t;
+	/*
+	 * Type 1 reserved to cell
+	 */
+
+	/* Token contains a cell capabilities information */
+	EP_TLV_CELL_CAP      = 0x0100,
+
+	/*
+	 * Type 2 reserved to eNB
+	 */
+
+	/*
+	 * Type 3 reserved to Handover
+	 */
+
+	/*
+	 * Type 4 reserved to Reports
+	 */
+
+	/*
+	 * Type 5 reserved to RAN
+	 */
+
+	/* Token contains RAN MAC slice scheduler information */
+	EP_TLV_RAN_MAC_SCHED = 0x0500,
+	/* token contains RAN slice specific MAC information */
+	EP_TLV_RAN_SLICE_MAC = 0x0501,
+
+	/*
+	 * Type 6 reserved to UE measurements
+	 */
+
+	/*
+	 * Type 7 reserved to UE reports
+	 */
+};
 
 /* Structure of the TLV header common to all components */
 typedef struct __ep_hdr_TLV {

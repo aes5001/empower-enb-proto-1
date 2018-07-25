@@ -98,8 +98,7 @@ int epp_ecap_single_TLV(char * buf, ep_enb_det * det)
 
 		break;
 	default:
-		ep_dbg_log("P - ECAP Rep: Unknwon token %d!\n",
-			tlv->type);
+		ep_dbg_log("P - ECAP Rep: Unexpected token %d!\n", tlv->type);
 		break;
 	}
 

@@ -5,15 +5,11 @@
 
 The TLV tokens are a way to represent data that is forward and backward 
 compatible with the message parsers. In addition, it provides great way to 
-extend certain type of messages without having to modify lot of already existing
-headers.
+extend certain type of messages without having to modify lot of fields of 
+existing headers.
 
 A type field itentifies the contents of the value, while the length field 
 informs how much bytes, after this header, are used to carry the information.
-
-Recognized TLV types are:
-
-    1 - Cell capabilities
 
 Life-cycle:
 
@@ -26,6 +22,8 @@ Message:
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |             Type              |            Length             |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                   'Length' amount of bytes                    |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     
 Fields:
 
@@ -36,5 +34,97 @@ Fields:
     LENGTH
         A 16-bits field which informs how much space in bytes will consume the 
         TLV entry.
+
+
+NOTES ABOUT TLV IDs PARTITIONING:
+
+TLV entries ID are not choosen at random, but follows a strictly partitioning
+scheme that divide the 16-bits ID filed in two sub-fields. The first 8 bits
+are reserved for the TLV family, the remaining value classify the type of 
+TLV.
+
+The overall view of the TLV fields is then as follows:
+ 
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |     Family    |     Type      |            Length             |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Values and types of families are defined in 'tlv.h' header. I can resume up here
+a rough resume of this classification, which is:
+
+    Family 0 - Invalid Token
+        Type interval 1
+
+    Family 1 - Cell tokens
+        Type interval 256 elements
+
+    Family 2 - eNB tokens
+        Type interval 256 elements
+
+    Family 3 - Handover tokens
+        Type interval 256 elements
+
+    Family 4 - MAC Report tokens
+        Type interval 256 elements
+
+    Family 5 - RAN tokens
+        Type interval 256 elements
+
+    Family 6 - UE measurements tokens
+        Type interval 256 elements
+
+    Family 7 - UE report tokens
+        Type interval 256 elements
+
+As you can notice the organization is similar to the current operations 
+performed bye the protocol, and can be that the partition will be subject to 
+modifications in the next future. Keep the definitions flexible enough to be 
+modified as protocol version evolve.
+
+
+RAN_MAC_SCHED TLV TOKEN
+
+The following message is the body of the specified TLV token. This means that
+BEFORE encountering this elements you will find a TLV header.
+
+Message:
+
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                    MAC slice scheduler ID                     |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    
+Fields:
+
+    SCHEDULER ID (32-bits)
+        A field containing the ID of the slice scheduler currently running.
+
+
+EP_TLV_RAN_SLICE_MAC TOKEN
+
+The following message is the body of the specified TLV token. This means that
+BEFORE encountering this elements you will find a TLV header.
+
+Message:
+
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                      MAC UE scheduler ID                      |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |            Nof_PRBs           | | | | | | | | | | | | | | | | |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    
+Fields:
+
+    UE SCHEDULER ID (32-bits)
+        A field containing the ID of the UE scheduler currently running for this
+        particular Slice.
+
+    NOF PRBs (16-bits):
+        Number of PRBs assigned to this Slice at MAC layer.
 
 Kewin R.

@@ -45,6 +45,13 @@ void ep_dbg_log(char * msg, ...);
 #define ep_dbg_dump(p, m, s)    /* ... into nothing */
 #endif
 
+/* Formatting spacing for nested message categories */
+
+#define EP_DBG_0 ""
+#define EP_DBG_1 "    "
+#define EP_DBG_2 "        "
+#define EP_DBG_3 "            "
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

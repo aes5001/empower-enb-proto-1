@@ -27,9 +27,25 @@ extern "C"
 {
 #endif /* __cplusplus */
 
-typedef uint64_t enb_id_t;       /* Definition of the enb-id */
-typedef uint16_t cell_id_t;      /* Definition of the cell id */
-typedef uint32_t mod_id_t;       /* Definition of the module id */
+typedef uint64_t enb_id_t;      /* Definition of the enb-id */
+typedef uint16_t cell_id_t;     /* Definition of the cell id */
+typedef uint32_t mod_id_t;      /* Definition of the module id */
+typedef uint16_t rnti_id_t;     /* Definition of the RNTI id */
+
+typedef uint32_t sched_id_t;    /* Definition of the scheduler id */
+
+/*
+ * RAN types 
+ */
+
+typedef uint64_t slice_id_t;    /* Definition of the slice id */
+
+/*
+ * TLV types
+ */
+
+typedef uint16_t tlv_type_t;    /* Definition of TLV type field */
+typedef uint16_t tlv_length_t;  /* Definition of TLV length field */
 
 #ifdef __cplusplus
 }
