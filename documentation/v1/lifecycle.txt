@@ -19,8 +19,7 @@ it gets a positive hello reply back. In case of refusing the Agent can decide to
 try with another controller, or wait and try again after some time.
 
 If Hello is successful, the controller is expected to query the Agent about the
-base station capability (which also contains the number of cells in use), and
-then loop over the reported cells to obtains details of their functionalities.
+base station capability (which also contains the number of cells in use).
 
         Controller                Agent
             |                       |
@@ -35,7 +34,7 @@ then loop over the reported cells to obtains details of their functionalities.
             |                       |      n |
             |                    Positive ---+
             |                     reply?
-            |                       |
+            |                       | y
             | eNB capability req    |
             +---------------------->|
             |                       |
@@ -45,24 +44,32 @@ then loop over the reported cells to obtains details of their functionalities.
             |<----------------------+
             |    eNB capability rep |
             |                       |
-         Discover                   |
-      number of cells               |
-          in eNB                    |
+
+
+  KEEP ALIVE FUNCTIONALITY
+
+Not only the Hello message role is the one to present the Agent to the 
+controller, but it also plays the role of the Keep alive check. Every 
+customizable millisecond (2000 by default), a message is sent to the Controller
+to test that the connection is still up and working.
+
+A controller can assume that if it does not receive any feedback from the agent,
+and no Hello are sent for the setup Keep Alive period, then the connection can
+be assumed to be down.
+
+        Controller                Agent
             |                       |
-            | cell capability req   |
-  +-------> +---------------------->|
-  |         |                       |
-  |         |                   Collecting
-  |         |                  capabilities
-  |         |                       |
-  |         |<----------------------+
-  |         |   cell capability rep |
-  |         |                       |
-  | n    all the                    |     
-  +-- cells have been               |
-         queried?                   |
+            | UE Hello req          |
+        Ok! +<----------------------|<------+
+            |                       |       |
+            |                       |       | Every 'n' ms
+            |                       |       |   repeat.
+            |                       |       |
+            |---------------------->+ Ok! --+
+            |          UE Hello rep |
             |                       |
-            
+
+
   ENABLE/DISABLE FUNCTIONALITY
   
 If the Agent reported it during capability discovery, the Controller can then
@@ -106,14 +113,14 @@ operation is not available or has failed.
 
         Controller                Agent
             |                       |
-            | RAN add tenant req    |
+            | RAN req               |
             +---------------------->|
             |                       |
             |                     Sanity
             |                     checks
             |                       |
             |<----------------------+
-            |    RAN add tenant rep |
+            |               RAN rep |
 
 In the case of Handover, since it is assumed that such operation will be done on
 X2 interface following the standards and propertary mechanism, a negative reply
@@ -133,14 +140,15 @@ instance.
             |                     Sanity                    |
             |                     checks                    |
             |                       |                       |
-            |                   Falure or     n             |
+            |                  Failure or     n             |
             |                 not supported? -------------->|             
             |                       | y                     |
             |<----------------------+                   X2 handover
             | Handover negative rep |                       |
             |                       |                       |
             |<----------------------------------------------+
-            |                       |          Handover rep |
+            |                Handover positive/negative rep |
             |                       |                       |
-                                  
+
+
 Kewin R.
