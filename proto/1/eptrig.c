@@ -61,7 +61,10 @@ ep_act_type epp_trigger_type(char * buf, unsigned int size)
 		return EP_ACT_INVALID;
 	}
 
-	ep_dbg_log(EP_DBG_0"P - TRIG Type: %d\n", ntohs(h->type));
+	ep_dbg_dump(
+		EP_DBG_1"P - TRIG: ", 
+		buf + sizeof(ep_hdr), 
+		sizeof(ep_t_hdr));
 
 	return ntohs(h->type);
 }

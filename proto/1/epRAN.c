@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  */
 
+#include <inttypes.h>
+#include <stdint.h>
 #include <string.h>
 #include <netinet/in.h>
 
@@ -79,7 +81,7 @@ int epf_ran_eup(char * buf, unsigned int size, ep_ran_det * det)
 
 	/* TLV for MAC scheduler information */
 	if(det->l2.mac.slice_sched != EP_RAN_SCHED_INVALID) {
-		if((c - buf) + sizeof(ep_ran_mac_sched_TLV) > size) {
+		if(c + sizeof(ep_ran_mac_sched_TLV) > buf + size) {
 			ep_dbg_log(EP_DBG_3"F - RANS Rep: Not enough space!\n");
 			return -1;
 		}
@@ -183,18 +185,18 @@ int epp_ran_eup(char * buf, unsigned int size, ep_ran_det * det)
  */
 int epf_ran_suq(char * buf, unsigned int size, slice_id_t id)
 {
-	ep_ran_sreq * r = (ep_ran_sreq *)buf;
+	ep_ran_sinf * r = (ep_ran_sinf *)buf;
 
-	if(size < sizeof(ep_ran_sreq)) {
+	if(size < sizeof(ep_ran_sinf)) {
 		ep_dbg_log(EP_DBG_2"F - RANS Unspec Req: Not enough space!\n");
 		return -1;
 	}
 
 	r->id = htobe64(id);
 
-	ep_dbg_dump(EP_DBG_2"F - RANS Unspec Req: ", buf, sizeof(ep_ran_sreq));
+	ep_dbg_dump(EP_DBG_2"F - RANS Unspec Req: ", buf, sizeof(ep_ran_sinf));
 
-	return sizeof(ep_ran_sreq);
+	return sizeof(ep_ran_sinf);
 }
 
 /* Parse SUQ, Slice Unspecified reQuest 
@@ -202,9 +204,9 @@ int epf_ran_suq(char * buf, unsigned int size, slice_id_t id)
  */
 int epp_ran_suq(char * buf, unsigned int size, slice_id_t * id)
 {
-	ep_ran_sreq * r = (ep_ran_sreq *)buf;
+	ep_ran_sinf * r = (ep_ran_sinf *)buf;
 
-	if(size < sizeof(ep_ran_sreq)) {
+	if(size < sizeof(ep_ran_sinf)) {
 		ep_dbg_log(EP_DBG_2"P - RANS Unspec Req: Not enough space!\n");
 		return EP_ERROR;
 	}
@@ -213,7 +215,7 @@ int epp_ran_suq(char * buf, unsigned int size, slice_id_t * id)
 		*id = be64toh(r->id);
 	}
 
-	ep_dbg_dump(EP_DBG_2"P - RANS Unspec Req: ", buf, sizeof(ep_ran_sreq));
+	ep_dbg_dump(EP_DBG_2"P - RANS Unspec Req: ", buf, sizeof(ep_ran_sinf));
 
 	return EP_SUCCESS;
 }
@@ -223,35 +225,25 @@ int epp_ran_suq(char * buf, unsigned int size, slice_id_t * id)
  * Returns the size in bytes of the formatted area.
  */
 int epf_ran_sup(
-	char * buf, unsigned int size, uint16_t id, ep_ran_slice_det * det) 
+	char * buf, unsigned int size, slice_id_t id, ep_ran_slice_det * det) 
 {
-	int           l = sizeof(ep_ran_srep) + (sizeof(ep_ran_sinf));
+	int               s;
+	char *            c;
 
-	ep_ran_srep * r = (ep_ran_srep *) buf;
-	ep_ran_sinf * d = (ep_ran_sinf *)(buf + sizeof(ep_ran_srep));
-	
+	ep_ran_sinf *     r = (ep_ran_sinf *) buf;
 	ep_ran_smac_TLV * smac;
-
-	if(size < l) {
-		ep_dbg_log(EP_DBG_2"F - RANS Unspec Rep: Not enough space!\n");
-		return -1;
-	}
-
-	r->nof_slices = htons(1);
 	
-	ep_dbg_dump(EP_DBG_2"F - RANS Unspec Rep: ", buf, sizeof(ep_ran_srep));
-
-	d->id = htobe64(id);
-
-	ep_dbg_dump(EP_DBG_2"F - RANS Unspec Info: ",
-		(char *)d, sizeof(ep_ran_sinf));
+	r->id = htobe64(id);
 	
+	ep_dbg_dump(EP_DBG_2"F - RANS Unspec Rep: ", buf, sizeof(ep_ran_sinf));
+
+	c = buf + sizeof(ep_ran_sinf);
+
 	/* Time to check if to create TLVs for additional options */
 	if(det) {
-		smac = (ep_ran_smac_TLV *)(buf + l);
-		l   += sizeof(ep_ran_smac_TLV);
+		smac = (ep_ran_smac_TLV *)(c);
 
-		if(size < l) {
+		if(c + sizeof(ep_ran_smac_TLV) > buf + size) {
 			ep_dbg_log(EP_DBG_3
 				"F - RANS Unspec Rep: Not enough space!\n");
 			return -1;
@@ -259,11 +251,24 @@ int epf_ran_sup(
 
 		smac->header.type    = htons(EP_TLV_RAN_SLICE_MAC);
 		smac->header.length  = htons(sizeof(ep_ran_smac));
-		smac->body.prbs      = htons(det->l2.prbs);
+		smac->body.rbgs      = htons(det->l2.rbgs);
 		smac->body.user_sched= htonl(det->l2.usched);
+
+		ep_dbg_dump(EP_DBG_3"F - RANS Unspec TLV: ",
+			(char *)smac, sizeof(ep_ran_smac_TLV));
+
+		c += sizeof(ep_ran_smac_TLV);
+
+		/* Format a RNTI report TLV token just after the message */
+		s = epf_TLV_rnti_report(
+			c, size - (c - buf), det->users, det->nof_users);
+
+		if(s > 0) {
+			c += s;
+		}
 	}
 
-	return sizeof(ep_ran_srep) + sizeof(ep_ran_sinf);
+	return c - buf;
 }
 
 
@@ -284,12 +289,20 @@ int epp_ran_sup_TLV(char * buf, ep_ran_slice_det * det)
 		/* Points to the TLV body */
 		macs = (ep_ran_smac_TLV *)(buf);
 
-		det->l2.prbs   = ntohs(macs->body.prbs);
+		det->l2.rbgs   = ntohs(macs->body.rbgs);
 		det->l2.usched = ntohl(macs->body.user_sched);
 
 		ep_dbg_dump(EP_DBG_3"P - RANS Unspec Rep TLV: ", 
 			buf, sizeof(ep_ccap_TLV));
 
+		break;
+	case EP_TLV_RNTI_REPORT:
+		det->nof_users = EP_RAN_USERS_MAX;
+		if(epp_TLV_rnti_report(
+			(char*)tlv, det->users, &det->nof_users)) 
+		{
+			return EP_ERROR;
+		}
 		break;
 	default:
 		ep_dbg_log(EP_DBG_3"P - RANS Unspec Rep: Unexpected TLV %d!\n", 
@@ -307,28 +320,20 @@ int epp_ran_sup_TLV(char * buf, ep_ran_slice_det * det)
 int epp_ran_sup(
 	char * buf, unsigned int size, slice_id_t * id, ep_ran_slice_det * det)
 {
-	int           len = sizeof(ep_ran_srep) + sizeof(ep_ran_sinf);
-
-	char *        c = buf + len;
-	ep_ran_srep * r = (ep_ran_srep *) buf;
-	ep_ran_sinf * d = (ep_ran_sinf *)(buf + sizeof(ep_ran_srep));
+	char *        c = buf + sizeof(ep_ran_sinf);
+	ep_ran_sinf * r = (ep_ran_sinf *) buf;
 	ep_TLV *      tlv;
 
-	if(size < len) {
+	if(size < sizeof(ep_ran_sinf)) {
 		ep_dbg_log(EP_DBG_2"P - RANS Unspec Rep: Not enough space!\n");
 		return EP_ERROR;
 	}
 
-	if(ntohs(r->nof_slices) != 1) {
-		ep_dbg_log(EP_DBG_2"P - RANS Unspec Rep: Expected 1 slice!\n");
-		return EP_ERROR;
-	}
-
 	if(id) {
-		*id = be64toh(d->id);
+		*id = be64toh(r->id);
 	}
 
-	ep_dbg_dump(EP_DBG_2"P - RANS Unspec Rep: ", buf, len);
+	ep_dbg_dump(EP_DBG_2"P - RANS Unspec Rep: ", buf, sizeof(ep_ran_sinf));
 
 	while(c < buf + size) {
 		tlv = (ep_TLV *)c;
@@ -350,7 +355,7 @@ int epp_ran_sup(
 
 	return EP_SUCCESS;
 }
-
+#if 0
 /* Format SUP, Slice Unspecified rePly.
  * This message contains multiple slices IDs, but no specific information.
  * Returns the size in bytes of the formatted area.
@@ -431,7 +436,7 @@ int epp_ran_sup_m(
 
 	return EP_SUCCESS;
 }
-
+#endif
 /* Format SAQ, Slice Add reQuest.
  * Returns the size in bytes of the formatted area.
  */
@@ -461,7 +466,7 @@ int epf_ran_saq(
 
 		smac->header.type     = EP_TLV_RAN_SLICE_MAC;
 		smac->header.length   = htons(sizeof(ep_ran_smac_TLV));
-		smac->body.prbs       = htons(det->l2.prbs);
+		smac->body.rbgs       = htons(det->l2.rbgs);
 		smac->body.user_sched = htonl(det->l2.usched);
 	}
 end:
@@ -484,7 +489,7 @@ int epp_ran_saq_TLV(char * buf, ep_ran_slice_det * det)
 	case EP_TLV_RAN_SLICE_MAC:
 		smac = (ep_ran_smac_TLV *)buf;
 
-		det->l2.prbs   = ntohs(smac->body.prbs);
+		det->l2.rbgs   = ntohs(smac->body.rbgs);
 		det->l2.usched = ntohs(smac->body.user_sched);
 
 		ep_dbg_dump(EP_DBG_3"P - RANS Add Req TLV: ", 
@@ -620,7 +625,7 @@ int epf_ran_ssq(
 
 		smac->header.type     = EP_TLV_RAN_SLICE_MAC;
 		smac->header.length   = htons(sizeof(ep_ran_smac_TLV));
-		smac->body.prbs       = det->l2.prbs;
+		smac->body.rbgs       = det->l2.rbgs;
 		smac->body.user_sched = det->l2.usched;
 
 		ep_dbg_dump(EP_DBG_3"F - RANS Set Req TLV: ", 
@@ -644,7 +649,7 @@ int epp_ran_ssq_TLV(char * buf, ep_ran_slice_det * det)
 	case EP_TLV_RAN_SLICE_MAC:
 		smac = (ep_ran_smac_TLV *)buf;
 
-		det->l2.prbs   = ntohs(smac->body.prbs);
+		det->l2.rbgs   = ntohs(smac->body.rbgs);
 		det->l2.usched = ntohs(smac->body.user_sched);
 
 		ep_dbg_dump(EP_DBG_3"P - RANS Set Req: ", 
@@ -702,7 +707,7 @@ int epp_ran_ssq(
 
 	return EP_SUCCESS;
 }
-
+#if 0
 /*
  * 
  * Parser user primitives for RAN:
@@ -906,12 +911,12 @@ int epp_ran_urq(char * buf, unsigned int size, ep_ran_user_det * det)
 
 	return EP_SUCCESS;
 }
-
+#endif
 /******************************************************************************
  * Public API                                                                 *
  ******************************************************************************/
 
-int epf_single_ran_rep_fail(
+int epf_single_ran_rep_success(
 	char *       buf,
 	unsigned int size,
 	ep_act_type  type,
@@ -946,7 +951,7 @@ int epf_single_ran_rep_fail(
 		buf + ret,
 		size - ret,
 		type,
-		EP_OPERATION_FAIL);
+		EP_OPERATION_SUCCESS);
 
 	if(ms < 0) {
 		return ms;
@@ -960,13 +965,78 @@ int epf_single_ran_rep_fail(
 	return ret;
 }
 
+int epf_single_ran_rep_fail(
+	char *       buf,
+	unsigned int size,
+	ep_act_type  type,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id,
+	slice_id_t   slice_id)
+{
+	int          ms = 0;
+	int          ret= 0;
+
+	slice_id_t * s;
+	/* Check of given buffer size here */
+
+	if(!buf) {
+		ep_dbg_log(EP_DBG_2"F - Single RAN Fail: Invalid buffer!\n");
+		return -1;
+	}
+
+	ms = epf_head(
+		buf, 
+		size, 
+		EP_TYPE_SINGLE_MSG, 
+		enb_id, 
+		cell_id, 
+		mod_id,
+		EP_HDR_FLAG_DIR_REP);
+
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+	ms   = epf_single(
+		buf + ret,
+		size - ret,
+		type,
+		EP_OPERATION_FAIL);
+
+	if(ms < 0) {
+		return ms;
+	}
+
+	ret += ms;
+
+	if(ret + sizeof(uint64_t) > size) {
+		ep_dbg_log(EP_DBG_2"F - Single RAN Fail: No space!\n");
+		return -1;
+	}
+
+	s = (slice_id_t *)(buf + ret);
+	*s = htobe64(slice_id);
+
+	ret += sizeof(uint64_t);
+
+	ep_dbg_log(EP_DBG_2"F - Single RAN Fail: % " PRIu64 "\n", slice_id);
+
+	/* Inject the message size */
+	epf_msg_length(buf, size, ret);
+
+	return ret;
+}
+
 int epf_single_ran_rep_ns(
 	char *       buf,
 	unsigned int size,
 	ep_act_type  type,
 	enb_id_t     enb_id,
 	cell_id_t    cell_id,
-	mod_id_t     mod_id)
+	mod_id_t     mod_id,
+	slice_id_t   slice_id)
 {
 	int ms = 0;
 	int ret= 0 ;
@@ -1236,7 +1306,7 @@ int epp_single_ran_slice_req(
 		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
 		slice_id);
 }
-
+#if 0
 int epf_single_ran_multi_slice_rep(
 	char *             buf,
 	unsigned int       size,
@@ -1314,7 +1384,7 @@ int epp_single_ran_multi_slice_rep(
 		nof_slices,
 		slices);
 }
-
+#endif
 int epf_single_ran_slice_rep(
 	char *             buf,
 	unsigned int       size,
@@ -1622,7 +1692,7 @@ int epp_single_ran_slice_set(
 		slice_id,
 		det);
 }
-
+#if 0
 /******* RAN Users ************************************************************/
 
 int epf_single_ran_usr_req(
@@ -1924,3 +1994,4 @@ int epp_single_ran_usr_rem(
 		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
 		det);
 }
+#endif

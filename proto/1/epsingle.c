@@ -18,9 +18,10 @@
 #include <emproto.h>
 
 int epf_single(
-	char * buf, unsigned int size,
-	ep_act_type type,
-	ep_op_type  op)
+	char *       buf, 
+	unsigned int size,
+	ep_act_type  type,
+	ep_op_type   op)
 {
 	ep_s_hdr * h = (ep_s_hdr *)(buf);
 
@@ -50,7 +51,10 @@ ep_act_type epp_single_type(char * buf, unsigned int size)
 		return EP_ACT_INVALID;
 	}
 
-	ep_dbg_log(EP_DBG_0"P - SING Type: %d\n", ntohs(h->type));
+	ep_dbg_dump(
+		EP_DBG_1"P - SING: ", 
+		buf + sizeof(ep_hdr), 
+		sizeof(ep_s_hdr));
 
 	return ntohs(h->type);
 }

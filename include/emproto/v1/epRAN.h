@@ -69,7 +69,7 @@ typedef struct __ep_ran_sched_req {
   * RAN User                                                                  *
   *                                                                           *
   *****************************************************************************/
-
+#if 0
  /* RAN User information message */
 typedef struct __ep_ran_user_info {
 	rnti_id_t  rnti;          /* RNTI of the user */
@@ -86,40 +86,7 @@ typedef struct __ep_ran_user_rep {
 typedef struct __ep_ran_user_req {
 	rnti_id_t rnti;	        /* RNTI of the user */
  }__attribute__((packed)) ep_ran_ureq;
-
- /*****************************************************************************
-  *                                                                           *
-  * RAN Slice                                                                 *
-  *                                                                           *
-  *****************************************************************************/
-
-/* RAN slice MAC information */
-typedef struct __ep_ran_slice_mac {
-	sched_id_t  user_sched; /* Id of the user scheduler associated */
-	uint16_t    prbs;       /* PRBs assigned to the slice */
-}__attribute__((packed)) ep_ran_smac;
-
-/* RAN slice MAC information in TLV style */
-typedef struct __ep_ran_slice_mac_TLV {
-	ep_TLV      header;
-	ep_ran_smac body;
-}__attribute__((packed)) ep_ran_smac_TLV;
-
- /* RAN Slice info message */
-typedef struct __ep_ran_slice_inf {
-	slice_id_t  id;		/* ID of the Slice */
-}__attribute__((packed)) ep_ran_sinf;
-
- /* RAN Slice reply message */
-typedef struct __ep_ran_slice_rep {
-	uint16_t    nof_slices;	/* Number of Slices reported */
-	/* Here the array of ep_ran_tinf which depends from 'nof_Slices' */
-}__attribute__((packed)) ep_ran_srep;
-
- /* RAN Slice request message */
-typedef struct __ep_ran_slice_req {
-	slice_id_t  id;		/* ID of the Slice */
- }__attribute__((packed)) ep_ran_sreq;
+#endif
 
  /*****************************************************************************
   *                                                                           *
@@ -163,6 +130,39 @@ typedef struct __ep_ran_setup {
 
  /*****************************************************************************
   *                                                                           *
+  * RAN Slice                                                                 *
+  *                                                                           *
+  *****************************************************************************/
+
+/* RAN slice MAC information */
+typedef struct __ep_ran_slice_mac {
+	sched_id_t  user_sched; /* Id of the user scheduler associated */
+	uint16_t    rbgs;       /* PRBs assigned to the slice */
+}__attribute__((packed)) ep_ran_smac;
+
+/* RAN slice MAC information in TLV style */
+typedef struct __ep_ran_slice_mac_TLV {
+	ep_TLV      header;
+	ep_ran_smac body;
+}__attribute__((packed)) ep_ran_smac_TLV;
+
+ /* RAN Slice info message */
+typedef struct __ep_ran_slice_inf {
+	slice_id_t  id;	         /* ID of the Slice */
+}__attribute__((packed)) ep_ran_sinf;
+#if 0
+ /* RAN Slice reply message */
+typedef struct __ep_ran_slice_rep {
+	uint64_t    id;         /* Slice ID */
+}__attribute__((packed)) ep_ran_srep;
+
+ /* RAN Slice request message */
+typedef struct __ep_ran_slice_req {
+	slice_id_t  id;	        /* ID of the Slice */
+ }__attribute__((packed)) ep_ran_sreq;
+#endif
+ /*****************************************************************************
+  *                                                                           *
   * Opaque structures                                                         *
   *                                                                           *
   *****************************************************************************/
@@ -182,19 +182,25 @@ typedef struct __ep_ran_sched_param_details {
 	char *   value;		/* Value of the parameter */
 	uint16_t value_len;	/* Length of the value */
 }ep_ran_sparam_det;
-#endif
+
 typedef struct __ep_ran_user_details {
 	rnti_id_t  id;          /* RNTI */
 	slice_id_t slice;       /* Id of the Slice */
 }ep_ran_user_det;
+#endif
+
+#define EP_RAN_USERS_MAX	32
 
 typedef struct __ep_ran_slice_l2_details {
 	sched_id_t       usched; /* User scheduler ID */
-	uint16_t         prbs;   /* PRBs assigned to the slice */
+	uint16_t         rbgs;   /* PRBs assigned to the slice */
 } ep_ran_slice_l2d;
 
 typedef struct __ep_ran_slice_details {
-	ep_ran_slice_l2d l2;    /* ID of the active User scheduler */
+	/* Users of this slice */
+	uint32_t         nof_users;
+	rnti_id_t        users[EP_RAN_USERS_MAX];
+	ep_ran_slice_l2d l2;     /* ID of the active User scheduler */
 } ep_ran_slice_det;
 
 /* Invalid id for a scheduler */
@@ -221,24 +227,53 @@ typedef struct __ep_ran_setup_details {
  *                                                                            *
  ******************************************************************************/
 
+/* Format a RAN setup operation success message.
+ * Returns the message size or -1 on error.
+ */
+ #define epf_single_ran_setup_success(b, s, e, c, m)	\
+	epf_single_ran_rep_success(b, s, EP_ACT_RAN_SETUP, e, c, m)
+
+/* Format a RAN Slice operation success message.
+ * Returns the message size or -1 on error.
+ */
+#define epf_single_ran_slice_success(b, s, e, c, m)	\
+	epf_single_ran_rep_success(b, s, EP_ACT_RAN_SLICE, e, c, m)
+#if 0
+/* Format a RAN User operation success message.
+ * Returns the message size or -1 on error.
+ */
+#define epf_single_ran_user_success(b, s, e, c, m)		\
+	epf_single_ran_rep_success(b, s, EP_ACT_RAN_USER, e, c, m)
+#endif
+/* Format a RAN operation success message. 
+ * Returns the message size or -1 on error. 
+ */
+int epf_single_ran_rep_success(
+	char *       buf,
+	unsigned int size,
+	ep_act_type  type,
+	enb_id_t     enb_id,
+	cell_id_t    cell_id,
+	mod_id_t     mod_id);
+
 /* Format a RAN setup operation failed message.
  * Returns the message size or -1 on error.
  */
- #define epf_single_ran_setup_fail(b, s, e, c, m)	\
-	epf_single_ran_rep_fail(b, s, EP_ACT_RAN_SETUP, e, c, m)
+ #define epf_single_ran_setup_fail(b, s, e, c, m, i)    \
+	epf_single_ran_rep_fail(b, s, EP_ACT_RAN_SETUP, e, c, m, i)
 
 /* Format a RAN Slice operation failed message.
  * Returns the message size or -1 on error.
  */
-#define epf_single_ran_slice_fail(b, s, e, c, m)	\
-	epf_single_ran_rep_fail(b, s, EP_ACT_RAN_SLICE, e, c, m)
-
+#define epf_single_ran_slice_fail(b, s, e, c, m, i)     \
+	epf_single_ran_rep_fail(b, s, EP_ACT_RAN_SLICE, e, c, m, i)
+#if 0
 /* Format a RAN User operation failed message.
  * Returns the message size or -1 on error.
  */
 #define epf_single_ran_user_fail(b, s, e, c, m)		\
 	epf_single_ran_rep_fail(b, s, EP_ACT_RAN_USER, e, c, m)
-#if 0
+
 /* Format a RAN Schedule operation failed message.
  * Returns the message size or -1 on error.
  */
@@ -254,26 +289,27 @@ int epf_single_ran_rep_fail(
 	ep_act_type  type,
 	enb_id_t     enb_id,
 	cell_id_t    cell_id,
-	mod_id_t     mod_id);
+	mod_id_t     mod_id,
+	slice_id_t   slice_id);
 
 /* Format a RAN setup operation failed message.
  * Returns the message size or -1 on error.
  */
- #define epf_single_ran_setup_ns(b, s, e, c, m)	\
+ #define epf_single_ran_setup_ns(b, s, e, c, m, i) \
 	epf_single_ran_rep_ns(b, s, EP_ACT_RAN_SETUP, e, c, m)
 
 /* Format a RAN Slice operation failed message.
  * Returns the message size or -1 on error.
  */
-#define epf_single_ran_slice_ns(b, s, e, c, m)	\
+#define epf_single_ran_slice_ns(b, s, e, c, m, i)  \
 	epf_single_ran_rep_ns(b, s, EP_ACT_RAN_SLICE, e, c, m)
-
+#if 0
 /* Format a RAN User operation failed message.
  * Returns the message size or -1 on error.
  */
 #define epf_single_ran_user_ns(b, s, e, c, m)		\
 	epf_single_ran_rep_ns(b, s, EP_ACT_RAN_USER, e, c, m)
-#if 0
+
 /* Format a RAN Schedule operation failed message.
  * Returns the message size or -1 on error.
  */
@@ -289,7 +325,8 @@ int epf_single_ran_rep_ns(
 	ep_act_type  type,
 	enb_id_t     enb_id,
 	cell_id_t    cell_id,
-	mod_id_t     mod_id);
+	mod_id_t     mod_id,
+	slice_id_t   slice_id);
 
 /******************************************************************************/
 
@@ -349,7 +386,7 @@ int epp_single_ran_slice_req(
 	char *       buf,
 	unsigned int size,
 	slice_id_t * slice_id);
-
+#if 0
 /* Formats a RAN Slice reply message for multiple slice IDs.
  * Returns the message size or -1 on error.
  */
@@ -370,7 +407,7 @@ int epp_single_ran_multi_slice_rep(
 	unsigned int       size,
 	uint16_t *         nof_slices,
 	slice_id_t *       slices);
-
+#endif
 /* Formats a RAN Slice reply message.
  * Returns the message size or -1 on error.
  */
@@ -432,8 +469,29 @@ int epp_single_ran_slice_rem(
 	unsigned int       size,
 	slice_id_t *       id);
 
-/******************************************************************************/
+/* Formats a RAN Slice set message.
+ * Returns the message size or -1 on error.
+ */
+int epf_single_ran_slice_set(
+	char *             buf,
+	unsigned int       size,
+	enb_id_t           enb_id,
+	cell_id_t          cell_id,
+	mod_id_t           mod_id,
+	slice_id_t         slice_id,
+	ep_ran_slice_det * det);
 
+/* Parses a RAN Slice set message.
+ * Returns EP_SUCCESS on success, otherwise a negative error code.
+ */
+int epp_single_ran_slice_set(
+	char *             buf,
+	unsigned int       size,
+	slice_id_t *       slice_id,
+	ep_ran_slice_det * det);
+
+/******************************************************************************/
+#if 0
 /* Formats a RAN user request message.
  * Returns the message size or -1 on error.
  */
@@ -511,7 +569,7 @@ int epp_single_ran_usr_rem(
 	char *            buf,
 	unsigned int      size,
 	ep_ran_user_det * det);
-
+#endif
 /******************************************************************************
  * Operation on schedule-event messages                                       *
  ******************************************************************************/

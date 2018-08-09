@@ -54,8 +54,8 @@ The overall view of the TLV fields is then as follows:
 Values and types of families are defined in 'tlv.h' header. I can resume up here
 a rough resume of this classification, which is:
 
-    Family 0 - Invalid Token
-        Type interval 1
+    Family 0 - Generic Token
+        Type interval 256
 
     Family 1 - Cell tokens
         Type interval 256 elements
@@ -103,10 +103,12 @@ Fields:
         A field containing the ID of the slice scheduler currently running.
 
 
-EP_TLV_RAN_SLICE_MAC TOKEN
+EP_TLV_RNTI_REPORT TOKEN
 
 The following message is the body of the specified TLV token. This means that
 BEFORE encountering this elements you will find a TLV header.
+
+The RNTI report is a generic TLV
 
 Message:
 
@@ -126,5 +128,28 @@ Fields:
 
     NOF PRBs (16-bits):
         Number of PRBs assigned to this Slice at MAC layer.
+
+
+EP_TLV_RAN_SLICE_MAC TOKEN
+
+The following message is the body of the specified TLV token. This means that
+BEFORE encountering this elements you will find a TLV header.
+
+Message:
+
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |             RNTI(*)           | | | | | | | | | | | | | | | | |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    
+Fields:
+
+    RNTI (16-bits); Zero or more
+        This field contains a RNTI identifying an UE, and can be repeated from 
+        zero to multiple times inside the body. This means that you can have no 
+        RNTIs, meanings no UE are there.
+        To detect how many RNTIs are there, just divide the TLV length by two.
+
 
 Kewin R.

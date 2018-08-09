@@ -34,6 +34,9 @@ enum ep_TLV_type {
 	/* Invalid TLV token */
 	EP_TLV_INVALID       = 0,
 
+	/* A generic report of bunch of RNTIs */
+	EP_TLV_RNTI_REPORT   = 0x0001,
+
 	/*
 	 * Type 1 reserved to cell
 	 */
@@ -79,6 +82,29 @@ typedef struct __ep_hdr_TLV {
 	 * Here following there will be the TLV body
 	 */
 }__attribute__((packed)) ep_TLV;
+
+/*
+ * 
+ * RNTI container generic TLV token:
+ * 
+ */
+
+/* Format a generic RNTI report TLV token (just a bunch of RNTIs).
+ * Returns the message size or -1 on error.
+ */
+int epf_TLV_rnti_report(
+	char *       buf, 
+	unsigned int size, 
+	rnti_id_t *  rntis,
+	uint32_t     nof_rntis);
+
+/* Parses a generic RNTI report TLV token.
+ * Returns EP_SUCCESS on success, otherwise a negative error code.
+ */
+int epp_TLV_rnti_report(
+	char *       buf,
+	rnti_id_t *  rntis,
+	uint32_t  *  nof_rntis);
 
 #ifdef __cplusplus
 }

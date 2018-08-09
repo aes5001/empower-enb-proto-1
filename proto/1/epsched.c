@@ -65,7 +65,10 @@ ep_act_type epp_schedule_type(char * buf, unsigned int size)
 		return EP_ACT_INVALID;
 	}
 
-	ep_dbg_log(EP_DBG_0"P - SCHE Type: \%dn", ntohs(h->type));
+	ep_dbg_dump(
+		EP_DBG_1"P - SCHE: ", 
+		buf + sizeof(ep_hdr), 
+		sizeof(ep_c_hdr));
 
 	return ntohs(h->type);
 }

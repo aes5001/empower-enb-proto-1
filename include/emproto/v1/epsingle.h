@@ -45,9 +45,10 @@ typedef struct __ep_single_header {
 
 /* Format a single-event message */
 int epf_single(
-	char * buf, unsigned int size,
-	ep_act_type type,
-	ep_op_type  op);
+	char *       buf, 
+	unsigned int size,
+	ep_act_type  type,
+	ep_op_type   op);
 
 /* Extracts the type from an Empower single message */
 ep_act_type epp_single_type(char * buf, unsigned int size);

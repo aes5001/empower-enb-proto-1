@@ -45,18 +45,16 @@ typedef enum __ep_message_type {
 
 /* Action operated by the message */
 typedef enum __ep_action_type {
-	EP_ACT_INVALID        = 0,  /* Invalid */
-	EP_ACT_HELLO          = 1,  /* Hello */
-	EP_ACT_ECAP           = 2,  /* eNB capabilities */
-	EP_ACT_CCAP           = 3,  /* Cell capabilities */
-	EP_ACT_UE_REPORT      = 4,  /* UE report */
-	EP_ACT_UE_MEASURE     = 5,  /* UE RRC measurements */
-	EP_ACT_MAC_REPORT     = 6,  /* Report coming from MAC layer */
-	EP_ACT_HANDOVER       = 7,  /* Hand an UE over another eNB */
-	EP_ACT_RAN_SETUP      = 9,  /* */
-	EP_ACT_RAN_SLICE      = 10, /* */
-	EP_ACT_RAN_USER       = 11, /* */
-	EP_ACT_RAN_SCHED      = 12, /* */
+	EP_ACT_INVALID        =  0, /* Invalid */
+	EP_ACT_HELLO          =  1, /* Hello */
+	EP_ACT_ECAP           =  2, /* eNB capabilities */
+	EP_ACT_CCAP           =  3, /* Cell capabilities */
+	EP_ACT_UE_REPORT      =  4, /* UE report */
+	EP_ACT_UE_MEASURE     =  5, /* UE RRC measurements */
+	EP_ACT_MAC_REPORT     =  6, /* Report coming from MAC layer */
+	EP_ACT_HANDOVER       =  7, /* Hand an UE over another eNB */
+	EP_ACT_RAN_SETUP      =  9, /* RAN setup operation */
+	EP_ACT_RAN_SLICE      = 10  /* Ran Slice Setup request */
 } ep_act_type;
 
 #ifdef __cplusplus

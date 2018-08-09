@@ -48,6 +48,7 @@ int epf_ecap_rep(
 		ctlv->header.length = htons(sizeof(ep_ccap_rep));
 
 		ctlv->body.pci      = htons(det->cells[i].pci);
+		ctlv->body.cap      = htonl(det->cells[i].cap);
 		ctlv->body.DL_earfcn= htons(det->cells[i].DL_earfcn);
 		ctlv->body.DL_prbs  = det->cells[i].DL_prbs;
 		ctlv->body.UL_earfcn= htons(det->cells[i].UL_earfcn);
