@@ -41,6 +41,149 @@ int epf_ran_euq(char * buf, unsigned int size)
 	return 0;
 }
 
+/*
+ * 
+ * TLV parser for RAN:
+ * 
+ */
+
+/* Format SUP, Slice rePly TLV tokens.
+ * Returns the size in bytes of the formatted area.
+ */
+int epf_ran_TLV(char * buf, unsigned int size, ep_ran_slice_det * det)
+{
+	int               s = 0;
+	char *            c = buf;
+
+	ep_ran_sres_TLV * sres;
+	ep_ran_ssch_TLV * ssch;
+
+	/*
+	 * Format the RAN Slice resource token
+	 */
+
+	sres = (ep_ran_sres_TLV *)c;
+
+	if(c + sizeof(ep_ran_sres_TLV) > buf + size) {
+		ep_dbg_log(EP_DBG_3"F - RANS TLV: Not enough space!\n");
+		return -1;
+	}
+
+	sres->header.type   = htons(EP_TLV_RAN_SLICE_MAC_RES);
+	sres->header.length = htons(sizeof(ep_ran_sres));
+	sres->body.rbgs     = htons(det->l2.rbgs);
+
+	ep_dbg_dump(EP_DBG_3
+		"F - RANS Res TLV: ", c, sizeof(ep_ran_sres_TLV));
+
+	s += sizeof(ep_ran_sres_TLV);
+	c += sizeof(ep_ran_sres_TLV);
+
+	/*
+	 * Format the RAN Slice scheduler token
+	 */
+
+	/* Bypass this token? */
+	if(det->l2.usched == 0) {
+		goto usr;
+	}
+
+	ssch = (ep_ran_ssch_TLV *)c;
+
+	if(c + sizeof(ep_ran_ssch_TLV) > buf + size) {
+		ep_dbg_log(EP_DBG_3"F - RANS TLV: Not enough space!\n");
+		return -1;
+	}
+
+	ssch->header.type    = htons(EP_TLV_RAN_SLICE_MAC_SCHED);
+	ssch->header.length  = htons(sizeof(ep_ran_ssch));
+	ssch->body.user_sched= htonl(det->l2.usched);
+
+	ep_dbg_dump(EP_DBG_3
+		"F - RANS Sched TLV: ", c, sizeof(ep_ran_ssch_TLV));
+
+	s += sizeof(ep_ran_ssch_TLV);
+	c += sizeof(ep_ran_ssch_TLV);
+usr:
+	/*
+	 * Format the RAN Slice users token
+	 */
+
+	if(det->nof_users > 0) {
+		s = epf_TLV_rnti_report(
+			c, size - s, det->users, det->nof_users);
+
+		if(s < 0) {
+			return s;
+		}
+
+		c += s;
+	}
+
+	return c - buf;
+}
+
+/* Parse a single TLV field for Slice Unspecified Reply.
+ *
+ * It assumes that the checks over the size have already been done by the 
+ * caller, and the area of memory is fine to access.
+ */
+int epp_ran_TLV(char * buf, ep_ran_slice_det * det)
+{
+	ep_TLV *          tlv = (ep_TLV *)buf;
+	ep_ran_sres_TLV * sres;
+	ep_ran_ssch_TLV * ssch;
+
+	/* Decide what to do depending on the TLV type */
+	switch(ntohs(tlv->type)) {
+	case EP_TLV_RNTI_REPORT:
+		det->nof_users = EP_RAN_USERS_MAX;
+
+		if(epp_TLV_rnti_report(
+			(char*)tlv, det->users, &det->nof_users)) 
+		{
+			return EP_ERROR;
+		}
+		break;
+	case EP_TLV_RAN_SLICE_MAC_RES:
+		/* Points to the TLV body */
+		sres = (ep_ran_sres_TLV *)(buf);
+
+		det->l2.rbgs   = ntohs(sres->body.rbgs);
+
+		ep_dbg_dump(
+			EP_DBG_3"P - RANS Res TLV: ", 
+			buf, 
+			sizeof(ep_ran_sres_TLV));
+
+		break;
+	case EP_TLV_RAN_SLICE_MAC_SCHED:
+		/* Points to the TLV body */
+		ssch = (ep_ran_ssch_TLV *)(buf);
+
+		det->l2.usched = ntohl(ssch->body.user_sched);
+
+		ep_dbg_dump(
+			EP_DBG_3"P - RANS Sched TLV: ", 
+			buf, 
+			sizeof(ep_ran_ssch_TLV));
+
+		break;
+	default:
+		ep_dbg_log(EP_DBG_3"P - RANS: Unexpected TLV %d!\n", 
+			tlv->type);
+		break;
+	}
+
+	return EP_SUCCESS;
+}
+
+/*
+ * 
+ * RAN parsers for messages:
+ * 
+ */
+
 /* Parse EUQ, sEtup Unspecified reQuest. 
  * Returns the SUCCESS/FAILED error codes.
  */
@@ -158,9 +301,9 @@ int epp_ran_eup(char * buf, unsigned int size, ep_ran_det * det)
 		tlv = (ep_TLV *)c;
 
 		/* Reading next TLV token will overflow the buffer? */
-		if(c + sizeof(ep_TLV) + ntohs(tlv->length) >= buf + size) {
+		if(c + sizeof(ep_TLV) + ntohs(tlv->length) > buf + size) {
 			ep_dbg_log(EP_DBG_3"P - RANS Rep: TLV %d > %d\n",
-				ntohs(sizeof(ep_TLV)) + tlv->length,
+				ntohs(sizeof(ep_TLV)) + ntohs(tlv->length),
 				(buf + size) - c);
 			break;
 		}
@@ -227,92 +370,23 @@ int epp_ran_suq(char * buf, unsigned int size, slice_id_t * id)
 int epf_ran_sup(
 	char * buf, unsigned int size, slice_id_t id, ep_ran_slice_det * det) 
 {
-	int               s;
-	char *            c;
+	int           s = sizeof(slice_id_t);
+	ep_ran_sinf * r = (ep_ran_sinf *) buf;
 
-	ep_ran_sinf *     r = (ep_ran_sinf *) buf;
-	ep_ran_smac_TLV * smac;
-	
 	r->id = htobe64(id);
 	
 	ep_dbg_dump(EP_DBG_2"F - RANS Unspec Rep: ", buf, sizeof(ep_ran_sinf));
 
-	c = buf + sizeof(ep_ran_sinf);
-
 	/* Time to check if to create TLVs for additional options */
 	if(det) {
-		smac = (ep_ran_smac_TLV *)(c);
-
-		if(c + sizeof(ep_ran_smac_TLV) > buf + size) {
-			ep_dbg_log(EP_DBG_3
-				"F - RANS Unspec Rep: Not enough space!\n");
-			return -1;
-		}
-
-		smac->header.type    = htons(EP_TLV_RAN_SLICE_MAC);
-		smac->header.length  = htons(sizeof(ep_ran_smac));
-		smac->body.rbgs      = htons(det->l2.rbgs);
-		smac->body.user_sched= htonl(det->l2.usched);
-
-		ep_dbg_dump(EP_DBG_3"F - RANS Unspec TLV: ",
-			(char *)smac, sizeof(ep_ran_smac_TLV));
-
-		c += sizeof(ep_ran_smac_TLV);
-
-		/* Format a RNTI report TLV token just after the message */
-		s = epf_TLV_rnti_report(
-			c, size - (c - buf), det->users, det->nof_users);
-
-		if(s > 0) {
-			c += s;
-		}
+		s += epf_ran_TLV(
+			buf + sizeof(ep_ran_sinf),
+			size - sizeof(ep_ran_sinf),
+			det);
 	}
 
-	return c - buf;
+	return s;
 }
-
-
-/* Parse a single TLV field for Slice Unspecified Reply.
- *
- * It assumes that the checks over the size have already been done by the 
- * caller, and the area of memory is fine to access.
- */
-int epp_ran_sup_TLV(char * buf, ep_ran_slice_det * det)
-{
-	ep_TLV *          tlv = (ep_TLV *)buf;
-
-	ep_ran_smac_TLV * macs;
-
-	/* Decide what to do depending on the TLV type */
-	switch(ntohs(tlv->type)) {
-	case EP_TLV_RAN_SLICE_MAC:
-		/* Points to the TLV body */
-		macs = (ep_ran_smac_TLV *)(buf);
-
-		det->l2.rbgs   = ntohs(macs->body.rbgs);
-		det->l2.usched = ntohl(macs->body.user_sched);
-
-		ep_dbg_dump(EP_DBG_3"P - RANS Unspec Rep TLV: ", 
-			buf, sizeof(ep_ccap_TLV));
-
-		break;
-	case EP_TLV_RNTI_REPORT:
-		det->nof_users = EP_RAN_USERS_MAX;
-		if(epp_TLV_rnti_report(
-			(char*)tlv, det->users, &det->nof_users)) 
-		{
-			return EP_ERROR;
-		}
-		break;
-	default:
-		ep_dbg_log(EP_DBG_3"P - RANS Unspec Rep: Unexpected TLV %d!\n", 
-			tlv->type);
-		break;
-	}
-
-	return EP_SUCCESS;
-}
-
 
 /* Parses SUP, Slice Unspecified rePly.
  * Returns the SUCCESS/FAILED error codes.
@@ -339,15 +413,17 @@ int epp_ran_sup(
 		tlv = (ep_TLV *)c;
 
 		/* Reading next TLV token will overflow the buffer? */
-		if(c + sizeof(ep_TLV) + ntohs(tlv->length) >= buf + size) {
-			ep_dbg_log(EP_DBG_3"P - RANS Unspec Rep: TLV %d > %d\n",
-				ntohs(sizeof(ep_TLV)) + tlv->length,
+		if(c + sizeof(ep_TLV) + ntohs(tlv->length) > buf + size) {
+			ep_dbg_log(
+				EP_DBG_3"P - RANS Rep: TLV size %d > %d\n",
+				ntohs(sizeof(ep_TLV)) + ntohs(tlv->length),
 				(buf + size) - c);
+
 			break;
 		}
 
 		/* Explore the single token */
-		epp_ran_sup_TLV(c, det);
+		epp_ran_TLV(c, det);
 
 		/* To the next tag */
 		c += sizeof(ep_TLV) + ntohs(tlv->length);
@@ -355,155 +431,33 @@ int epp_ran_sup(
 
 	return EP_SUCCESS;
 }
-#if 0
-/* Format SUP, Slice Unspecified rePly.
- * This message contains multiple slices IDs, but no specific information.
- * Returns the size in bytes of the formatted area.
- */
-int epf_ran_sup_m(char * buf, unsigned int size, uint16_t nof, slice_id_t * ids) 
-{
-	uint16_t      i;
 
-	ep_ran_srep * r = (ep_ran_srep *) buf;
-	ep_ran_sinf * d = (ep_ran_sinf *)(buf + sizeof(ep_ran_srep));
-
-	if(size < sizeof(ep_ran_srep) + (sizeof(ep_ran_sinf) * nof)) {
-		ep_dbg_log(EP_DBG_2"F - RANS Unspec Rep: Not enough space!\n");
-		return -1;
-	}
-
-	r->nof_slices = htons(nof);
-	
-	ep_dbg_dump(EP_DBG_2"F - RANS Unspec Rep: ", buf, sizeof(ep_ran_srep));
-
-	for (i = 0; i < nof && i < EP_RAN_SLICE_MAX; i++) {
-		d[i].id = htobe64(ids[i]);
-
-		ep_dbg_dump(
-			EP_DBG_3"F - RANS Unspec Info: ",
-			buf + sizeof(ep_ran_srep) + (sizeof(ep_ran_sinf) * i),
-			sizeof(ep_ran_sinf));
-	}
-
-	return sizeof(ep_ran_srep) + (sizeof(ep_ran_sinf) * i);
-}
-
-/* Parses SUP, Slice Unspecified rePly.
- * This message contains multiple slices IDs, but no specific information.
- * Returns the SUCCESS/FAILED error codes.
- */
-int epp_ran_sup_m(
-	char * buf, unsigned int size, uint16_t * nof, slice_id_t * ids)
-{
-	uint16_t      i;
-	uint16_t      n;
-
-	ep_ran_srep * r = (ep_ran_srep *) buf;
-	ep_ran_sinf * d = (ep_ran_sinf *)(buf + sizeof(ep_ran_srep));
-
-	if(size < sizeof(ep_ran_srep)) {
-		ep_dbg_log(EP_DBG_2"P - RANT Rep: Not enough space!\n");
-		return EP_ERROR;
-	}
-
-	if(size < sizeof(ep_ran_srep) + (
-		sizeof(ep_ran_sinf) * ntohs(r->nof_slices)))
-	{
-		ep_dbg_log(EP_DBG_2"P - RANT Rep: Not enough space!\n");
-		return EP_ERROR;
-	}
-
-	n = ntohs(r->nof_slices);
-
-	if(nof) {
-		*nof = n;
-	}
-
-	ep_dbg_dump(EP_DBG_2"P - RANT Rep: ", buf, sizeof(ep_ran_srep));
-
-	if(ids) {
-		for (i = 0; i < n && i < EP_RAN_SLICE_MAX; i++) {
-			ids[i] = be64toh(d[i].id);
-
-			ep_dbg_dump(
-				EP_DBG_3"P - RANT Info: ",
-				buf + 
-					sizeof(ep_ran_srep) +
-					(sizeof(ep_ran_sinf) * i),
-				sizeof(ep_ran_sinf));
-		}
-	}
-
-	return EP_SUCCESS;
-}
-#endif
 /* Format SAQ, Slice Add reQuest.
  * Returns the size in bytes of the formatted area.
  */
 int epf_ran_saq(
 	char * buf, unsigned int size, slice_id_t id, ep_ran_slice_det * det)
 {
-	int               len = sizeof(ep_ran_sinf);
-	ep_ran_sinf *     r   = (ep_ran_sinf *)buf;
-	ep_ran_smac_TLV * smac;
+	int           s = sizeof(ep_ran_sinf);
+	ep_ran_sinf * r = (ep_ran_sinf *)buf;
 
-	if(size < len) {
+	if(size < sizeof(ep_ran_sinf)) {
 		ep_dbg_log(EP_DBG_2"F - RANS Add Req: Not enough space!\n");
 		return -1;
 	}
 
 	r->id = htobe64(id);
 
-	ep_dbg_dump(EP_DBG_2"F - RANS Add Req: ", buf, len);
+	ep_dbg_dump(EP_DBG_2"F - RANS Add Req: ", buf, sizeof(ep_ran_sinf));
 
 	if(det) {
-		if(det->l2.usched == 0) {
-			goto end;
-		}
-
-		smac = (ep_ran_smac_TLV *)(buf + len);
-		len += sizeof(ep_ran_smac_TLV);
-
-		smac->header.type     = EP_TLV_RAN_SLICE_MAC;
-		smac->header.length   = htons(sizeof(ep_ran_smac_TLV));
-		smac->body.rbgs       = htons(det->l2.rbgs);
-		smac->body.user_sched = htonl(det->l2.usched);
-	}
-end:
-	return len;
-}
-
-/* Parse a single TLV field for Slice Add Request.
- *
- * It assumes that the checks over the size have already been done by the 
- * caller, and the area of memory is fine to access.
- */
-int epp_ran_saq_TLV(char * buf, ep_ran_slice_det * det)
-{
-	ep_TLV *          tlv = (ep_TLV *)buf;
-
-	ep_ran_smac_TLV * smac;
-
-	/* Decide what to do depending on the TLV type */
-	switch(ntohs(tlv->type)) {
-	case EP_TLV_RAN_SLICE_MAC:
-		smac = (ep_ran_smac_TLV *)buf;
-
-		det->l2.rbgs   = ntohs(smac->body.rbgs);
-		det->l2.usched = ntohs(smac->body.user_sched);
-
-		ep_dbg_dump(EP_DBG_3"P - RANS Add Req TLV: ", 
-			buf, 
-			sizeof(ep_ccap_TLV));
-
-		break;
-	default:
-		ep_dbg_log(EP_DBG_3"P - RANS Add Req: Unexpected token %d!\n", 
-			tlv->type);
-		break;
+		s += epf_ran_TLV(
+			buf + sizeof(ep_ran_sinf), 
+			size - sizeof(ep_ran_sinf),
+			det);
 	}
 
-	return EP_SUCCESS;
+	return s;
 }
 
 /* Parse SAQ, Slice Add reQuest.
@@ -531,15 +485,17 @@ int epp_ran_saq(
 		tlv = (ep_TLV *)c;
 
 		/* Reading next TLV token will overflow the buffer? */
-		if(c + sizeof(ep_TLV) + ntohs(tlv->length) >= buf + size) {
+		if(c + sizeof(ep_TLV) + ntohs(tlv->length) > buf + size) {
 			ep_dbg_log(EP_DBG_3"P - RANS Add Req: TLV %d > %d\n",
-				ntohs(sizeof(ep_TLV)) + tlv->length,
+				ntohs(sizeof(ep_TLV)) + ntohs(tlv->length),
 				(buf + size) - c);
 			break;
 		}
 
 		/* Explore the single token */
-		epp_ran_saq_TLV(c, det);
+		if(epp_ran_TLV(c, det)) {
+			return EP_ERROR;
+		}
 
 		/* To the next tag */
 		c += sizeof(ep_TLV) + ntohs(tlv->length);
@@ -594,12 +550,10 @@ int epp_ran_srq(char * buf, unsigned int size, slice_id_t * id)
 int epf_ran_ssq(
 	char * buf, unsigned int size, slice_id_t id, ep_ran_slice_det * det) 
 {
-	int               len = sizeof(ep_ran_sinf);
-	ep_ran_sinf *     r   = (ep_ran_sinf *)buf;
+	int           s = sizeof(ep_ran_sinf);
+	ep_ran_sinf * r = (ep_ran_sinf *)buf;
 
-	ep_ran_smac_TLV * smac;
-
-	if(size < len) {
+	if(size < sizeof(ep_ran_sinf)) {
 		ep_dbg_log(EP_DBG_2"F - RANS Set Req: Not enough space!\n");
 		return -1;
 	}
@@ -609,60 +563,13 @@ int epf_ran_ssq(
 	ep_dbg_dump(EP_DBG_2"F - RANS Set Req: ", buf, sizeof(ep_ran_sinf));
 
 	if(det) {
-		if(det->l2.usched == 0) {
-			goto end;
-		}
-
-		smac = (ep_ran_smac_TLV *)(buf + len);
-		len += sizeof(ep_ran_smac_TLV);
-		
-		if(size < len) {
-			ep_dbg_log(EP_DBG_3
-				"F - RANS Set Req TLV: Not enough space!\n");
-
-			return -1;
-		}
-
-		smac->header.type     = EP_TLV_RAN_SLICE_MAC;
-		smac->header.length   = htons(sizeof(ep_ran_smac_TLV));
-		smac->body.rbgs       = det->l2.rbgs;
-		smac->body.user_sched = det->l2.usched;
-
-		ep_dbg_dump(EP_DBG_3"F - RANS Set Req TLV: ", 
-			(char *)smac, sizeof(ep_ran_smac_TLV));
-	}
-end:
-	return len;
-}
-
-/* Parse SRQ, Slice Set reQuest, TLV entry.
- * Returns the SUCCESS/FAILED error codes.
- */
-int epp_ran_ssq_TLV(char * buf, ep_ran_slice_det * det)
-{
-	ep_TLV *          tlv = (ep_TLV *)buf;
-
-	ep_ran_smac_TLV * smac;
-
-	/* Decide what to do depending on the TLV type */
-	switch(ntohs(tlv->type)) {
-	case EP_TLV_RAN_SLICE_MAC:
-		smac = (ep_ran_smac_TLV *)buf;
-
-		det->l2.rbgs   = ntohs(smac->body.rbgs);
-		det->l2.usched = ntohs(smac->body.user_sched);
-
-		ep_dbg_dump(EP_DBG_3"P - RANS Set Req: ", 
-			buf, sizeof(ep_ccap_TLV));
-
-		break;
-	default:
-		ep_dbg_log(EP_DBG_3"P - RANS Set Req: Unexpected token %d!\n", 
-			tlv->type);
-		break;
+		s+= epf_ran_TLV(
+			buf + sizeof(ep_ran_sinf),
+			size - sizeof(ep_ran_sinf),
+			det);
 	}
 
-	return EP_SUCCESS;
+	return s;
 }
 
 /* Parse SRQ, Slice Set reQuest.
@@ -691,15 +598,16 @@ int epp_ran_ssq(
 		tlv = (ep_TLV *)c;
 
 		/* Reading next TLV token will overflow the buffer? */
-		if(c + sizeof(ep_TLV) + ntohs(tlv->length) >= buf + size) {
-			ep_dbg_log(EP_DBG_3"P - RANS Set Req:: TLV %d > %d\n",
-				ntohs(sizeof(ep_TLV)) + tlv->length,
+		if(c + sizeof(ep_TLV) + ntohs(tlv->length) > buf + size) {
+			ep_dbg_log(
+				EP_DBG_3"P - RANS Set Size: TLV %d > %d\n",
+				ntohs(sizeof(ep_TLV)) +  ntohs(tlv->length),
 				(buf + size) - c);
 			break;
 		}
 
 		/* Explore the single token */
-		epp_ran_ssq_TLV(c, det);
+		epp_ran_TLV(c, det);
 
 		/* To the next tag */
 		c += sizeof(ep_TLV) + ntohs(tlv->length);
@@ -707,211 +615,7 @@ int epp_ran_ssq(
 
 	return EP_SUCCESS;
 }
-#if 0
-/*
- * 
- * Parser user primitives for RAN:
- * 
- */
 
-/* Format UUQ, User Unspecified reQuest.
- * Returns the size in bytes of the formatted area.
- */
-int epf_ran_uuq(char * buf, unsigned int size, rnti_id_t rnti)
-{
-	ep_ran_ureq * r = (ep_ran_ureq *)buf;
-
-	if(size < sizeof(ep_ran_ureq)) {
-		ep_dbg_log(EP_DBG_2"F - RANU Req: Not enough space!\n");
-		return -1;
-	}
-
-	r->rnti = htons(rnti);
-
-	ep_dbg_dump(EP_DBG_2"F - RANU Req: ", buf, sizeof(ep_ran_ureq));
-
-	return sizeof(ep_ran_ureq);
-}
-
-/* Parse UUQ, User Unspecified reQuest.
- * Returns the SUCCESS/FAILED error codes.
- */
-int epp_ran_uuq(char * buf, unsigned int size, uint16_t * rnti)
-{
-	ep_ran_ureq * r = (ep_ran_ureq *)buf;
-
-	if(size < sizeof(ep_ran_ureq)) {
-		ep_dbg_log(EP_DBG_2"P - RANU Req: Not enough space!\n");
-		return EP_ERROR;
-	}
-
-	if(rnti) {
-		*rnti = ntohs(r->rnti);
-	}
-
-	ep_dbg_dump(EP_DBG_2"P - RANU Req: ", buf, sizeof(ep_ran_ureq));
-
-	return sizeof(ep_ran_ureq);
-}
-
-/* Format UUP, User Unspecified rePly.
- * Returns the size in bytes of the formatted area.
- */
-int epf_ran_uup(
-	char * buf, unsigned int size, uint16_t nof, ep_ran_user_det * det)
-{
-	uint16_t      i;
-	ep_ran_urep * r = (ep_ran_urep *) buf;
-	ep_ran_uinf * u = (ep_ran_uinf *)(buf + sizeof(ep_ran_urep));
-
-	if(size < sizeof(ep_ran_ureq) + (sizeof(ep_ran_uinf) * nof)) {
-		ep_dbg_log(EP_DBG_2"F - RANU Rep: Not enough space!\n");
-		return -1;
-	}
-
-	r->nof_users = htons(nof);
-
-	ep_dbg_dump(EP_DBG_2"F - RANU Rep: ", buf, sizeof(ep_ran_urep));
-
-	for (i = 0; i < nof && i < EP_RAN_USER_MAX; i++) {
-		u[i].rnti     = htons(det[i].id);
-		u[i].slice_id = htobe64(det[i].slice);
-
-		ep_dbg_dump(EP_DBG_3"F - RANU Info: ",
-			buf + sizeof(ep_ran_urep)  + (sizeof(ep_ran_uinf) * i),
-			sizeof(ep_ran_uinf));
-	}
-
-	return sizeof(ep_ran_ureq) + (sizeof(ep_ran_uinf) * (i + 1));
-}
-
-/* Parse UUP, User Unspecified rePly.
- * Returns the SUCCESS/FAILED error codes.
- */
-int epp_ran_uup(
-	char * buf, unsigned int size, uint16_t * nof, ep_ran_user_det * det)
-{
-	uint16_t      i;
-	ep_ran_urep * r = (ep_ran_urep *) buf;
-	ep_ran_uinf * u = (ep_ran_uinf *)(buf + sizeof(ep_ran_urep));
-
-	if(size < sizeof(ep_ran_ureq)) {
-		ep_dbg_log(EP_DBG_2"P - RANU Rep: Not enough space!\n");
-		return EP_ERROR;
-	}
-
-	if(size < sizeof(ep_ran_ureq) + (
-		sizeof(ep_ran_uinf) * ntohs(r->nof_users)))
-	{
-		ep_dbg_log(EP_DBG_2"P - RANU Rep: Not enough space!\n");
-		return EP_ERROR;
-	}
-
-	if(nof) {
-		*nof = ntohs(r->nof_users);
-	}
-
-	ep_dbg_dump(EP_DBG_2"P - RANU Rep: ", buf, sizeof(ep_ran_urep));
-
-	if(det) {
-		for (i = 0; i < *nof && i < EP_RAN_USER_MAX; i++) {
-			det[i].id     = ntohs(u[i].rnti);
-			det[i].slice = be64toh(u[i].slice_id);
-
-			ep_dbg_dump(EP_DBG_3"P - RANU Info: ",
-				buf + sizeof(ep_ran_urep)  + (
-					sizeof(ep_ran_uinf) * i),
-				sizeof(ep_ran_uinf));
-		}
-	}
-
-	return EP_SUCCESS;
-}
-
-/* Format UAQ, User Add reQuest.
- * Returns the size in bytes of the formatted area.
- */
-int epf_ran_uaq(char * buf, unsigned int size, ep_ran_user_det * det)
-{
-	ep_ran_uinf * r = (ep_ran_uinf *)buf;
-
-	if(size < sizeof(ep_ran_uinf)) {
-		ep_dbg_log(EP_DBG_2"F - RANU Add: Not enough space!\n");
-		return -1;
-	}
-
-	r->rnti     = htons(det->id);
-	r->slice_id = htobe64(det->slice);
-
-	ep_dbg_dump(EP_DBG_2"F - RANU Add: ", buf, sizeof(ep_ran_uinf));
-
-	return sizeof(ep_ran_uinf);
-}
-
-/* Parse UAQ, User Add reQuest.
- * Returns the SUCCESS/FAILED error codes.
- */
-int epp_ran_uaq(char * buf, unsigned int size, ep_ran_user_det * det)
-{
-	ep_ran_uinf * r = (ep_ran_uinf *)buf;
-
-	if(size < sizeof(ep_ran_uinf)) {
-		ep_dbg_log(EP_DBG_2"P - RANU Add: Not enough space!\n");
-		return EP_ERROR;
-	}
-
-	if(det) {
-		det->id    = ntohs(r->rnti);
-		det->slice = be64toh(det->slice);
-	}
-
-	ep_dbg_dump(EP_DBG_2"P - RANU Add: ", buf, sizeof(ep_ran_uinf));
-
-	return EP_SUCCESS;
-}
-
-/* Format URQ, User Rem reQuest.
- * Returns the size in bytes of the formatted area.
- */
-int epf_ran_urq(char * buf, unsigned int size, ep_ran_user_det * det)
-{
-	ep_ran_uinf * r = (ep_ran_uinf *)buf;
-
-	if(size < sizeof(ep_ran_uinf)) {
-		ep_dbg_log(EP_DBG_2"F - RANU Rem: Not enough space!\n");
-		return -1;
-	}
-
-	r->rnti      = htons(det->id);
-	r->slice_id = htobe64(det->slice);
-
-	ep_dbg_dump(EP_DBG_2"F - RANU Rem: ", buf, sizeof(ep_ran_uinf));
-
-	return sizeof(ep_ran_uinf);
-}
-
-/* Parse URQ, User Rem reQuest.
- * Returns the SUCCESS/FAILED error codes.
- */
-int epp_ran_urq(char * buf, unsigned int size, ep_ran_user_det * det)
-{
-	ep_ran_uinf * r = (ep_ran_uinf *)buf;
-
-	if(size < sizeof(ep_ran_uinf)) {
-		ep_dbg_log(EP_DBG_2"P - RANU Rem: Not enough space!\n");
-		return EP_ERROR;
-	}
-
-	if(det) {
-		det->id     = ntohs(r->rnti);
-		det->slice = be64toh(det->slice);
-	}
-
-	ep_dbg_dump(EP_DBG_2"P - RANU Rem: ", buf, sizeof(ep_ran_uinf));
-
-	return EP_SUCCESS;
-}
-#endif
 /******************************************************************************
  * Public API                                                                 *
  ******************************************************************************/
@@ -1306,85 +1010,7 @@ int epp_single_ran_slice_req(
 		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
 		slice_id);
 }
-#if 0
-int epf_single_ran_multi_slice_rep(
-	char *             buf,
-	unsigned int       size,
-	enb_id_t           enb_id,
-	cell_id_t          cell_id,
-	mod_id_t           mod_id,
-	uint16_t           nof_slices,
-	slice_id_t *       slices)
-{
-	int ms = 0;
-	int ret= 0;
 
-	if(!buf || !slices) {
-		ep_dbg_log(EP_DBG_2"F - Single RANT Rep: Invalid buffer!\n");
-		return -1;
-	}
-
-	ms = epf_head(
-		buf,
-		size,
-		EP_TYPE_SINGLE_MSG,
-		enb_id,
-		cell_id,
-		mod_id,
-		EP_HDR_FLAG_DIR_REP);
-
-	if(ms < 0) {
-		return ms;
-	}
-
-	ret += ms;
-	ms   = epf_single(
-		buf + ret,
-		size - ret,
-		EP_ACT_RAN_SLICE,
-		EP_OPERATION_UNSPECIFIED);
-
-	if(ms < 0) {
-		return ms;
-	}
-
-	ret += ms;
-	ms   = epf_ran_sup_m(
-		buf + ret,
-		size - ret,
-		nof_slices,
-		slices);
-
-	if(ms < 0) {
-		return ms;
-	}
-
-	ret += ms;
-
-	/* Inject the message size */
-	epf_msg_length(buf, size, ret);
-
-	return ret;
-}
-
-int epp_single_ran_multi_slice_rep(
-	char *             buf,
-	unsigned int       size,
-	uint16_t *         nof_slices,
-	slice_id_t *       slices)
-{
-	if(!buf) {
-		ep_dbg_log(EP_DBG_2"P - Single RANT Rep: Invalid buffer!\n");
-		return EP_ERROR;
-	}
-
-	return epp_ran_sup_m(
-		buf  +  sizeof(ep_hdr) + sizeof(ep_s_hdr),
-		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
-		nof_slices,
-		slices);
-}
-#endif
 int epf_single_ran_slice_rep(
 	char *             buf,
 	unsigned int       size,
@@ -1692,306 +1318,3 @@ int epp_single_ran_slice_set(
 		slice_id,
 		det);
 }
-#if 0
-/******* RAN Users ************************************************************/
-
-int epf_single_ran_usr_req(
-	char *       buf,
-	unsigned int size,
-	enb_id_t     enb_id,
-	cell_id_t    cell_id,
-	mod_id_t     mod_id,
-	rnti_id_t    rnti)
-{
-	int ms = 0;
-	int ret= 0;
-
-	if(!buf) {
-		ep_dbg_log("F - Single RANU Req: Invalid buffer!\n");
-		return -1;
-	}
-
-	ms = epf_head(
-		buf,
-		size,
-		EP_TYPE_SINGLE_MSG,
-		enb_id,
-		cell_id,
-		mod_id,
-		EP_HDR_FLAG_DIR_REQ);
-
-	if(ms < 0) {
-		return ms;
-	}
-
-	ret += ms;
-	ms   = epf_single(
-		buf + ret,
-		size - ret,
-		EP_ACT_RAN_USER,
-		EP_OPERATION_UNSPECIFIED);
-
-	if(ms < 0) {
-		return ms;
-	}
-
-	ret += ms;
-	ms   = epf_ran_uuq(
-		buf + ret,
-		size - ret,
-		rnti);
-
-	if(ms < 0) {
-		return ms;
-	}
-
-	ret += ms;
-
-	/* Inject the message size */
-	epf_msg_length(buf, size, ret);
-
-	return ret;
-}
-
-int epp_single_ran_usr_req(
-	char *       buf,
-	unsigned int size,
-	rnti_id_t *  rnti)
-{
-	if(!buf) {
-		ep_dbg_log("P - Single RANU Req: Invalid buffer!\n");
-		return -1;
-	}
-
-	return epp_ran_uuq(
-		buf  +  sizeof(ep_hdr) + sizeof(ep_s_hdr),
-		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
-		rnti);
-}
-
-int epf_single_ran_usr_rep(
-	char *            buf,
-	unsigned int      size,
-	enb_id_t          enb_id,
-	cell_id_t         cell_id,
-	mod_id_t          mod_id,
-	uint16_t          nof_users,
-	ep_ran_user_det * dets)
-{
-	int ms = 0;
-	int ret= 0;
-
-	if(!buf || !dets) {
-		ep_dbg_log("F - Single RANU Rep: Invalid buffer!\n");
-		return -1;
-	}
-
-	ms = epf_head(
-		buf,
-		size,
-		EP_TYPE_SINGLE_MSG,
-		enb_id,
-		cell_id,
-		mod_id,
-		EP_HDR_FLAG_DIR_REP);
-
-	if(ms < 0) {
-		return ms;
-	}
-
-	ret += ms;
-	ms   = epf_single(
-		buf + ret,
-		size - ret,
-		EP_ACT_RAN_USER,
-		EP_OPERATION_UNSPECIFIED);
-
-	if(ms < 0) {
-		return ms;
-	}
-
-	ret += ms;
-	ms   = epf_ran_uup(
-		buf + ret,
-		size - ret,
-		nof_users,
-		dets);
-
-	if(ms < 0) {
-		return ms;
-	}
-
-	ret += ms;
-
-	/* Inject the message size */
-	epf_msg_length(buf, size, ret);
-
-	return ret;
-}
-
-int epp_single_ran_usr_rep(
-	char *            buf,
-	unsigned int      size,
-	uint16_t *        nof_users,
-	ep_ran_user_det * dets)
-{
-	if(!buf) {
-		ep_dbg_log("P - Single RANU Rep: Invalid buffer!\n");
-		return EP_ERROR;
-	}
-
-	return epp_ran_uup(
-		buf  +  sizeof(ep_hdr) + sizeof(ep_s_hdr),
-		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
-		nof_users, 
-		dets);
-}
-
-int epf_single_ran_usr_add(
-	char *            buf,
-	unsigned int      size,
-	enb_id_t          enb_id,
-	cell_id_t         cell_id,
-	mod_id_t          mod_id,
-	ep_ran_user_det * det)
-{
-	int ms = 0;
-	int ret= 0;
-
-	if(!buf || !det) {
-		ep_dbg_log("F - Single RANU Add: Invalid buffer!\n");
-		return -1;
-	}
-
-	ms = epf_head(
-		buf,
-		size,
-		EP_TYPE_SINGLE_MSG,
-		enb_id,
-		cell_id,
-		mod_id,
-		EP_HDR_FLAG_DIR_REQ);
-
-	if(ms < 0) {
-		return ms;
-	}
-
-	ret += ms;
-	ms   = epf_single(
-		buf + ret,
-		size - ret,
-		EP_ACT_RAN_USER,
-		EP_OPERATION_ADD);
-
-	if(ms < 0) {
-		return ms;
-	}
-
-	ret += ms;
-	ms   = epf_ran_uaq(
-		buf + ret,
-		size - ret,
-		det);
-
-	if(ms < 0) {
-		return ms;
-	}
-
-	ret += ms;
-
-	/* Inject the message size */
-	epf_msg_length(buf, size, ret);
-
-	return ret;
-}
-
-int epp_single_ran_usr_add(
-	char *            buf,
-	unsigned int      size,
-	ep_ran_user_det * det)
-{
-	if(!buf) {
-		ep_dbg_log("P - Single RANU Add: Invalid buffer!\n");
-		return EP_ERROR;
-	}
-
-	return epp_ran_uaq(
-		buf  +  sizeof(ep_hdr) + sizeof(ep_s_hdr),
-		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
-		det);
-}
-
-int epf_single_ran_usr_rem(
-	char *            buf,
-	unsigned int      size,
-	enb_id_t          enb_id,
-	cell_id_t         cell_id,
-	mod_id_t          mod_id,
-	ep_ran_user_det * det)
-{
-	int ms = 0;
-	int ret= 0;
-
-	if(!buf || !det) {
-		ep_dbg_log("F - Single RANU Rem: Invalid buffer!\n");
-		return -1;
-	}
-
-	ms = epf_head(
-		buf,
-		size,
-		EP_TYPE_SINGLE_MSG,
-		enb_id,
-		cell_id,
-		mod_id,
-		EP_HDR_FLAG_DIR_REQ);
-
-	if(ms < 0) {
-		return ms;
-	}
-
-	ret += ms;
-	ms   = epf_single(
-		buf + ret,
-		size - ret,
-		EP_ACT_RAN_USER,
-		EP_OPERATION_REM);
-
-	if(ms < 0) {
-		return ms;
-	}
-
-	ret += ms;
-	ms   = epf_ran_urq(
-		buf + ret,
-		size - ret,
-		det);
-
-	if(ms < 0) {
-		return ms;
-	}
-
-	ret += ms;
-
-	/* Inject the message size */
-	epf_msg_length(buf, size, ret);
-
-	return ret;
-}
-
-int epp_single_ran_usr_rem(
-	char *            buf,
-	unsigned int      size, 
-	ep_ran_user_det * det)
-{
-	if(!buf) {
-		ep_dbg_log("P - Single RANU Rem: Invalid buffer!\n");
-		return EP_ERROR;
-	}
-
-	return epp_ran_urq(
-		buf  +  sizeof(ep_hdr) + sizeof(ep_s_hdr),
-		size - (sizeof(ep_hdr) + sizeof(ep_s_hdr)),
-		det);
-}
-#endif

@@ -31,62 +31,10 @@
 extern "C"
 {
 #endif /* __cplusplus */
-#if 0
-/* Possible types of schedulers handled by the RAN sharing mechanisms */
-typedef enum __ep_RAN_sched_type {
-	EP_RAN_SCHED_SLICE_TYPE = 0,
-	EP_RAN_SCHED_USER_TYPE  = 1
-}ep_ran_schedtype;
-#endif
+
 /*
  * Message structures:
  */
-#if 0
- /********** RAN SCHEDULERS  **********/
-
- /* RAN scheduler parameter reply message*/
-typedef struct __ep_ran_sched_rep {
-	uint32_t id;		/* ID of the scheduler */
-	uint8_t  type;		/* Type of scheduler */
-	uint64_t slice_id;	/* ID of the Slice; valid if 'type' = 1 */
-	uint8_t  name_len;	/* Length of the name field */
-	uint16_t value_len;	/* Length of the value field */
-	/* Scheduler parameter name  will be attached here */
-	/* Scheduler parameter value will be attached here */
-}__attribute__((packed)) ep_ran_crep;
-
-/* RAN scheduler parameter request message*/
-typedef struct __ep_ran_sched_req {
-	uint32_t id;		/* ID of the scheduler */
-	uint8_t  type;		/* Type of scheduler */
-	uint64_t slice_id;	/* ID of the Slice; valid if 'type' = 1 */
-	uint8_t  name_len;	/* Length of the name field */
-	/* Scheduler parameter name will be attached here */
- }__attribute__((packed)) ep_ran_creq;
-#endif
- /*****************************************************************************
-  *                                                                           *
-  * RAN User                                                                  *
-  *                                                                           *
-  *****************************************************************************/
-#if 0
- /* RAN User information message */
-typedef struct __ep_ran_user_info {
-	rnti_id_t  rnti;          /* RNTI of the user */
-	slice_id_t slice_id;      /* ID of the Slice the user belong to */
-}__attribute__((packed)) ep_ran_uinf;
-
-/* RAN User reply message */
-typedef struct __ep_ran_user_rep {
-	uint16_t nof_users;     /* Number of Users to take into account */
-	/* Here the array of ep_ran_uinf which depends from 'nof_users' */
-}__attribute__((packed)) ep_ran_urep;
-
-/* RAN User request message */
-typedef struct __ep_ran_user_req {
-	rnti_id_t rnti;	        /* RNTI of the user */
- }__attribute__((packed)) ep_ran_ureq;
-#endif
 
  /*****************************************************************************
   *                                                                           *
@@ -134,60 +82,38 @@ typedef struct __ep_ran_setup {
   *                                                                           *
   *****************************************************************************/
 
-/* RAN slice MAC information */
-typedef struct __ep_ran_slice_mac {
+/* RAN slice scheduler information */
+typedef struct __ep_ran_slice_sched {
 	sched_id_t  user_sched; /* Id of the user scheduler associated */
-	uint16_t    rbgs;       /* PRBs assigned to the slice */
-}__attribute__((packed)) ep_ran_smac;
+}__attribute__((packed)) ep_ran_ssch;
 
-/* RAN slice MAC information in TLV style */
-typedef struct __ep_ran_slice_mac_TLV {
+/* RAN slice scheduler information in TLV style */
+typedef struct __ep_ran_slice_sched_TLV {
 	ep_TLV      header;
-	ep_ran_smac body;
-}__attribute__((packed)) ep_ran_smac_TLV;
+	ep_ran_ssch body;
+}__attribute__((packed)) ep_ran_ssch_TLV;
+
+/* RAN slice resources information */
+typedef struct __ep_ran_slice_res {
+	uint16_t    rbgs;       /* PRBs assigned to the slice */
+}__attribute__((packed)) ep_ran_sres;
+
+/* RAN slice resources information in TLV style */
+typedef struct __ep_ran_slice_res_TLV {
+	ep_TLV      header;
+	ep_ran_sres body;
+}__attribute__((packed)) ep_ran_sres_TLV;
 
  /* RAN Slice info message */
 typedef struct __ep_ran_slice_inf {
 	slice_id_t  id;	         /* ID of the Slice */
 }__attribute__((packed)) ep_ran_sinf;
-#if 0
- /* RAN Slice reply message */
-typedef struct __ep_ran_slice_rep {
-	uint64_t    id;         /* Slice ID */
-}__attribute__((packed)) ep_ran_srep;
 
- /* RAN Slice request message */
-typedef struct __ep_ran_slice_req {
-	slice_id_t  id;	        /* ID of the Slice */
- }__attribute__((packed)) ep_ran_sreq;
-#endif
  /*****************************************************************************
   *                                                                           *
   * Opaque structures                                                         *
   *                                                                           *
   *****************************************************************************/
-
-/* NOTE: This limits the number of Slices per message! */
-#define EP_RAN_SLICE_MAX        16
-/* NOTE: This limits the number of Users per message! */
-#define EP_RAN_USER_MAX         64
-/* NOTE: This limits the number of character per scheduler parameter name! */
-#define EP_RAN_NAME_MAX         32
-/* NOTE: This limits the number of character per scheduler parameter value! */
-#define EP_RAN_VALUE_MAX        8192
-#if 0
-typedef struct __ep_ran_sched_param_details {
-	char *   name;		/* Name of the parameter */
-	uint8_t  name_len;	/* Length of the name */
-	char *   value;		/* Value of the parameter */
-	uint16_t value_len;	/* Length of the value */
-}ep_ran_sparam_det;
-
-typedef struct __ep_ran_user_details {
-	rnti_id_t  id;          /* RNTI */
-	slice_id_t slice;       /* Id of the Slice */
-}ep_ran_user_det;
-#endif
 
 #define EP_RAN_USERS_MAX	32
 
@@ -238,13 +164,7 @@ typedef struct __ep_ran_setup_details {
  */
 #define epf_single_ran_slice_success(b, s, e, c, m)	\
 	epf_single_ran_rep_success(b, s, EP_ACT_RAN_SLICE, e, c, m)
-#if 0
-/* Format a RAN User operation success message.
- * Returns the message size or -1 on error.
- */
-#define epf_single_ran_user_success(b, s, e, c, m)		\
-	epf_single_ran_rep_success(b, s, EP_ACT_RAN_USER, e, c, m)
-#endif
+
 /* Format a RAN operation success message. 
  * Returns the message size or -1 on error. 
  */
@@ -267,19 +187,7 @@ int epf_single_ran_rep_success(
  */
 #define epf_single_ran_slice_fail(b, s, e, c, m, i)     \
 	epf_single_ran_rep_fail(b, s, EP_ACT_RAN_SLICE, e, c, m, i)
-#if 0
-/* Format a RAN User operation failed message.
- * Returns the message size or -1 on error.
- */
-#define epf_single_ran_user_fail(b, s, e, c, m)		\
-	epf_single_ran_rep_fail(b, s, EP_ACT_RAN_USER, e, c, m)
 
-/* Format a RAN Schedule operation failed message.
- * Returns the message size or -1 on error.
- */
-#define epf_single_ran_schedule_fail(b, s, e, c, m)	\
-	epf_single_ran_rep_fail(b, s, EP_ACT_RAN_SCHED, e, c, m)
-#endif
 /* Format a RAN operation failed message. 
  * Returns the message size or -1 on error. 
  */
@@ -303,19 +211,7 @@ int epf_single_ran_rep_fail(
  */
 #define epf_single_ran_slice_ns(b, s, e, c, m, i)  \
 	epf_single_ran_rep_ns(b, s, EP_ACT_RAN_SLICE, e, c, m)
-#if 0
-/* Format a RAN User operation failed message.
- * Returns the message size or -1 on error.
- */
-#define epf_single_ran_user_ns(b, s, e, c, m)		\
-	epf_single_ran_rep_ns(b, s, EP_ACT_RAN_USER, e, c, m)
 
-/* Format a RAN Schedule operation failed message.
- * Returns the message size or -1 on error.
- */
-#define epf_single_ran_schedule_ns(b, s, e, c, m)	\
-	epf_single_ran_rep_ns(b, s, EP_ACT_RAN_SCHED, e, c, m)
-#endif
 /* Format a RAN operation not supported message.
  * Returns the message size or -1 on error.
  */
@@ -386,28 +282,7 @@ int epp_single_ran_slice_req(
 	char *       buf,
 	unsigned int size,
 	slice_id_t * slice_id);
-#if 0
-/* Formats a RAN Slice reply message for multiple slice IDs.
- * Returns the message size or -1 on error.
- */
-int epf_single_ran_multi_slice_rep(
-	char *             buf,
-	unsigned int       size,
-	enb_id_t           enb_id,
-	cell_id_t          cell_id,
-	mod_id_t           mod_id,
-	uint16_t           nof_slices,
-	slice_id_t *       slices);
 
-/* Parses a RAN Slice reply message for multiple slice IDs.
- * Returns EP_SUCCESS on success, otherwise a negative error code..
- */
-int epp_single_ran_multi_slice_rep(
-	char *             buf,
-	unsigned int       size,
-	uint16_t *         nof_slices,
-	slice_id_t *       slices);
-#endif
 /* Formats a RAN Slice reply message.
  * Returns the message size or -1 on error.
  */
@@ -490,86 +365,6 @@ int epp_single_ran_slice_set(
 	slice_id_t *       slice_id,
 	ep_ran_slice_det * det);
 
-/******************************************************************************/
-#if 0
-/* Formats a RAN user request message.
- * Returns the message size or -1 on error.
- */
-int epf_single_ran_usr_req(
-	char *       buf,
-	unsigned int size,
-	enb_id_t     enb_id,
-	cell_id_t    cell_id,
-	mod_id_t     mod_id,
-	rnti_id_t    rnti);
-
-/* Parses a RAN user request message.
- * Returns EP_SUCCESS on success, otherwise a negative error code.
- */
-int epp_single_ran_usr_req(
-	char *       buf,
-	unsigned int size,
-	rnti_id_t *  rnti);
-
-/* Formats a RAN user reply message.
- * Returns the message size or -1 on error.
- */
-int epf_single_ran_usr_rep(
-	char *             buf,
-	unsigned int       size,
-	enb_id_t           enb_id,
-	cell_id_t          cell_id,
-	mod_id_t           mod_id,
-	uint16_t           nof_users,
-	ep_ran_user_det *  dets);
-
-/* Parses a RAN user reply message.
- * Returns EP_SUCCESS on success, otherwise a negative error code.
- */
-int epp_single_ran_usr_rep(
-	char *            buf,
-	unsigned int      size,
-	uint16_t *        nof_users,
-	ep_ran_user_det * dets);
-
-/* Formats a RAN user add message.
- * Returns the message size or -1 on error.
- */
-int epf_single_ran_usr_add(
-	char *            buf,
-	unsigned int      size,
-	enb_id_t          enb_id,
-	cell_id_t         cell_id,
-	mod_id_t          mod_id,
-	ep_ran_user_det * det);
-
-/* Parses a RAN user add message.
- * Returns EP_SUCCESS on success, otherwise a negative error code.
- */
-int epp_single_ran_usr_add(
-	char *            buf,
-	unsigned int      size,
-	ep_ran_user_det * det);
-
-/* Formats a RAN user remove message.
- * Returns the message size or -1 on error.
- */
-int epf_single_ran_usr_rem(
-	char *            buf,
-	unsigned int      size,
-	enb_id_t          enb_id,
-	cell_id_t         cell_id,
-	mod_id_t          mod_id,
-	ep_ran_user_det * det);
-
-/* Parses a RAN user remove message.
- * Returns EP_SUCCESS on success, otherwise a negative error code.
- */
-int epp_single_ran_usr_rem(
-	char *            buf,
-	unsigned int      size,
-	ep_ran_user_det * det);
-#endif
 /******************************************************************************
  * Operation on schedule-event messages                                       *
  ******************************************************************************/

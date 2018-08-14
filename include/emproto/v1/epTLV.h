@@ -32,17 +32,17 @@ extern "C"
 /* types of valid TLV token for empower protocol */
 enum ep_TLV_type {
 	/* Invalid TLV token */
-	EP_TLV_INVALID       = 0,
+	EP_TLV_INVALID             = 0,
 
 	/* A generic report of bunch of RNTIs */
-	EP_TLV_RNTI_REPORT   = 0x0001,
+	EP_TLV_RNTI_REPORT         = 0x0001,
 
 	/*
 	 * Type 1 reserved to cell
 	 */
 
 	/* Token contains a cell capabilities information */
-	EP_TLV_CELL_CAP      = 0x0100,
+	EP_TLV_CELL_CAP            = 0x0100,
 
 	/*
 	 * Type 2 reserved to eNB
@@ -60,10 +60,12 @@ enum ep_TLV_type {
 	 * Type 5 reserved to RAN
 	 */
 
-	/* Token contains RAN MAC slice scheduler information */
-	EP_TLV_RAN_MAC_SCHED = 0x0500,
-	/* token contains RAN slice specific MAC information */
-	EP_TLV_RAN_SLICE_MAC = 0x0501,
+	/* Token contains RAN MAC Slices scheduler information */
+	EP_TLV_RAN_MAC_SCHED       = 0x0500,
+	/* Token contains RAN Slice specific MAC resources information */
+	EP_TLV_RAN_SLICE_MAC_RES   = 0x0501,
+	/* Token contains RAN Slice specific MAC scheduler information */
+	EP_TLV_RAN_SLICE_MAC_SCHED = 0x0502,
 
 	/*
 	 * Type 6 reserved to UE measurements

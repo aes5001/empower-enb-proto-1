@@ -32,6 +32,8 @@ int epf_TLV_rnti_report(
 	ep_TLV *    tlv = (ep_TLV *)buf;
 	rnti_id_t * cur = (rnti_id_t *)(buf + sizeof(ep_TLV));
 
+	tlv->type   = htons(EP_TLV_RNTI_REPORT);
+
 	/* Scan the array while incrementing the RNTIs pointer */
 	for(i = 0; i < nof_rntis; i++, cur++) {
 		if((char *)cur + sizeof(rnti_id_t) > buf + size) {
@@ -44,19 +46,19 @@ int epf_TLV_rnti_report(
 		*cur = htons(rntis[i]);
 	}
 
-	tlv->type   = htons(EP_TLV_RNTI_REPORT);
 	tlv->length = htons((char *)cur - (buf + sizeof(ep_TLV)));
 
 	ep_dbg_dump(EP_DBG_3"F - RNTIREP TLV: ", buf, (char *)cur - buf);
 
 	return (char *)cur - buf;
 }
-
+#include <stdio.h>
 int epp_TLV_rnti_report(
 	char *       buf, 
 	rnti_id_t *  rntis,
 	uint32_t  *  nof_rntis)
 {
+	int         i = 0;/* Index */
 	int         c = 0;/* Count */
 	int         s;    /* Size */
 	
@@ -64,20 +66,23 @@ int epp_TLV_rnti_report(
 	rnti_id_t * cur = (rnti_id_t *)(buf + sizeof(ep_TLV));
 
 	s = ntohs(tlv->length);
+	c = s / sizeof(rnti_id_t);
 
-	/* Continue until you reach the end of the given TLV */
-	while((char *)cur <= buf + sizeof(ep_TLV) + s) {
-		if(c >= *nof_rntis) {
-			break;
-		}
-
-		rntis[c] = ntohs(*cur);
-		
-		cur++;  /* Go to the next rnti; pointer aritmetics */
-		c++;    /* Increment the amount of TLVs read */
+	if(c > *nof_rntis) {
+		c = *nof_rntis;
 	}
 
 	*nof_rntis = c;
+
+	/* Continue until you reach the end of the given TLV */
+	//while((char *)cur <= buf + sizeof(ep_TLV) + s) {
+	while(c > 0) {
+		rntis[i] = ntohs(*cur);
+
+		cur++;/* Go to the next rnti; pointer aritmetics */
+		c--;  /* Decrement the number of rnti to scan */
+		i++;  /* Increment the index*/
+	}
 
 	ep_dbg_dump(EP_DBG_3"P - RNTIREP TLV: ", buf, (char *)cur - buf);
 
